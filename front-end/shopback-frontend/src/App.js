@@ -105,7 +105,7 @@ const api = {
 };
 
 const App = () => {
-  const { currentLanguage } = useLanguage();
+  const { currentLanguage, isLoading: languageLoading } = useLanguage();
   const translate = (key) => t(key, currentLanguage);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [stores, setStores] = useState([]);
@@ -1381,14 +1381,7 @@ if (languageLoading || loading) {
     </div>
   );
 };
-// 包装原组件
-const AppWithLanguage = () => {
-  return (
-    <LanguageProvider>
-      <App />
-    </LanguageProvider>
-  );
-};
+
 
 export default function AppWithLanguage() {
   return (

@@ -402,4 +402,5 @@ export const getSupportedLanguages = () => {
 
 // 检查是否支持某种语言
 export const isLanguageSupported = (language) => {
-  return translations
+  return translations;
+};
