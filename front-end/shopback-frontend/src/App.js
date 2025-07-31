@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Navigation from './components/Navigation';
 import TradingViewPage from './pages/trading';
+import { LanguageProvider, useLanguage } from './hooks/useLanguage';
+import { t } from './translations';
+import LanguageSelector from './components/LanguageSelector';
 
 const API_BASE_URL = '';
 
@@ -102,6 +105,8 @@ const api = {
 };
 
 const App = () => {
+  const { currentLanguage } = useLanguage();
+  const translate = (key) => t(key, currentLanguage);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [stores, setStores] = useState([]);
   const [upsizedStores, setUpsizedStores] = useState([]);
@@ -319,7 +324,7 @@ const App = () => {
     fetchData();
   }, []);
 
-  if (loading) {
+if (languageLoading || loading) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -330,7 +335,7 @@ const App = () => {
         background: '#f5f5f5'
       }}>
         <div style={{fontSize: '2em', marginBottom: '20px'}}>🔄</div>
-        <div>正在加载数据...</div>
+        <div>{translate('messages.loading')}</div>
       </div>
     );
   }
@@ -345,7 +350,7 @@ const App = () => {
         flexDirection: 'column',
         background: '#f5f5f5'
       }}>
-        <h2 style={{color: '#dc3545'}}>❌ 连接错误</h2>
+        <h2 style={{color: '#dc3545'}}>❌ {translate('messages.connectionError')}</h2>
         <p>{error}</p>
         <button onClick={fetchData} style={{
           background: '#007bff',
@@ -355,7 +360,7 @@ const App = () => {
           borderRadius: '4px',
           cursor: 'pointer'
         }}>
-          重试
+          {translate('messages.retry')}
         </button>
         
       </div>
@@ -365,6 +370,13 @@ const App = () => {
   return (
     <div style={{minHeight: '100vh', background: '#f5f5f5', padding: '20px'}}>
       <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <div style={{
+        position: 'absolute',
+        top: '20px',
+        right: '20px'
+      }}>
+        <LanguageSelector />
+      </div>
         
         {/* 页面标题 */}
         <div style={{
@@ -378,7 +390,7 @@ const App = () => {
 {/* 导航菜单 */}
 <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 <h1 style={{margin: 0, color: '#333', fontSize: '2.5em'}}>
-  {currentPage === 'dashboard' ? '🏪 ShopBack Cashback 管理平台' : '📈 TradingView 交易图表'}
+  {currentPage === 'dashboard' ? translate('dashboard.title') : translate('nav.trading')}
 </h1>
 {currentPage === 'dashboard' && (
   <>
@@ -392,7 +404,7 @@ const App = () => {
       marginTop: '20px',
       fontSize: '16px'
     }}>
-      {isRescraping ? '🔄 正在重新抓取...' : '🔄 重新抓取并刷新'}
+      {isRescraping ? translate('dashboard.rescraping') : translate('dashboard.rescrape')}
     </button>
     <button onClick={() => setShowAlerts(!showAlerts)} style={{
       background: '#17a2b8',
@@ -405,7 +417,7 @@ const App = () => {
       marginLeft: '10px',
       fontSize: '16px'
     }}>
-      {showAlerts ? '📋 关闭价格提醒' : '🔔 价格提醒管理'}
+      {showAlerts ? translate('dashboard.closeAlerts') : translate('dashboard.alerts')}
     </button>
   </>
 )}
@@ -428,7 +440,7 @@ const App = () => {
               borderLeft: '4px solid #007bff'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>🏪</div>
-              <h3 style={{margin: 0, color: '#666'}}>总商家数</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.totalStores')}</h3>
               <div style={{fontSize: '3em', color: '#007bff', fontWeight: 'bold'}}>
                 {dashboardStats.total_stores}
               </div>
@@ -443,7 +455,7 @@ const App = () => {
               borderLeft: '4px solid #28a745'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>📊</div>
-              <h3 style={{margin: 0, color: '#666'}}>总记录数</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.totalRecords')}</h3>
               <div style={{fontSize: '3em', color: '#28a745', fontWeight: 'bold'}}>
                 {dashboardStats.total_records?.toLocaleString()}
               </div>
@@ -458,7 +470,7 @@ const App = () => {
               borderLeft: '4px solid #ffc107'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>🔄</div>
-              <h3 style={{margin: 0, color: '#666'}}>24小时抓取</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.recentScrapes')}</h3>
               <div style={{fontSize: '3em', color: '#ffc107', fontWeight: 'bold'}}>
                 {dashboardStats.recent_scrapes}
               </div>
@@ -473,7 +485,7 @@ const App = () => {
               borderLeft: '4px solid #dc3545'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>🔥</div>
-              <h3 style={{margin: 0, color: '#666'}}>Upsized商家</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.upsizedStores')}</h3>
               <div style={{fontSize: '3em', color: '#dc3545', fontWeight: 'bold'}}>
                 {dashboardStats.upsized_stores}
               </div>
@@ -491,7 +503,7 @@ const App = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             marginBottom: '30px'
           }}>
-            <h2 style={{margin: '0 0 15px 0', color: '#333'}}>💰 平均Cashback率</h2>
+            <h2 style={{margin: '0 0 15px 0', color: '#333'}}>💰 {translate('dashboard.avgCashback')}</h2>
             <div style={{fontSize: '4em', color: '#007bff', fontWeight: 'bold'}}>
               {dashboardStats.avg_cashback_rate}%
             </div>
@@ -1369,4 +1381,19 @@ const App = () => {
     </div>
   );
 };
-export default App;
+// 包装原组件
+const AppWithLanguage = () => {
+  return (
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  );
+};
+
+export default function AppWithLanguage() {
+  return (
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  );
+}
