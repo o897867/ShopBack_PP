@@ -1,15 +1,18 @@
-# 忽略整个 frontend 除了 src 目录
+# 忽略整个 frontend/shopback-frontend 文件夹下的所有内容
 front-end/shopback-frontend/*
+
+# 但是保留 src 目录及其所有内容
 !front-end/shopback-frontend/src/
+!front-end/shopback-frontend/src/**
 
-# 可选：如果 src 下还有你想忽略的内容，可以继续写：
-# front-end/shopback-frontend/src/some-temp-folder/
-
-# 忽略 node_modules、build、日志等常见内容
+# 忽略 node_modules、build、日志等
 **/node_modules/
 **/build/
 *.log
 .DS_Store
 .env
+
+# 忽略 Python 虚拟环境和缓存
 back-end/venv/
-back-end/__pycache__
+back-end/__pycache__/
+
