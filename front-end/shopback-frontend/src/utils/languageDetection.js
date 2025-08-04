@@ -5,14 +5,18 @@ export const detectUserLanguage = () => {
 
   // 检查浏览器语言
   const browserLanguage = navigator.language || navigator.userLanguage;
-  const supportedLanguages = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko'];
+  const supportedLanguages = ['en', 'zh-CN']; // 确保这里只有你支持的语言
   
-  // 匹配最佳语言
+  // 精确匹配
   if (supportedLanguages.includes(browserLanguage)) {
     return browserLanguage;
   }
   
+  // 部分匹配
   const primaryLang = browserLanguage.split('-')[0];
-  const match = supportedLanguages.find(lang => lang.startsWith(primaryLang));
-  return match || 'en';
+  if (primaryLang === 'zh') {
+    return 'zh-CN';
+  }
+  
+  return 'en'; // 默认英语
 };

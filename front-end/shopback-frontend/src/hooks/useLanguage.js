@@ -7,10 +7,17 @@ export const useLanguage = () => useContext(LanguageContext);
 
 export const LanguageProvider = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [isLoading, setIsLoading] = useState(true); // 添加这行
 
   useEffect(() => {
-    const lang = detectUserLanguage();
-    setCurrentLanguage(lang);
+    const initLanguage = async () => {
+      setIsLoading(true); // 添加这行
+      const lang = detectUserLanguage();
+      setCurrentLanguage(lang);
+      setIsLoading(false); // 添加这行
+    };
+
+    initLanguage();
   }, []);
 
   const changeLanguage = (lang) => {
@@ -19,7 +26,11 @@ export const LanguageProvider = ({ children }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ currentLanguage, changeLanguage }}>
+    <LanguageContext.Provider value={{ 
+      currentLanguage, 
+      changeLanguage, 
+      isLoading // 添加这个
+    }}>
       {children}
     </LanguageContext.Provider>
   );
