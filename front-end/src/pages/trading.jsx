@@ -26,7 +26,7 @@ const TradingViewPage = () => {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
         <h2 style={{ margin: '0 0 20px 0', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          📈 TradingView图表
+          TradingView图表
         </h2>
         
         <div style={{
@@ -74,7 +74,7 @@ const TradingViewPage = () => {
               }}
             >
               <option value="dark">🌙 深色主题</option>
-              <option value="light">☀️ 浅色主题</option>
+              <option value="light">浅色主题</option>
             </select>
           </div>
         </div>

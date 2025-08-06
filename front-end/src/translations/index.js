@@ -4,7 +4,8 @@ export const translations = {
     // Navigation & General
     nav: {
       dashboard: 'ShopBack Management',
-      trading: 'TradingView'
+      trading: 'TradingView',
+      donations: 'Donations'
     },
     common: {
       close: 'Close',
@@ -144,7 +145,7 @@ export const translations = {
       selectSymbol: 'Select Trading Pair',
       theme: 'Theme',
       darkTheme: '🌙 Dark Theme',
-      lightTheme: '☀️ Light Theme',
+      lightTheme: 'Light Theme',
       quickSwitch: '🚀 Quick Switch'
     },
     
@@ -198,6 +199,43 @@ export const translations = {
       justNow: 'Just now'
     },
     
+    // Donation Page
+    donation: {
+      title: 'Support Our Project',
+      subtitle: 'Help us maintain and improve the ShopBack management platform',
+      chooseAmount: 'Choose Donation Amount',
+      presetAmounts: 'Quick Amounts',
+      customAmount: 'Custom Amount',
+      amountPlaceholder: 'Enter amount (USD)',
+      donorName: 'Your Name',
+      namePlaceholder: 'Enter your name',
+      email: 'Email Address',
+      emailPlaceholder: 'Enter your email',
+      message: 'Leave a Message',
+      messagePlaceholder: 'Share your thoughts or suggestions...',
+      optional: 'optional',
+      paymentMethods: 'Payment Methods',
+      total: 'Total Amount',
+      payWithPayPal: 'Donate with PayPal',
+      payWithCard: 'Donate with Credit Card',
+      payWithCrypto: 'Donate with Cryptocurrency',
+      processing: 'Processing your donation...',
+      invalidAmount: 'Please enter a valid amount',
+      thankYou: 'Thank you for your generous donation! ',
+      error: 'Donation failed. Please try again.',
+      aboutProject: 'About This Project',
+      whatWeDo: 'What We Do',
+      projectDescription: 'We provide a comprehensive cashback monitoring platform that helps users track and compare cashback rates across multiple platforms, ensuring you never miss the best deals.',
+      howHelpUs: 'How Your Donation Helps',
+      serverCosts: 'Server hosting and maintenance costs',
+      development: 'Continuous development and improvement',
+      maintenance: 'Bug fixes and security updates',
+      newFeatures: 'Adding new features and platforms',
+      transparency: 'Transparency',
+      transparencyText: 'We believe in transparency. All donations are used exclusively for project development and maintenance. We regularly update our community on how funds are utilized.',
+      topDonors: 'Top Supporters'
+    },
+    
     // Validation Messages
     validation: {
       required: 'This field is required',
@@ -213,7 +251,8 @@ export const translations = {
     // Navigation & General
     nav: {
       dashboard: 'ShopBack管理',
-      trading: '交易图表'
+      trading: '交易图表',
+      donations: '项目捐赠'
     },
     common: {
       close: '关闭',
@@ -353,7 +392,7 @@ export const translations = {
       selectSymbol: '选择交易对',
       theme: '主题',
       darkTheme: '🌙 深色主题',
-      lightTheme: '☀️ 浅色主题',
+      lightTheme: '浅色主题',
       quickSwitch: '🚀 快速切换'
     },
     
@@ -405,6 +444,43 @@ export const translations = {
       hoursAgo: '小时前',
       minutesAgo: '分钟前',
       justNow: '刚刚'
+    },
+    
+    // Donation Page
+    donation: {
+      title: '支持我们的项目',
+      subtitle: '帮助我们维护和改进 ShopBack 管理平台',
+      chooseAmount: '选择捐赠金额',
+      presetAmounts: '快速金额',
+      customAmount: '自定义金额',
+      amountPlaceholder: '输入金额 (美元)',
+      donorName: '您的姓名',
+      namePlaceholder: '输入您的姓名',
+      email: '邮箱地址',
+      emailPlaceholder: '输入您的邮箱',
+      message: '留言',
+      messagePlaceholder: '分享您的想法或建议...',
+      optional: '可选',
+      paymentMethods: '支付方式',
+      total: '总金额',
+      payWithPayPal: '使用 PayPal 捐赠',
+      payWithCard: '使用信用卡捐赠',
+      payWithCrypto: '使用加密货币捐赠',
+      processing: '正在处理您的捐赠...',
+      invalidAmount: '请输入有效金额',
+      thankYou: '感谢您的慷慨捐赠！',
+      error: '捐赠失败，请重试。',
+      aboutProject: '关于这个项目',
+      whatWeDo: '我们的工作',
+      projectDescription: '我们提供一个全面的返利监控平台，帮助用户跟踪和比较多个平台的返利率，确保您不错过任何优惠。',
+      howHelpUs: '您的捐赠如何帮助我们',
+      serverCosts: '服务器托管和维护成本',
+      development: '持续开发和改进',
+      maintenance: '错误修复和安全更新',
+      newFeatures: '添加新功能和平台',
+      transparency: '透明度',
+      transparencyText: '我们相信透明度。所有捐赠都专门用于项目开发和维护。我们定期向社区更新资金使用情况。',
+      topDonors: '主要支持者'
     },
     
     // Validation Messages

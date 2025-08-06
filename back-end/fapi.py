@@ -25,6 +25,14 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 # 导入我们的抓取器
 from sb_scrap import ShopBackSQLiteScraper, StoreInfo, CashbackRate
+import os
+from dotenv import load_dotenv
+from square import Square
+from square.environment import SquareEnvironment  # 正确的导入
+import uuid
+
+# 加载环境变量
+load_dotenv()
 
 # Pydantic模型定义
 
@@ -92,6 +100,10 @@ class DashboardStats(BaseModel):
     upsized_stores: int
     avg_cashback_rate: float
 
+class DonationRequest(BaseModel):
+    token: str
+    amount: float
+
 # 初始化FastAPI应用
 app = FastAPI(
     title="ShopBack Cashback API",
@@ -111,6 +123,12 @@ app.add_middleware(
 # 全局变量
 scraper_instance = None
 db_path = "shopback_data.db"
+
+# 初始化Square客户端
+square_client = Square(
+    token=os.environ.get("SQUARE_ACCESS_TOKEN"),
+    environment=SquareEnvironment.SANDBOX  # 使用正确的枚举
+)
 
 # 日志设置
 logging.basicConfig(level=logging.INFO)
@@ -928,6 +946,44 @@ async def send_alert_email(alert, current_rate):
         success = await loop.run_in_executor(executor, _send_email)
         if success:
             logger.info(f"提醒邮件已发送到: {alert['user_email']}")
+
+@app.post("/api/donations/pay", summary="处理捐赠支付")
+async def process_donation(request: DonationRequest):
+    """
+    接收前端生成的支付Token和金额，使用Square API完成实际扣款。
+    """
+    try:
+        # 将金额从浮点数（例如 10.50）转换为美分（1050）
+        amount_micros = int(request.amount * 100)
+
+        # 创建支付请求体
+        body = {
+            'source_id': request.token,
+            'idempotency_key': str(uuid.uuid4()), # 防止重复支付的唯一键
+            'amount_money': {
+                'amount': amount_micros,
+                'currency': 'USD' # 假设货币为美元
+            }
+        }
+
+        # 调用Square API
+        api_response = square_client.payments.create_payment(body)
+
+        if api_response.is_success():
+            payment_id = api_response.body['payment']['id']
+            # TODO: 在第四阶段，在这里将交易记录存入数据库
+            print(f"Payment successful, Square Payment ID: {payment_id}")
+            return {"status": "success", "message": "Donation successful!", "payment_id": payment_id}
+        elif api_response.is_error():
+            errors = api_response.errors
+            print(f"Payment failed with errors: {errors}")
+            # 返回给前端的第一个错误信息
+            error_message = errors[0].get('detail', 'Unknown payment error')
+            raise HTTPException(status_code=400, detail=f"Payment failed: {error_message}")
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        raise HTTPException(status_code=500, detail="An internal server error occurred.")
 
 # 错误处理
 @app.exception_handler(404)

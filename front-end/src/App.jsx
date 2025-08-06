@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Navigation from './components/Navigation.jsx';
 import TradingViewPage from './pages/trading.jsx';
+import DonationPage from './pages/DonationPage.jsx';
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
@@ -362,7 +363,7 @@ if (languageLoading || loading) {
         flexDirection: 'column',
         background: '#f5f5f5'
       }}>
-        <div style={{fontSize: '2em', marginBottom: '20px'}}>🔄</div>
+        <div style={{fontSize: '2em', marginBottom: '20px'}}></div>
         <div>{translate('messages.loading')}</div>
       </div>
     );
@@ -418,7 +419,9 @@ if (languageLoading || loading) {
 {/* 导航菜单 */}
 <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 <h1 style={{margin: 0, color: '#333', fontSize: '2.5em'}}>
-  {currentPage === 'dashboard' ? translate('dashboard.title') : translate('nav.trading')}
+  {currentPage === 'dashboard' ? translate('dashboard.title') : 
+ currentPage === 'trading' ? translate('nav.trading') : 
+ translate('nav.donations')}
 </h1>
 {currentPage === 'dashboard' && (
   <>
@@ -467,7 +470,7 @@ if (languageLoading || loading) {
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               borderLeft: '4px solid #007bff'
             }}>
-              <div style={{fontSize: '3em', marginBottom: '10px'}}>🏪</div>
+              
               <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.totalStores')}</h3>
               <div style={{fontSize: '3em', color: '#007bff', fontWeight: 'bold'}}>
                 {dashboardStats.total_stores}
@@ -482,7 +485,7 @@ if (languageLoading || loading) {
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               borderLeft: '4px solid #28a745'
             }}>
-              <div style={{fontSize: '3em', marginBottom: '10px'}}>📊</div>
+              
               <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.totalRecords')}</h3>
               <div style={{fontSize: '3em', color: '#28a745', fontWeight: 'bold'}}>
                 {dashboardStats.total_records?.toLocaleString()}
@@ -497,7 +500,7 @@ if (languageLoading || loading) {
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               borderLeft: '4px solid #ffc107'
             }}>
-              <div style={{fontSize: '3em', marginBottom: '10px'}}>🔄</div>
+              <div style={{fontSize: '3em', marginBottom: '10px'}}></div>
               <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.recentScrapes')}</h3>
               <div style={{fontSize: '3em', color: '#ffc107', fontWeight: 'bold'}}>
                 {dashboardStats.recent_scrapes}
@@ -531,7 +534,7 @@ if (languageLoading || loading) {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             marginBottom: '30px'
           }}>
-            <h2 style={{margin: '0 0 15px 0', color: '#333'}}>💰 {translate('dashboard.avgCashback')}</h2>
+            <h2 style={{margin: '0 0 15px 0', color: '#333'}}>{translate('dashboard.avgCashback')}</h2>
             <div style={{fontSize: '4em', color: '#007bff', fontWeight: 'bold'}}>
               {dashboardStats.avg_cashback_rate}%
             </div>
@@ -576,7 +579,7 @@ if (languageLoading || loading) {
           }}>
             <div>
               <h3 style={{margin: '0 0 5px 0', color: '#333', fontSize: '1.3em'}}>
-                🏪 {store.name}
+                {store.name}
               </h3>
               {/* 平台标签 */}
               <div style={{
@@ -783,7 +786,7 @@ if (languageLoading || loading) {
                 textTransform: 'uppercase',
                 fontSize: '1.1em'
               }}>
-                {platform === 'shopback' ? '🛍️ ShopBack' : '💰 CashRewards'}
+                {platform === 'shopback' ? 'ShopBack' : 'CashRewards'}
               </h4>
               {platform === selectedComparison.best_platform && (
                 <span style={{
@@ -863,7 +866,7 @@ if (languageLoading || loading) {
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
           <h2 style={{margin: '0 0 25px 0', color: '#333'}}>
-            🏪 {translate('stores.title')} ({stores.length})
+            {translate('stores.title')} ({stores.length})
           </h2>
           {/* 添加商家表单 */}
             <div style={{
@@ -955,7 +958,7 @@ if (languageLoading || loading) {
               marginBottom: '25px'
             }}>
               <h2 style={{margin: 0, color: '#333'}}>
-                🏪 {selectedStore.name} - {translate('stores.storeDetails')}
+                {selectedStore.name} - {translate('stores.storeDetails')}
               </h2>
               <button 
                 onClick={() => setSelectedStore(null)}
@@ -975,7 +978,7 @@ if (languageLoading || loading) {
             {/* 商家历史记录 */}
             {storeHistory.length > 0 && (
               <div>
-                <h3 style={{color: '#333', marginBottom: '20px'}}>📊 {translate('stores.cashbackHistory')}</h3>
+                <h3 style={{color: '#333', marginBottom: '20px'}}>{translate('stores.cashbackHistory')}</h3>
                 
                 {/* 按日期分组显示 */}
                 {Object.entries(
@@ -1078,7 +1081,7 @@ if (languageLoading || loading) {
                                       color: '#dc3545',
                                       marginBottom: '3px'
                                     }}>
-                                      📈 {translate('stats.highestRate')}:: {categoryStats.highest_rate}%
+                                      {translate('stats.highestRate')}:: {categoryStats.highest_rate}%
                                     </div>
                                     <div style={{color: '#666', fontSize: '0.8em'}}>
                                       {formatDate(categoryStats.highest_date)}
@@ -1102,7 +1105,7 @@ if (languageLoading || loading) {
                                 <div style={{marginTop: '8px', padding: '5px 0', borderTop: '1px solid #dee2e6'}}>
                                   {categoryStats.current_rate === categoryStats.highest_rate && (
                                     <span style={{color: '#dc3545', fontWeight: 'bold', fontSize: '0.8em'}}>
-                                      🎯 {translate('stats.currentIsHighest')}
+                                      {translate('stats.currentIsHighest')}
                                     </span>
                                   )}
                                   {categoryStats.current_rate === categoryStats.lowest_rate && (
@@ -1113,7 +1116,7 @@ if (languageLoading || loading) {
                                   {categoryStats.current_rate !== categoryStats.highest_rate && 
                                    categoryStats.current_rate !== categoryStats.lowest_rate && (
                                     <span style={{color: '#666', fontSize: '0.8em'}}>
-                                      📊 {translate('stats.differenceFromHigh')}: {(categoryStats.highest_rate - categoryStats.current_rate).toFixed(1)}%
+                                      {translate('stats.differenceFromHigh')}: {(categoryStats.highest_rate - categoryStats.current_rate).toFixed(1)}%
                                     </span>
                                   )}
                                 </div>
@@ -1157,7 +1160,7 @@ if (languageLoading || loading) {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             marginTop: '30px'
           }}>
-            <h2 style={{margin: '0 0 25px 0', color: '#333'}}>🔔 {translate('alerts.title')}</h2>
+            <h2 style={{margin: '0 0 25px 0', color: '#333'}}>{translate('alerts.title')}</h2>
             <button
               onClick={async () => {
                 try {
@@ -1229,7 +1232,7 @@ if (languageLoading || loading) {
               
               <div style={{marginBottom: '15px'}}>
                 <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                  🏪 URL：
+                  URL：
                 </label>
                 <input
                   type="text"
@@ -1254,7 +1257,7 @@ if (languageLoading || loading) {
               }}>
                 <div>
                   <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                    📊 {translate('alerts.thresholdType')}：
+                    {translate('alerts.thresholdType')}：
                   </label>
                   <select
                     value={alertThresholdType}
@@ -1275,7 +1278,7 @@ if (languageLoading || loading) {
 
                 <div>
                   <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                    🎯 {translate('alerts.threshold')}：
+                    {translate('alerts.threshold')}：
                   </label>
                   <input
                     type="number"
@@ -1329,7 +1332,7 @@ if (languageLoading || loading) {
             {/* 用户提醒列表 */}
             {userAlerts.length > 0 && (
               <div>
-                <h4 style={{margin: '0 0 15px 0', color: '#333'}}>📋 我的提醒列表</h4>
+                <h4 style={{margin: '0 0 15px 0', color: '#333'}}>我的提醒列表</h4>
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
@@ -1343,7 +1346,7 @@ if (languageLoading || loading) {
                       padding: '15px'
                     }}>
                       <h5 style={{margin: '0 0 10px 0', color: '#333'}}>
-                        🏪 {alert.store_name || '商家'}
+                        {alert.store_name || '商家'}
                       </h5>
                       <p style={{margin: '5px 0', fontSize: '14px', color: '#666'}}>
                         <strong>网址:</strong> {alert.store_url}
@@ -1397,12 +1400,14 @@ if (languageLoading || loading) {
           textAlign: 'center',
           border: '1px solid #c3e6cb'
         }}>
-          <h3>🎉 恭喜！ShopBack管理平台部署成功！</h3>
+          <h3>恭喜！ShopBack管理平台部署成功！</h3>
           <p>所有功能正常工作，API连接正常，数据加载成功。</p>
         </div>
       </div>
-) : (
+) : currentPage === 'trading' ? (
     <TradingViewPage />
+   ) : (
+    <DonationPage />
    )}
         </div>
       </div>
