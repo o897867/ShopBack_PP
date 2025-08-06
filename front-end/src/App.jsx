@@ -1,8 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import Navigation from './components/Navigation.jsx';
+import TradingViewPage from './pages/trading.jsx';
+import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
+import { t} from './translations/index';
+import LanguageSelector from './components/LanguageSelector.jsx';
 
 const API_BASE_URL = '';
+// 临时测试代码 - 添加到 App.js 最顶部
+const testObj = {
+  en: {
+    dashboard: {
+      title: 'English Title'
+    }
+  },
+  'zh-CN': {
+    dashboard: {
+      title: '中文标题'
+    }
+  }
+};
 
+// 简单测试函数
+const simpleTest = (key, lang) => {
+  console.log('Testing with:', key, lang);
+  console.log('testObj:', testObj);
+  console.log('testObj[lang]:', testObj[lang]);
+  console.log('testObj[lang].dashboard:', testObj[lang]?.dashboard);
+  console.log('testObj[lang].dashboard.title:', testObj[lang]?.dashboard?.title);
+  
+  return testObj[lang]?.dashboard?.title || 'NOT FOUND';
+};
+
+// 在 App 组件内测试
+console.log('Simple test result:', simpleTest('dashboard.title', 'zh-CN'));
 const api = {
   createAlert: async (alertData) => {
     const response = await fetch(`${API_BASE_URL}/api/alerts`, {
@@ -100,6 +131,8 @@ const api = {
 };
 
 const App = () => {
+  const { currentLanguage, isLoading: languageLoading } = useLanguage();
+  const translate = (key) => t(key, currentLanguage);
   const [dashboardStats, setDashboardStats] = useState(null);
   const [stores, setStores] = useState([]);
   const [upsizedStores, setUpsizedStores] = useState([]);
@@ -124,7 +157,9 @@ const App = () => {
   const [comparableStores, setComparableStores] = useState([]);
   const [selectedComparison, setSelectedComparison] = useState(null);
   const [showComparison, setShowComparison] = useState(false);
-  
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  console.log('Test EN:', t('dashboard.title', 'en'));
+  console.log('Test CN:', t('dashboard.title', 'zh-CN'));
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -202,7 +237,8 @@ const App = () => {
       setIsCreatingAlert(false);
     }
   };
-  
+
+
   const handleLoadUserAlerts = async () => {
     if (!alertEmail.trim()) {
       setAlertMessage({ type: 'error', text: '请输入邮箱地址' });
@@ -316,7 +352,7 @@ const App = () => {
     fetchData();
   }, []);
 
-  if (loading) {
+if (languageLoading || loading) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -327,7 +363,7 @@ const App = () => {
         background: '#f5f5f5'
       }}>
         <div style={{fontSize: '2em', marginBottom: '20px'}}>🔄</div>
-        <div>正在加载数据...</div>
+        <div>{translate('messages.loading')}</div>
       </div>
     );
   }
@@ -342,7 +378,7 @@ const App = () => {
         flexDirection: 'column',
         background: '#f5f5f5'
       }}>
-        <h2 style={{color: '#dc3545'}}>❌ 连接错误</h2>
+        <h2 style={{color: '#dc3545'}}>❌ {translate('messages.connectionError')}</h2>
         <p>{error}</p>
         <button onClick={fetchData} style={{
           background: '#007bff',
@@ -352,7 +388,7 @@ const App = () => {
           borderRadius: '4px',
           cursor: 'pointer'
         }}>
-          重试
+          {translate('messages.retry')}
         </button>
         
       </div>
@@ -362,6 +398,13 @@ const App = () => {
   return (
     <div style={{minHeight: '100vh', background: '#f5f5f5', padding: '20px'}}>
       <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <div style={{
+        position: 'absolute',
+        top: '20px',
+        right: '20px'
+      }}>
+        <LanguageSelector />
+      </div>
         
         {/* 页面标题 */}
         <div style={{
@@ -372,36 +415,42 @@ const App = () => {
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           textAlign: 'center'
         }}>
-          <h1 style={{margin: 0, color: '#333', fontSize: '2.5em'}}>
-            🏪 ShopBack Cashback 管理平台
-          </h1>
-          <button onClick={handleRescrape} disabled={isRescraping} style={{
-            background: isRescraping ? '#6c757d' : '#007bff',
-            color: 'white',
-            border: 'none',
-            padding: '12px 24px',
-            borderRadius: '6px',
-            cursor: isRescraping ? 'not-allowed' : 'pointer',
-            marginTop: '20px',
-            fontSize: '16px'
-          }}>
-            {isRescraping ? '🔄 正在重新抓取...' : '🔄 重新抓取并刷新'}
-          </button>
-          <button onClick={() => setShowAlerts(!showAlerts)} style={{
-            background: '#17a2b8',
-            color: 'white',
-            border: 'none',
-            padding: '12px 24px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            marginTop: '20px',
-            marginLeft: '10px',
-            fontSize: '16px'
-          }}>
-            {showAlerts ? '📋 关闭价格提醒' : '🔔 价格提醒管理'}
-          </button>
-        </div>
-
+{/* 导航菜单 */}
+<Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+<h1 style={{margin: 0, color: '#333', fontSize: '2.5em'}}>
+  {currentPage === 'dashboard' ? translate('dashboard.title') : translate('nav.trading')}
+</h1>
+{currentPage === 'dashboard' && (
+  <>
+    <button onClick={handleRescrape} disabled={isRescraping} style={{
+      background: isRescraping ? '#6c757d' : '#007bff',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '6px',
+      cursor: isRescraping ? 'not-allowed' : 'pointer',
+      marginTop: '20px',
+      fontSize: '16px'
+    }}>
+      {isRescraping ? translate('dashboard.rescraping') : translate('dashboard.rescrape')}
+    </button>
+    <button onClick={() => setShowAlerts(!showAlerts)} style={{
+      background: '#17a2b8',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      marginTop: '20px',
+      marginLeft: '10px',
+      fontSize: '16px'
+    }}>
+      {showAlerts ? translate('dashboard.closeAlerts') : translate('dashboard.alerts')}
+    </button>
+  </>
+)}
+   {currentPage === 'dashboard' ? (
+<div>
         {/* 统计卡片 */}
         {dashboardStats && (
           <div style={{
@@ -419,7 +468,7 @@ const App = () => {
               borderLeft: '4px solid #007bff'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>🏪</div>
-              <h3 style={{margin: 0, color: '#666'}}>总商家数</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.totalStores')}</h3>
               <div style={{fontSize: '3em', color: '#007bff', fontWeight: 'bold'}}>
                 {dashboardStats.total_stores}
               </div>
@@ -434,7 +483,7 @@ const App = () => {
               borderLeft: '4px solid #28a745'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>📊</div>
-              <h3 style={{margin: 0, color: '#666'}}>总记录数</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.totalRecords')}</h3>
               <div style={{fontSize: '3em', color: '#28a745', fontWeight: 'bold'}}>
                 {dashboardStats.total_records?.toLocaleString()}
               </div>
@@ -449,7 +498,7 @@ const App = () => {
               borderLeft: '4px solid #ffc107'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>🔄</div>
-              <h3 style={{margin: 0, color: '#666'}}>24小时抓取</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.recentScrapes')}</h3>
               <div style={{fontSize: '3em', color: '#ffc107', fontWeight: 'bold'}}>
                 {dashboardStats.recent_scrapes}
               </div>
@@ -464,7 +513,7 @@ const App = () => {
               borderLeft: '4px solid #dc3545'
             }}>
               <div style={{fontSize: '3em', marginBottom: '10px'}}>🔥</div>
-              <h3 style={{margin: 0, color: '#666'}}>Upsized商家</h3>
+              <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.upsizedStores')}</h3>
               <div style={{fontSize: '3em', color: '#dc3545', fontWeight: 'bold'}}>
                 {dashboardStats.upsized_stores}
               </div>
@@ -482,7 +531,7 @@ const App = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             marginBottom: '30px'
           }}>
-            <h2 style={{margin: '0 0 15px 0', color: '#333'}}>💰 平均Cashback率</h2>
+            <h2 style={{margin: '0 0 15px 0', color: '#333'}}>💰 {translate('dashboard.avgCashback')}</h2>
             <div style={{fontSize: '4em', color: '#007bff', fontWeight: 'bold'}}>
               {dashboardStats.avg_cashback_rate}%
             </div>
@@ -499,7 +548,7 @@ const App = () => {
     marginBottom: '30px'
   }}>
     <h2 style={{margin: '0 0 25px 0', color: '#333'}}>
-      🔥 Upsized优惠商家 ({upsizedStores.length})
+      {translate('dashboard.upsizedStores')} ({upsizedStores.length})
     </h2>
     
     {/* 这里是关键部分 - map函数的正确写法 */}
@@ -551,7 +600,7 @@ const App = () => {
               fontSize: '0.8em',
               fontWeight: 'bold'
             }}>
-              🔥 UPSIZED
+               UPSIZED
             </span>
           </div>
           
@@ -565,7 +614,7 @@ const App = () => {
                 marginLeft: '15px',
                 fontSize: '0.7em'
               }}>
-                原价: {store.previous_offer}
+                {translate('upsized.originalPrice')}: {store.previous_offer}
               </span>
             )}
           </div>
@@ -575,7 +624,7 @@ const App = () => {
             🔗 {store.url}
           </p>
           <p style={{color: '#999', fontSize: '12px', margin: 0}}>
-            ⏰ 抓取时间: {new Date(store.scraped_at).toLocaleString()}
+            {translate('upsized.scraped')}: {new Date(store.scraped_at).toLocaleString()}
           </p>
         </div>
       );
@@ -591,10 +640,10 @@ const App = () => {
     marginBottom: '30px'
   }}>
     <h2 style={{margin: '0 0 25px 0', color: '#333'}}>
-      🆚 可比较商家 ({comparableStores.length})
+      {translate('compare.title')} ({comparableStores.length})
     </h2>
     <p style={{color: '#666', marginBottom: '20px'}}>
-      这些商家在多个平台都有数据，点击可查看费率比较
+      {translate('compare.description')}
     </p>
     <div style={{
       display: 'grid',
@@ -624,10 +673,10 @@ const App = () => {
              }}>
           <h4 style={{margin: '0 0 8px 0', color: '#333'}}>{store.name}</h4>
           <div style={{fontSize: '12px', color: '#666'}}>
-            平台: {store.platforms}
+            {translate('compare.platforms')}: {store.platforms}
           </div>
           <div style={{fontSize: '12px', color: '#007bff', marginTop: '5px'}}>
-            点击比较 →
+            {translate('compare.clickToCompare')}
           </div>
         </div>
       ))}
@@ -635,7 +684,7 @@ const App = () => {
   </div>
 )}
 
-// 比较结果弹窗（在最后添加）
+
 {showComparison && selectedComparison && (
   <div style={{
     position: 'fixed',
@@ -669,7 +718,7 @@ const App = () => {
         paddingBottom: '15px'
       }}>
         <h2 style={{margin: 0, color: '#333'}}>
-          🆚 {selectedComparison.store_name} 比较
+          🆚 {selectedComparison.store_name} {translate('compare.title')}
         </h2>
         <button 
           onClick={() => setShowComparison(false)}
@@ -683,7 +732,7 @@ const App = () => {
             fontSize: '14px'
           }}
         >
-          关闭
+          {translate('common.close')}
         </button>
       </div>
 
@@ -698,7 +747,7 @@ const App = () => {
           textAlign: 'center'
         }}>
           <h3 style={{margin: '0 0 10px 0', fontSize: '1.3em'}}>
-            🏆 最佳选择
+            {translate('compare.bestChoice')}
           </h3>
           <div style={{fontSize: '1.5em', fontWeight: 'bold'}}>
             {selectedComparison.best_platform.toUpperCase()}: {selectedComparison.best_rate}%
@@ -745,14 +794,14 @@ const App = () => {
                   fontSize: '0.8em',
                   fontWeight: 'bold'
                 }}>
-                  最佳
+                  {translate('compare.best')}
                 </span>
               )}
             </div>
 
             {/* Cashback率 */}
             <div style={{marginBottom: '10px'}}>
-              <div style={{fontSize: '0.9em', color: '#666'}}>Cashback率</div>
+              <div style={{fontSize: '0.9em', color: '#666'}}>{translate('compare.cashbackRate')}</div>
               <div style={{
                 fontSize: '2em',
                 fontWeight: 'bold',
@@ -780,7 +829,7 @@ const App = () => {
 
             {/* 更新时间 */}
             <div style={{fontSize: '0.8em', color: '#999'}}>
-              更新: {new Date(data.last_updated).toLocaleString()}
+              {translate('time.updated')}: {new Date(data.last_updated).toLocaleString()}
             </div>
           </div>
         ))}
@@ -794,12 +843,12 @@ const App = () => {
         borderRadius: '6px',
         borderLeft: '4px solid #007bff'
       }}>
-        <h5 style={{margin: '0 0 8px 0', color: '#333'}}>💡 使用建议</h5>
+        <h5 style={{margin: '0 0 8px 0', color: '#333'}}></h5>
         <ul style={{margin: 0, paddingLeft: '20px', fontSize: '0.9em', color: '#666'}}>
-          <li>选择费率更高的平台可以获得更多返现</li>
-          <li>注意查看各平台的条款和限制</li>
-          <li>UPSIZED标签表示限时提升的优惠</li>
-          <li>数据会定期更新，建议购买前再次确认</li>
+          <li>{translate('compare.tip1')}</li>
+          <li>{translate('compare.tip2')}</li>
+          <li>{translate('compare.tip3')}</li>
+          <li>{translate('compare.tip4')}</li>
         </ul>
       </div>
     </div>
@@ -814,7 +863,7 @@ const App = () => {
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
           <h2 style={{margin: '0 0 25px 0', color: '#333'}}>
-            🏪 商家列表 ({stores.length})
+            🏪 {translate('stores.title')} ({stores.length})
           </h2>
           {/* 添加商家表单 */}
             <div style={{
@@ -824,11 +873,11 @@ const App = () => {
               marginBottom: '20px',
               border: '1px solid #dee2e6'
             }}>
-              <h4 style={{margin: '0 0 15px 0', color: '#333'}}>➕ 添加新商家</h4>
+              <h4 style={{margin: '0 0 15px 0', color: '#333'}}>➕ {translate('stores.addNew')}</h4>
               <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
                 <input
                   type="text"
-                  placeholder="输入ShopBack商家页面URL..."
+                  placeholder={translate('stores.addUrl')}
                   value={addStoreUrl}
                   onChange={(e) => setAddStoreUrl(e.target.value)}
                   style={{
@@ -884,7 +933,7 @@ const App = () => {
                 {store.url}
               </p>
               <p style={{color: '#999', fontSize: '12px', margin: 0}}>
-                更新时间: {new Date(store.updated_at).toLocaleString()}
+                {translate('store.updateTime')}: {new Date(store.updated_at).toLocaleString()}
               </p>
             </div>
           ))}
@@ -906,7 +955,7 @@ const App = () => {
               marginBottom: '25px'
             }}>
               <h2 style={{margin: 0, color: '#333'}}>
-                🏪 {selectedStore.name} - 详细信息
+                🏪 {selectedStore.name} - {translate('stores.storeDetails')}
               </h2>
               <button 
                 onClick={() => setSelectedStore(null)}
@@ -926,7 +975,7 @@ const App = () => {
             {/* 商家历史记录 */}
             {storeHistory.length > 0 && (
               <div>
-                <h3 style={{color: '#333', marginBottom: '20px'}}>📊 Cashback历史记录</h3>
+                <h3 style={{color: '#333', marginBottom: '20px'}}>📊 {translate('stores.cashbackHistory')}</h3>
                 
                 {/* 按日期分组显示 */}
                 {Object.entries(
@@ -1029,7 +1078,7 @@ const App = () => {
                                       color: '#dc3545',
                                       marginBottom: '3px'
                                     }}>
-                                      📈 史高: {categoryStats.highest_rate}%
+                                      📈 {translate('stats.highestRate')}:: {categoryStats.highest_rate}%
                                     </div>
                                     <div style={{color: '#666', fontSize: '0.8em'}}>
                                       {formatDate(categoryStats.highest_date)}
@@ -1041,7 +1090,7 @@ const App = () => {
                                       color: '#6c757d',
                                       marginBottom: '3px'
                                     }}>
-                                      📉 史低: {categoryStats.lowest_rate}%
+                                       📉 {translate('stats.lowestRate')}: {categoryStats.lowest_rate}%
                                     </div>
                                     <div style={{color: '#666', fontSize: '0.8em'}}>
                                       {formatDate(categoryStats.lowest_date)}
@@ -1053,18 +1102,18 @@ const App = () => {
                                 <div style={{marginTop: '8px', padding: '5px 0', borderTop: '1px solid #dee2e6'}}>
                                   {categoryStats.current_rate === categoryStats.highest_rate && (
                                     <span style={{color: '#dc3545', fontWeight: 'bold', fontSize: '0.8em'}}>
-                                      🎯 当前为史高！
+                                      🎯 {translate('stats.currentIsHighest')}
                                     </span>
                                   )}
                                   {categoryStats.current_rate === categoryStats.lowest_rate && (
                                     <span style={{color: '#6c757d', fontWeight: 'bold', fontSize: '0.8em'}}>
-                                      📉 当前为史低
+                                      📉 {translate('stats.currentIsLowest')}
                                     </span>
                                   )}
                                   {categoryStats.current_rate !== categoryStats.highest_rate && 
                                    categoryStats.current_rate !== categoryStats.lowest_rate && (
                                     <span style={{color: '#666', fontSize: '0.8em'}}>
-                                      📊 史高差距: {(categoryStats.highest_rate - categoryStats.current_rate).toFixed(1)}%
+                                      📊 {translate('stats.differenceFromHigh')}: {(categoryStats.highest_rate - categoryStats.current_rate).toFixed(1)}%
                                     </span>
                                   )}
                                 </div>
@@ -1094,7 +1143,7 @@ const App = () => {
                 color: '#666'
               }}>
                 <div style={{fontSize: '3em', marginBottom: '15px'}}>📭</div>
-                <p>暂无历史数据</p>
+                <p>{translate('stores.noHistory')}</p>
               </div>
             )}
           </div>
@@ -1108,7 +1157,7 @@ const App = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             marginTop: '30px'
           }}>
-            <h2 style={{margin: '0 0 25px 0', color: '#333'}}>🔔 价格提醒管理</h2>
+            <h2 style={{margin: '0 0 25px 0', color: '#333'}}>🔔 {translate('alerts.title')}</h2>
             <button
               onClick={async () => {
                 try {
@@ -1132,17 +1181,17 @@ const App = () => {
                 marginLeft: '10px'
               }}
             >
-              测试邮件
+              {translate('alerts.testEmail')}
             </button>
                         {/* 邮箱输入 */}
             <div style={{marginBottom: '25px'}}>
               <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>
-                📧 邮箱地址：
+                📧 {translate('alerts.email')}：
               </label>
               <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
                 <input
                   type="email"
-                  placeholder="输入您的邮箱地址"
+                  placeholder=" "
                   value={alertEmail}
                   onChange={(e) => setAlertEmail(e.target.value)}
                   style={{
@@ -1164,7 +1213,7 @@ const App = () => {
                     cursor: 'pointer'
                   }}
                 >
-                  加载我的提醒
+                  {translate('alerts.loadAlerts')}
                 </button>
               </div>
             </div>
@@ -1176,15 +1225,15 @@ const App = () => {
               borderRadius: '6px',
               marginBottom: '25px'
             }}>
-              <h4 style={{margin: '0 0 15px 0', color: '#333'}}>➕ 创建新提醒</h4>
+              <h4 style={{margin: '0 0 15px 0', color: '#333'}}>➕ {translate('alerts.createNew')}</h4>
               
               <div style={{marginBottom: '15px'}}>
                 <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                  🏪 商家URL：
+                  🏪 URL：
                 </label>
                 <input
                   type="text"
-                  placeholder="输入ShopBack商家页面URL..."
+                  placeholder="URL..."
                   value={alertUrl}
                   onChange={(e) => setAlertUrl(e.target.value)}
                   style={{
@@ -1205,7 +1254,7 @@ const App = () => {
               }}>
                 <div>
                   <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                    📊 提醒类型：
+                    📊 {translate('alerts.thresholdType')}：
                   </label>
                   <select
                     value={alertThresholdType}
@@ -1218,21 +1267,21 @@ const App = () => {
                       fontSize: '14px'
                     }}
                   >
-                    <option value="above_current">高于当前比例</option>
-                    <option value="fixed_value">达到固定值</option>
-                    <option value="percentage_increase">涨幅百分比</option>
+                    <option value="above_current">＞</option>
+                    <option value="fixed_value">=</option>
+                    <option value="percentage_increase">Δ%</option>
                   </select>
                 </div>
 
                 <div>
                   <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                    🎯 阈值 (%)：
+                    🎯 {translate('alerts.threshold')}：
                   </label>
                   <input
                     type="number"
                     step="0.1"
                     min="0"
-                    placeholder="输入数值"
+                    placeholder="enter"
                     value={alertThresholdValue}
                     onChange={(e) => setAlertThresholdValue(e.target.value)}
                     style={{
@@ -1259,7 +1308,7 @@ const App = () => {
                   fontWeight: 'bold'
                 }}
               >
-                {isCreatingAlert ? '创建中...' : '创建提醒'}
+                {isCreatingAlert ? 'Creating...' : 'Create'}
               </button>
             </div>
 
@@ -1352,8 +1401,20 @@ const App = () => {
           <p>所有功能正常工作，API连接正常，数据加载成功。</p>
         </div>
       </div>
+) : (
+    <TradingViewPage />
+   )}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default App;
+
+export default function AppWithLanguage() {
+  return (
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  );
+}

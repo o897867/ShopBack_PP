@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import TradingViewWidget from '../components/tradingWidget';
 
 const TradingViewPage = () => {
   const [selectedSymbol, setSelectedSymbol] = useState('BINANCE:BTCUSDT');
@@ -7,10 +6,9 @@ const TradingViewPage = () => {
 
   const popularSymbols = [
     { label: 'Bitcoin (BTC/USDT)', value: 'BINANCE:BTCUSDT' },
-    { label: 'USDJPY', value: '	FX_IDC:USDJPY' },
+    { label: 'USDJPY', value: 'FX_IDC:USDJPY' },
     { label: 'Gold (XAU/USD)', value: 'TVC:GOLD' },
     { label: 'EURJPY', value: 'FX_IDC:EURJPY' },
-    { label: 'USDJPY', value: 'FX_IDC:USDJPY' },
     { label: 'EURUSD', value: 'FX_IDC:EURUSD' },
     { label: 'Silver (XAG/USD)', value: 'TVC:SILVER' }
   ];
@@ -80,48 +78,25 @@ const TradingViewPage = () => {
         </div>
       </div>
 
-      {/* TradingView图表 */}
+      {/* TradingView图表占位符 */}
       <div style={{
         background: 'white',
         borderRadius: '8px',
         padding: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        textAlign: 'center',
+        minHeight: '400px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
       }}>
-        <TradingViewWidget symbol={selectedSymbol} theme={theme} />
-      </div>
-
-      {/* 快速访问按钮 */}
-      <div style={{
-        background: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        marginTop: '20px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
-        <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>🚀 快速切换:</h3>
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }}>
-          {popularSymbols.slice(0, 6).map(symbol => (
-            <button
-              key={symbol.value}
-              onClick={() => setSelectedSymbol(symbol.value)}
-              style={{
-                background: selectedSymbol === symbol.value ? '#007bff' : '#f8f9fa',
-                color: selectedSymbol === symbol.value ? 'white' : '#333',
-                border: '1px solid #ddd',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {symbol.label}
-            </button>
-          ))}
+        <div>
+          <h3>📈 TradingView 图表</h3>
+          <p>当前交易对: {selectedSymbol}</p>
+          <p>主题: {theme}</p>
+          <p style={{color: '#666', fontSize: '14px'}}>
+            TradingView组件将在这里显示
+          </p>
         </div>
       </div>
     </div>
