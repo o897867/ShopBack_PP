@@ -25,6 +25,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 # 导入我们的抓取器
 from sb_scrap import ShopBackSQLiteScraper, StoreInfo, CashbackRate
+from bayesian_model import BayesianCashbackModel, ModelManager, train_model, update_all_models
+from model_scheduler import start_model_scheduler, get_scheduler_status
 import os
 from dotenv import load_dotenv
 from square import Square
@@ -123,6 +125,7 @@ app.add_middleware(
 # 全局变量
 scraper_instance = None
 db_path = "shopback_data.db"
+model_manager = ModelManager(db_path)
 
 # 初始化Square客户端
 square_client = Square(
@@ -835,6 +838,212 @@ async def test_email(email: str = Query(..., description="测试邮箱")):
     except Exception as e:
         return {"success": False, "message": f"邮件发送失败: {str(e)}"}
 
+# Bayesian Model API Endpoints
+@app.get("/api/predictions", summary="获取所有预测结果")
+async def get_all_predictions():
+    """获取所有商家的预测结果"""
+    try:
+        predictions = model_manager.get_all_predictions()
+        return {
+            "success": True,
+            "predictions": predictions,
+            "count": len(predictions)
+        }
+    except Exception as e:
+        logger.error(f"获取预测失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/predictions/{store_id}", summary="获取特定商家的预测")
+async def get_store_predictions(store_id: int):
+    """获取特定商家的详细预测"""
+    try:
+        model = model_manager.load_model(store_id)
+        if not model:
+            raise HTTPException(status_code=404, detail="该商家暂无预测模型")
+        
+        summary = model.get_model_summary()
+        return {
+            "success": True,
+            "prediction": summary
+        }
+    except Exception as e:
+        logger.error(f"获取商家预测失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/predictions/global", summary="获取全局预测模型")
+async def get_global_predictions():
+    """获取全局预测模型的结果"""
+    try:
+        model = model_manager.load_model()  # None for global model
+        if not model:
+            raise HTTPException(status_code=404, detail="全局模型尚未训练")
+        
+        summary = model.get_model_summary()
+        return {
+            "success": True,
+            "prediction": summary
+        }
+    except Exception as e:
+        logger.error(f"获取全局预测失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/predictions/retrain", summary="重新训练预测模型")
+async def retrain_models(background_tasks: BackgroundTasks, store_id: Optional[int] = None):
+    """重新训练预测模型"""
+    try:
+        if store_id:
+            # 重新训练特定商家模型
+            background_tasks.add_task(retrain_single_model, store_id)
+            return {
+                "success": True,
+                "message": f"商家 {store_id} 的模型正在后台重新训练"
+            }
+        else:
+            # 重新训练所有模型
+            background_tasks.add_task(retrain_all_models)
+            return {
+                "success": True,
+                "message": "所有模型正在后台重新训练"
+            }
+    except Exception as e:
+        logger.error(f"重新训练模型失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/predictions/insights", summary="获取AI洞察")
+async def get_ai_insights():
+    """获取基于预测模型的AI洞察"""
+    try:
+        predictions = model_manager.get_all_predictions()
+        insights = generate_insights(predictions)
+        return {
+            "success": True,
+            "insights": insights
+        }
+    except Exception as e:
+        logger.error(f"获取AI洞察失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/predictions/anomalies", summary="检测异常情况")
+async def detect_anomalies():
+    """检测cashback rate的异常变化"""
+    try:
+        # Get recent data
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT ch.*, s.name as store_name
+            FROM cashback_history ch
+            JOIN stores s ON ch.store_id = s.id
+            WHERE ch.scraped_at > datetime('now', '-7 days')
+            ORDER BY ch.scraped_at DESC
+        """)
+        
+        recent_data = cursor.fetchall()
+        conn.close()
+        
+        anomalies = []
+        
+        for row in recent_data:
+            rate = row[3] or row[5]  # main_rate_numeric or category_rate_numeric
+            if rate and rate > 20:  # Very high cashback rate
+                anomalies.append({
+                    'type': 'unusually_high_rate',
+                    'store_name': row[-1],
+                    'rate': rate,
+                    'date': row[8],  # scraped_at
+                    'severity': 'high' if rate > 30 else 'medium'
+                })
+        
+        return {
+            "success": True,
+            "anomalies": anomalies,
+            "count": len(anomalies)
+        }
+        
+    except Exception as e:
+        logger.error(f"检测异常失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/predictions/scheduler-status", summary="获取模型调度器状态")
+async def get_model_scheduler_status():
+    """获取后台模型更新调度器的状态"""
+    try:
+        status = get_scheduler_status()
+        return {
+            "success": True,
+            "scheduler_status": status
+        }
+    except Exception as e:
+        logger.error(f"获取调度器状态失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def retrain_single_model(store_id: int):
+    """后台任务：重新训练单个商家模型"""
+    try:
+        model = train_model(db_path, store_id)
+        model_manager.save_model(model)
+        logger.info(f"Successfully retrained model for store {store_id}")
+    except Exception as e:
+        logger.error(f"Failed to retrain model for store {store_id}: {e}")
+
+async def retrain_all_models():
+    """后台任务：重新训练所有模型"""
+    try:
+        update_all_models(db_path)
+        logger.info("Successfully retrained all models")
+    except Exception as e:
+        logger.error(f"Failed to retrain all models: {e}")
+
+def generate_insights(predictions: List[Dict]) -> List[Dict]:
+    """根据预测结果生成AI洞察"""
+    insights = []
+    
+    if not predictions:
+        return insights
+    
+    # 即将发生变化的商家
+    soon_changing = [p for p in predictions if p.get('next_change_days', 999) < 7]
+    if soon_changing:
+        insights.append({
+            'type': 'urgent',
+            'title': '即将变化的cashback rates',
+            'message': f'{len(soon_changing)}家商家可能在一周内改变cashback rates',
+            'stores': [p['store_name'] for p in soon_changing[:5]]
+        })
+    
+    # 高增长预期
+    high_increase = [p for p in predictions if p.get('magnitude_change', 0) > 2]
+    if high_increase:
+        insights.append({
+            'type': 'opportunity',
+            'title': '预期大幅增长',
+            'message': f'{len(high_increase)}家商家预期cashback rate将大幅提升',
+            'stores': [p['store_name'] for p in high_increase[:5]]
+        })
+    
+    # 高upsize概率
+    likely_upsized = [p for p in predictions if p.get('upsize_probability', 0) > 70]
+    if likely_upsized:
+        insights.append({
+            'type': 'promotion',
+            'title': '即将到来的upsize优惠',
+            'message': f'{len(likely_upsized)}家商家很可能推出upsize促销',
+            'stores': [p['store_name'] for p in likely_upsized[:5]]
+        })
+    
+    # 低信心预测
+    low_confidence = [p for p in predictions if p.get('confidence', 100) < 40]
+    if low_confidence:
+        insights.append({
+            'type': 'warning',
+            'title': '数据不足',
+            'message': f'{len(low_confidence)}家商家的预测置信度较低，建议增加观测数据',
+            'stores': [p['store_name'] for p in low_confidence[:5]]
+        })
+    
+    return insights
+
 async def check_price_alerts():
     """检查价格提醒条件"""
     conn = get_db_connection()
@@ -1013,5 +1222,9 @@ def run_scheduler():
 threading.Thread(target=run_scheduler, daemon=True).start()
 
 if __name__ == "__main__":
+    # Start the model scheduler
+    start_model_scheduler(db_path)
+    logger.info("Started Bayesian model scheduler")
+    
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)

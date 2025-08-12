@@ -3,6 +3,7 @@ import './App.css';
 import Navigation from './components/Navigation.jsx';
 import TradingViewPage from './pages/trading.jsx';
 import DonationPage from './pages/DonationPage.jsx';
+import BayesianDashboard from './pages/BayesianDashboard.jsx';
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
@@ -420,8 +421,9 @@ if (languageLoading || loading) {
 <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 <h1 style={{margin: 0, color: '#333', fontSize: '2.5em'}}>
   {currentPage === 'dashboard' ? translate('dashboard.title') : 
- currentPage === 'trading' ? translate('nav.trading') : 
- translate('nav.donations')}
+   currentPage === 'predictions' ? 'AI Cashback Predictions' :
+   currentPage === 'trading' ? translate('nav.trading') : 
+   translate('nav.donations')}
 </h1>
 {currentPage === 'dashboard' && (
   <>
@@ -1404,6 +1406,8 @@ if (languageLoading || loading) {
           <p>所有功能正常工作，API连接正常，数据加载成功。</p>
         </div>
       </div>
+) : currentPage === 'predictions' ? (
+    <BayesianDashboard />
 ) : currentPage === 'trading' ? (
     <TradingViewPage />
    ) : (

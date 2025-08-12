@@ -1,0 +1,101 @@
+.probability-chart {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.chart-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 24px 0;
+}
+
+.chart-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 200px;
+  margin-bottom: 24px;
+  padding: 0 20px;
+}
+
+.chart-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  max-width: 100px;
+}
+
+.bar-wrapper {
+  width: 60px;
+  height: 160px;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  transition: height 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.bar-value {
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.bar-label {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  text-align: center;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+@media (max-width: 640px) {
+  .chart-container {
+    padding: 0 10px;
+  }
+  
+  .bar-wrapper {
+    width: 40px;
+  }
+  
+  .chart-legend {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
