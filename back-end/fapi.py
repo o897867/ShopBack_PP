@@ -956,18 +956,15 @@ async def process_donation(request: DonationRequest):
         # 将金额从浮点数（例如 10.50）转换为美分（1050）
         amount_micros = int(request.amount * 100)
 
-        # 创建支付请求体
-        body = {
-            'source_id': request.token,
-            'idempotency_key': str(uuid.uuid4()), # 防止重复支付的唯一键
-            'amount_money': {
+        # 调用Square API（使用关键字参数）
+        api_response = square_client.payments.create(
+            source_id=request.token,
+            idempotency_key=str(uuid.uuid4()), # 防止重复支付的唯一键
+            amount_money={
                 'amount': amount_micros,
                 'currency': 'USD' # 假设货币为美元
             }
-        }
-
-        # 调用Square API
-        api_response = square_client.payments.create_payment(body)
+        )
 
         if api_response.is_success():
             payment_id = api_response.body['payment']['id']

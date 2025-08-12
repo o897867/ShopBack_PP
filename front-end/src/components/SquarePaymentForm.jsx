@@ -9,9 +9,11 @@ import React, { useEffect, useImperativeHandle, useRef, forwardRef } from 'react
  * @param {function(string): void} props.onTokenReceived - 成功获取Token后的回调函数
  */
 const SquarePaymentForm = forwardRef(({ applicationId, locationId, onTokenReceived, onReady }, ref) => {
-  
   // 使用useRef来存储Square的card实例，避免在组件重新渲染时丢失
   const cardRef = useRef(null);
+  // 生成唯一的容器ID，避免多个实例冲突
+  const containerIdRef = useRef(`card-container-${Math.random().toString(36).substr(2, 9)}`);
+  const containerId = containerIdRef.current;
 
   // useEffect将在组件首次挂载到DOM后运行
   useEffect(() => {
@@ -20,6 +22,22 @@ const SquarePaymentForm = forwardRef(({ applicationId, locationId, onTokenReceiv
       if (!window.Square) {
         console.error('Square SDK not loaded');
         return;
+      }
+
+      // 强力清理：清理DOM和之前的卡片实例
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.innerHTML = ''; // 清空容器内容
+      }
+      
+      if (cardRef.current) {
+        try {
+          await cardRef.current.destroy();
+          console.log('Previous card instance destroyed');
+        } catch (e) {
+          console.log('No previous card instance to destroy');
+        }
+        cardRef.current = null;
       }
 
       // 使用从props传入的ID初始化支付对象
@@ -52,11 +70,11 @@ const SquarePaymentForm = forwardRef(({ applicationId, locationId, onTokenReceiv
         });
 
         // 将卡片表单安全地附加到我们指定的div上
-        await card.attach('#card-container'); 
+        await card.attach(`#${containerId}`); 
         
         // 保存card实例以备后用
         cardRef.current = card; 
-        console.log('Square card form initialized and attached.');
+        console.log(`Square card form initialized and attached to ${containerId}`);
         
         // 通知父组件已准备就绪
         if (onReady) {
@@ -68,7 +86,21 @@ const SquarePaymentForm = forwardRef(({ applicationId, locationId, onTokenReceiv
     };
 
     initializeCard();
-  }, [applicationId, locationId, onReady]); // 依赖项数组确保只在ID变化时才重新初始化
+    
+    // 清理函数：组件卸载时清理卡片实例和DOM
+    return () => {
+      if (cardRef.current) {
+        cardRef.current.destroy().catch(() => {
+          console.log('Card cleanup completed');
+        });
+      }
+      // 额外的DOM清理
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.innerHTML = '';
+      }
+    };
+  }, [applicationId, locationId, containerId]); // 包含containerId确保容器变化时重新初始化
 
   // useImperativeHandle允许我们自定义暴露给父组件的ref实例
   // 这样父组件就可以调用我们在这里定义的函数
@@ -106,10 +138,10 @@ const SquarePaymentForm = forwardRef(({ applicationId, locationId, onTokenReceiv
     }
   }));
 
-  // 这是组件的UI部分，一个简单的div作为Square卡片表单的容器。
+  // 这是组件的UI部分，使用唯一的容器ID
   // 实际的输入框将由Square SDK安全地渲染在这个div内部。
   return (
-    <div id="card-container" style={{ minHeight: '50px' }}></div>
+    <div id={containerId} style={{ minHeight: '50px' }}></div>
   );
 });
 

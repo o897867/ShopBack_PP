@@ -40,6 +40,7 @@ class StoreInfo:
     url: str 
     last_updated: str
     scraping_success: bool
+    platform: str="unknown"
     error_message: Optional[str] = None
 class ShopBackSQLiteScraper:
     """ShopBack专用抓取器 - SQLite版本 (线程安全)"""
@@ -850,7 +851,8 @@ class ShopBackSQLiteScraper:
                     main_cashback, detailed_rates, is_upsized, previous_offer = self.extract_cashrewards_info(soup)
                 elif platform == "shopback":
                     self.logger.info("检测到ShopBack平台，使用现有解析方法")
-                    main_cashback, detailed_rates, is_upsized, previous_offer = self.extract_main_cashback_info(soup)
+                    main_cashback, is_upsized, previous_offer = self.extract_main_cashback_info(soup)
+                    detailed_rates = self.extract_detailed_rates(soup)
                 else:
                     self.logger.warning(f"未知平台: {platform}")
                     main_cashback = "0%"

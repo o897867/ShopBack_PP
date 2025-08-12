@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 import SquarePaymentForm from '../components/SquarePaymentForm.jsx'; // 1. 导入新组件
@@ -55,11 +55,12 @@ const DonationPage = () => {
     }
   };
 
-  const handleCardFormReady = () => {
+  // 使用 useCallback 稳定化这个函数
+  const handleCardFormReady = useCallback(() => {
     console.log("DonationPage: Card form is now ready.");
     setIsCardFormReady(true);
-  };
-
+  }, []);
+  
   // 4. 修改捐赠处理函数以触发子组件
   const handleDonation = async () => {
     const amount = customAmount ? parseFloat(customAmount) : selectedAmount;
