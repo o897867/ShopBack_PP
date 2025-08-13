@@ -870,6 +870,27 @@ async def get_global_predictions():
         logger.error(f"获取全局预测失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/predictions/scheduler-status", summary="获取模型调度器状态")
+async def get_model_scheduler_status():
+    """获取后台模型更新调度器的状态"""
+    try:
+        status = get_scheduler_status()
+        if status is None:
+            return {
+                "success": False,
+                "scheduler_status": {
+                    "running": False,
+                    "message": "Scheduler not initialized"
+                }
+            }
+        return {
+            "success": True,
+            **status  # Spread the status dict directly
+        }
+    except Exception as e:
+        logger.error(f"获取调度器状态失败: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/predictions/{store_id}", summary="获取特定商家的预测")
 async def get_store_predictions(store_id: int):
     """获取特定商家的详细预测"""
@@ -963,27 +984,6 @@ async def detect_anomalies():
         
     except Exception as e:
         logger.error(f"检测异常失败: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/predictions/scheduler-status", summary="获取模型调度器状态")
-async def get_model_scheduler_status():
-    """获取后台模型更新调度器的状态"""
-    try:
-        status = get_scheduler_status()
-        if status is None:
-            return {
-                "success": False,
-                "scheduler_status": {
-                    "running": False,
-                    "message": "Scheduler not initialized"
-                }
-            }
-        return {
-            "success": True,
-            **status  # Spread the status dict directly
-        }
-    except Exception as e:
-        logger.error(f"获取调度器状态失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 async def retrain_single_model(store_id: int):
