@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8001';
+import { API_BASE_URL } from '../config/api.js';
 
 const alertService = {
   createAlert: async (alertData) => {
