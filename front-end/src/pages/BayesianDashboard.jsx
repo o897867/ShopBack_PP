@@ -39,7 +39,7 @@ const BayesianDashboard = () => {
       const response = await fetch('/api/stores');
       if (response.ok) {
         const data = await response.json();
-        setStores(data.stores || []);
+        setStores(Array.isArray(data) ? data : data.stores || []);
       }
     } catch (err) {
       console.error('Failed to fetch stores:', err);
@@ -148,62 +148,62 @@ const BayesianDashboard = () => {
           <div className="prediction-grid">
             <PredictionCard
               title="Next Rate Change"
-              prediction={`${predictions.predictions.nextChange.expectedDays} days`}
-              confidence={predictions.predictions.nextChange.probabilities.within14Days * 100}
+              prediction={`${predictions.predictions.next_change.expected_days} days`}
+              confidence={predictions.predictions.next_change.probabilities.within_14_days * 100}
               icon="📅"
               color="blue"
               details={[
                 { 
                   label: '50% confidence', 
-                  value: `${predictions.predictions.nextChange.confidenceIntervals.days50} days` 
+                  value: `${predictions.predictions.next_change.confidence_intervals.days_50} days` 
                 },
                 { 
                   label: '95% confidence', 
-                  value: `${predictions.predictions.nextChange.confidenceIntervals.days95} days` 
+                  value: `${predictions.predictions.next_change.confidence_intervals.days_95} days` 
                 },
                 {
                   label: 'Predicted Date',
-                  value: new Date(predictions.predictions.nextChange.predictedDate).toLocaleDateString()
+                  value: new Date(predictions.predictions.next_change.predicted_date).toLocaleDateString()
                 }
               ]}
             />
             
             <PredictionCard
               title="Expected Change"
-              prediction={`${predictions.predictions.magnitude.expectedChange > 0 ? '+' : ''}${predictions.predictions.magnitude.expectedChange}%`}
+              prediction={`${predictions.predictions.magnitude.expected_change > 0 ? '+' : ''}${predictions.predictions.magnitude.expected_change}%`}
               confidence={modelConfidence}
               icon="📊"
               color="green"
               details={[
                 { 
                   label: 'Std Deviation', 
-                  value: `±${predictions.predictions.magnitude.standardDeviation}%` 
+                  value: `±${predictions.predictions.magnitude.standard_deviation}%` 
                 },
                 { 
                   label: '95% CI Lower', 
-                  value: `${predictions.predictions.magnitude.confidenceInterval95.lower}%` 
+                  value: `${predictions.predictions.magnitude.confidence_interval_95.lower}%` 
                 },
                 { 
                   label: '95% CI Upper', 
-                  value: `${predictions.predictions.magnitude.confidenceInterval95.upper}%` 
+                  value: `${predictions.predictions.magnitude.confidence_interval_95.upper}%` 
                 }
               ]}
             />
             
             <PredictionCard
               title="Upsize Probability"
-              prediction={`${predictions.predictions.upsizeProbability.probability}%`}
-              confidence={predictions.predictions.upsizeProbability.confidence}
+              prediction={`${predictions.predictions.upsize_probability.probability}%`}
+              confidence={predictions.predictions.upsize_probability.confidence}
               icon="🚀"
               color="purple"
               details={[
                 { 
                   label: 'Confidence', 
-                  value: `${predictions.predictions.upsizeProbability.confidence}%` 
+                  value: `${predictions.predictions.upsize_probability.confidence}%` 
                 },
                 { 
                   label: 'Historical Rate', 
-                  value: `${Math.round(predictions.posteriors.upsizeProbability.alpha / (predictions.posteriors.upsizeProbability.alpha + predictions.posteriors.upsizeProbability.beta) * 100)}%` 
+                  value: `${Math.round(predictions.posteriors.upsize_alpha / (predictions.posteriors.upsize_alpha + predictions.posteriors.upsize_beta) * 100)}%` 
                 }
               ]}
             />
@@ -211,14 +211,14 @@ const BayesianDashboard = () => {
           
           <div className="charts-section">
             <ProbabilityChart 
-              probabilities={predictions.predictions.nextChange.probabilities}
+              probabilities={predictions.predictions.next_change.probabilities}
               title="Probability of Rate Change"
             />
             
             <ModelConfidence
               confidence={modelConfidence}
-              observationCount={predictions.observationCount}
-              lastUpdate={lastUpdate || predictions.lastUpdate}
+              observationCount={predictions.observation_count}
+              lastUpdate={lastUpdate || predictions.last_update}
               isUpdating={isUpdating}
             />
           </div>
@@ -242,12 +242,12 @@ const BayesianDashboard = () => {
             <div className="stats-grid">
               <div className="stat-card">
                 <span className="stat-label">Total Observations</span>
-                <span className="stat-value">{predictions.observationCount}</span>
+                <span className="stat-value">{predictions.observation_count}</span>
               </div>
               <div className="stat-card">
                 <span className="stat-label">Last Update</span>
                 <span className="stat-value">
-                  {new Date(predictions.lastUpdate).toLocaleString()}
+                  {new Date(predictions.last_update).toLocaleString()}
                 </span>
               </div>
               <div className="stat-card">
@@ -291,20 +291,20 @@ const DetailedAnalysisView = ({ predictions, model }) => {
         <div className="distribution-grid">
           <div className="distribution-card">
             <h4>Time to Change (Gamma)</h4>
-            <p>α = {predictions.posteriors.timeToChange.alpha.toFixed(2)}</p>
-            <p>β = {predictions.posteriors.timeToChange.beta.toFixed(2)}</p>
+            <p>α = {predictions.posteriors.time_alpha.toFixed(2)}</p>
+            <p>β = {predictions.posteriors.time_beta.toFixed(2)}</p>
           </div>
           <div className="distribution-card">
             <h4>Magnitude (Normal-Gamma)</h4>
-            <p>μ₀ = {predictions.posteriors.magnitudeChange.mu0.toFixed(2)}</p>
-            <p>κ₀ = {predictions.posteriors.magnitudeChange.kappa0.toFixed(2)}</p>
-            <p>α₀ = {predictions.posteriors.magnitudeChange.alpha0.toFixed(2)}</p>
-            <p>β₀ = {predictions.posteriors.magnitudeChange.beta0.toFixed(2)}</p>
+            <p>μ₀ = {predictions.posteriors.magnitude_mu0.toFixed(2)}</p>
+            <p>κ₀ = {predictions.posteriors.magnitude_kappa0.toFixed(2)}</p>
+            <p>α₀ = {predictions.posteriors.magnitude_alpha0.toFixed(2)}</p>
+            <p>β₀ = {predictions.posteriors.magnitude_beta0.toFixed(2)}</p>
           </div>
           <div className="distribution-card">
             <h4>Upsize (Beta)</h4>
-            <p>α = {predictions.posteriors.upsizeProbability.alpha.toFixed(2)}</p>
-            <p>β = {predictions.posteriors.upsizeProbability.beta.toFixed(2)}</p>
+            <p>α = {predictions.posteriors.upsize_alpha.toFixed(2)}</p>
+            <p>β = {predictions.posteriors.upsize_beta.toFixed(2)}</p>
           </div>
         </div>
       </div>
@@ -322,18 +322,18 @@ const DetailedAnalysisView = ({ predictions, model }) => {
           <tbody>
             <tr>
               <td>50%</td>
-              <td>{predictions.predictions.nextChange.confidenceIntervals.days50} days</td>
-              <td>{(predictions.predictions.nextChange.probabilities.within7Days * 100).toFixed(1)}%</td>
+              <td>{predictions.predictions.next_change.confidence_intervals.days_50} days</td>
+              <td>{(predictions.predictions.next_change.probabilities.within_7_days * 100).toFixed(1)}%</td>
             </tr>
             <tr>
               <td>75%</td>
-              <td>{predictions.predictions.nextChange.confidenceIntervals.days75} days</td>
-              <td>{(predictions.predictions.nextChange.probabilities.within14Days * 100).toFixed(1)}%</td>
+              <td>{predictions.predictions.next_change.confidence_intervals.days_75} days</td>
+              <td>{(predictions.predictions.next_change.probabilities.within_14_days * 100).toFixed(1)}%</td>
             </tr>
             <tr>
               <td>95%</td>
-              <td>{predictions.predictions.nextChange.confidenceIntervals.days95} days</td>
-              <td>{(predictions.predictions.nextChange.probabilities.within30Days * 100).toFixed(1)}%</td>
+              <td>{predictions.predictions.next_change.confidence_intervals.days_95} days</td>
+              <td>{(predictions.predictions.next_change.probabilities.within_30_days * 100).toFixed(1)}%</td>
             </tr>
           </tbody>
         </table>
@@ -387,19 +387,19 @@ const StoreComparisonView = ({ stores }) => {
                 <div className="comparison-metrics">
                   <div className="metric">
                     <span>Next Change:</span>
-                    <strong>{data.predictions.nextChange.expectedDays} days</strong>
+                    <strong>{data.predictions.next_change.expected_days} days</strong>
                   </div>
                   <div className="metric">
                     <span>Expected:</span>
-                    <strong>{data.predictions.magnitude.expectedChange > 0 ? '+' : ''}{data.predictions.magnitude.expectedChange}%</strong>
+                    <strong>{data.predictions.magnitude.expected_change > 0 ? '+' : ''}{data.predictions.magnitude.expected_change}%</strong>
                   </div>
                   <div className="metric">
                     <span>Upsize Chance:</span>
-                    <strong>{data.predictions.upsizeProbability.probability}%</strong>
+                    <strong>{data.predictions.upsize_probability.probability}%</strong>
                   </div>
                   <div className="metric">
                     <span>Confidence:</span>
-                    <strong>{data.modelConfidence.toFixed(1)}%</strong>
+                    <strong>{data.model_confidence.toFixed(1)}%</strong>
                   </div>
                 </div>
               </div>

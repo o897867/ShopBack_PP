@@ -116,7 +116,7 @@ export const useBayesianModel = (storeId = null) => {
     refreshPredictions,
     getPredictionForStore,
     lastDataFetch,
-    modelConfidence: predictions?.modelConfidence || 0
+    modelConfidence: predictions?.model_confidence || 0
   };
 };
 

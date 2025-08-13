@@ -166,7 +166,19 @@ export function detectPatterns(dataPoints) {
 }
 
 export function formatPredictionSummary(predictions) {
-  const { nextChange, magnitude, upsizeProbability } = predictions;
+  // Handle both camelCase and snake_case API responses
+  const nextChange = predictions.next_change || predictions.nextChange;
+  const magnitude = predictions.magnitude || predictions.magnitude;
+  const upsizeProbability = predictions.upsize_probability || predictions.upsizeProbability;
+  
+  // Return empty summary if data is missing
+  if (!nextChange || !magnitude || !upsizeProbability) {
+    return {
+      headline: 'Insufficient prediction data',
+      details: [],
+      recommendations: []
+    };
+  }
   
   const summary = {
     headline: '',
@@ -174,50 +186,58 @@ export function formatPredictionSummary(predictions) {
     recommendations: []
   };
   
-  if (nextChange.expectedDays <= 7) {
+  const expectedDays = nextChange.expected_days || nextChange.expectedDays;
+  const expectedChange = magnitude.expected_change || magnitude.expectedChange;
+  const standardDeviation = magnitude.standard_deviation || magnitude.standardDeviation;
+  const probability = upsizeProbability.probability || 0;
+  
+  if (expectedDays <= 7) {
     summary.headline = `High probability of rate change within a week`;
-  } else if (nextChange.expectedDays <= 14) {
+  } else if (expectedDays <= 14) {
     summary.headline = `Rate change likely within two weeks`;
-  } else if (nextChange.expectedDays <= 30) {
+  } else if (expectedDays <= 30) {
     summary.headline = `Rate change expected within a month`;
   } else {
     summary.headline = `Rate change not expected soon`;
   }
   
   summary.details.push(
-    `Expected in ${nextChange.expectedDays} days (±${nextChange.standardDeviation} days)`
+    `Expected in ${expectedDays} days (±${standardDeviation || 0} days)`
   );
   
-  if (magnitude.expectedChange > 0) {
+  if (expectedChange > 0) {
     summary.details.push(
-      `Likely increase of ${magnitude.expectedChange}% (±${magnitude.standardDeviation}%)`
+      `Likely increase of ${expectedChange}% (±${standardDeviation || 0}%)`
     );
-  } else if (magnitude.expectedChange < 0) {
+  } else if (expectedChange < 0) {
     summary.details.push(
-      `Likely decrease of ${Math.abs(magnitude.expectedChange)}% (±${magnitude.standardDeviation}%)`
+      `Likely decrease of ${Math.abs(expectedChange)}% (±${standardDeviation || 0}%)`
     );
   } else {
     summary.details.push(
-      `Minimal change expected (±${magnitude.standardDeviation}%)`
+      `Minimal change expected (±${standardDeviation || 0}%)`
     );
   }
   
-  if (upsizeProbability.probability > 60) {
+  if (probability > 60) {
     summary.details.push(
-      `${upsizeProbability.probability}% chance of promotional upsize`
+      `${probability}% chance of promotional upsize`
     );
     summary.recommendations.push('Consider waiting for potential upsize offer');
   }
   
-  if (nextChange.probabilities.within7Days > 0.7) {
+  const probabilities = nextChange.probabilities || {};
+  const within7Days = probabilities.within_7_days || probabilities.within7Days || 0;
+  
+  if (within7Days > 0.7) {
     summary.recommendations.push('Monitor closely - change imminent');
-  } else if (nextChange.probabilities.within7Days < 0.3) {
+  } else if (within7Days < 0.3) {
     summary.recommendations.push('Current rates likely stable for now');
   }
   
-  if (magnitude.expectedChange > 1 && nextChange.expectedDays < 14) {
+  if (expectedChange > 1 && expectedDays < 14) {
     summary.recommendations.push('Potential opportunity for higher cashback soon');
-  } else if (magnitude.expectedChange < -1 && nextChange.expectedDays < 14) {
+  } else if (expectedChange < -1 && expectedDays < 14) {
     summary.recommendations.push('Consider using current rates before potential decrease');
   }
   
