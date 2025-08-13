@@ -113,10 +113,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS中间件配置
+# CORS中间件配置 - nginx handles CORS, but keeping for direct access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for deployment - you can restrict this to your specific domain
+    allow_origins=["*"],  # nginx reverse proxy will handle CORS
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
