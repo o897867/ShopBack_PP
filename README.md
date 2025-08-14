@@ -457,20 +457,103 @@ app.add_middleware(
 ### 项目结构 / Project Structure
 
 ```
-shopback-platform/
+ShopBack_PP/
+├── .claude/
+│   └── settings.local.json  # Claude设置 / Claude settings
 ├── back-end/
+│   ├── bayesian_model.py    # 贝叶斯模型 / Bayesian model
 │   ├── fapi.py              # 主API服务器 / Main API server
+│   ├── fapi copy.py         # API服务器备份 / API server backup
+│   ├── model_scheduler.py   # 模型调度器 / Model scheduler
 │   ├── sb_scrap.py          # 抓取器模块 / Scraper module
+│   ├── sb_scrap copy.py     # 抓取器备份 / Scraper backup
 │   ├── requirements.txt     # Python依赖 / Python dependencies
-│   └── shopback_data.db     # SQLite数据库 / SQLite database
+│   ├── shopback_data.db     # SQLite数据库 / SQLite database
+│   ├── shopback_test.db     # 测试数据库 / Test database
+│   ├── test.db              # 测试数据库 / Test database
+│   ├── test_debug.db        # 调试数据库 / Debug database
+│   ├── test.ipynb           # Jupyter测试笔记 / Jupyter test notebook
+│   ├── shopback_scraper.log # 抓取日志 / Scraping logs
+│   ├── 1.txt                # 临时文件 / Temporary file
+│   └── venv/                # Python虚拟环境 / Python virtual environment
 ├── front-end/
-│   └── shopback-frontend/
-│       ├── src/
-│       │   ├── App.js       # 主应用组件 / Main app component
-│       │   ├── components/  # 组件目录 / Components directory
-│       │   └── pages/       # 页面目录 / Pages directory
-│       ├── package.json     # npm依赖 / npm dependencies
-│       └── public/          # 静态文件 / Static files
+│   ├── build/               # 构建输出 / Build output
+│   │   └── assets/          # 静态资源 / Static assets
+│   ├── shopback-frontend/
+│   │   └── src/
+│   │       └── App copy.js  # 应用备份 / App backup
+│   ├── src/
+│   │   ├── App.jsx          # 主应用组件 / Main app component
+│   │   ├── main.jsx         # 入口文件 / Entry point
+│   │   ├── App.css          # 应用样式 / App styles
+│   │   ├── index.css        # 全局样式 / Global styles
+│   │   ├── assets/          # 前端资源 / Frontend assets
+│   │   │   └── react.svg    # React图标 / React icon
+│   │   ├── components/      # 组件目录 / Components directory
+│   │   │   ├── Alerts/
+│   │   │   │   └── AlertManagement.jsx
+│   │   │   ├── Comparison/
+│   │   │   │   ├── ComparableStoresList.jsx
+│   │   │   │   └── CompareModal.jsx
+│   │   │   ├── Dashboard/
+│   │   │   │   ├── AverageCashback.jsx
+│   │   │   │   ├── StatsCards.jsx
+│   │   │   │   └── UpsizedStoresList.jsx
+│   │   │   ├── Stores/
+│   │   │   │   ├── StoreDetails.jsx
+│   │   │   │   └── StoreList.jsx
+│   │   │   ├── LanguageSelector.jsx
+│   │   │   ├── ModelConfidence.jsx
+│   │   │   ├── ModelConfidence.css
+│   │   │   ├── Navigation.jsx
+│   │   │   ├── PredictionCard.jsx
+│   │   │   ├── PredictionCard.css
+│   │   │   ├── ProbabilityChart.jsx
+│   │   │   ├── ProbabilityChart.css
+│   │   │   ├── SquarePaymentForm.jsx
+│   │   │   └── tradingWidget.jsx
+│   │   ├── config/
+│   │   │   └── api.js        # API配置 / API configuration
+│   │   ├── hooks/           # React Hooks
+│   │   │   ├── useAlerts.js
+│   │   │   ├── useBayesianModel.jsx
+│   │   │   ├── useComparison.js
+│   │   │   ├── useDashboard.js
+│   │   │   ├── useLanguage.jsx
+│   │   │   └── useStores.js
+│   │   ├── pages/           # 页面目录 / Pages directory
+│   │   │   ├── BayesianDashboard.jsx
+│   │   │   ├── BayesianDashboard.css
+│   │   │   ├── DonationPage.jsx
+│   │   │   └── trading.jsx
+│   │   ├── services/        # 服务层 / Service layer
+│   │   │   ├── alertService.js
+│   │   │   ├── apiService.js
+│   │   │   └── comparisonService.js
+│   │   ├── translations/    # 国际化 / Internationalization
+│   │   │   └── index.js
+│   │   └── utils/           # 工具函数 / Utility functions
+│   │       ├── bayesianModel.js
+│   │       ├── dataProcessing.js
+│   │       ├── dateFormatter.js
+│   │       ├── languageDetection.js
+│   │       ├── modelUpdater.js
+│   │       ├── platformDetector.js
+│   │       └── thresholdTypes.js
+│   ├── public/              # 静态文件 / Static files
+│   │   └── vite.svg         # Vite图标 / Vite icon
+│   ├── node_modules/        # Node模块 / Node modules
+│   ├── package.json         # npm依赖 / npm dependencies
+│   ├── package-lock.json    # npm锁定文件 / npm lock file
+│   ├── vite.config.js       # Vite配置 / Vite configuration
+│   ├── eslint.config.js     # ESLint配置 / ESLint configuration
+│   ├── index.html           # HTML入口 / HTML entry
+│   └── README.md            # 前端文档 / Frontend documentation
+├── node_modules/            # 根级Node模块 / Root level Node modules
+├── package.json             # 根级npm依赖 / Root level npm dependencies
+├── package-lock.json        # 根级npm锁定文件 / Root level npm lock file
+├── deploy.sh                # 部署脚本 / Deployment script
+└── README.md                # 项目文档 / Project documentation
 ```
 
 ### 添加新功能 / Adding New Features
