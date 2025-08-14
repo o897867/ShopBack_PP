@@ -73,7 +73,7 @@ const TradingViewPage = () => {
                 fontSize: '14px'
               }}
             >
-              <option value="dark">🌙 深色主题</option>
+              <option value="dark">深色主题</option>
               <option value="light">浅色主题</option>
             </select>
           </div>
@@ -98,7 +98,7 @@ const TradingViewPage = () => {
         marginTop: '20px',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
-        <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>🚀 快速切换:</h3>
+        <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>快速切换:</h3>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',

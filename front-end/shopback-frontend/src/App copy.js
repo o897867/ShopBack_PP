@@ -128,7 +128,7 @@ const App = () => {
       setUpsizedStores(upsizedData);
       setStatistics(statisticsData);
     } catch (error) {
-      console.error('❌ 获取数据失败:', error);
+      console.error('获取数据失败:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -283,7 +283,7 @@ const App = () => {
         flexDirection: 'column',
         background: '#f5f5f5'
       }}>
-        <div style={{fontSize: '2em', marginBottom: '20px'}}>🔄</div>
+        <div style={{fontSize: '2em', marginBottom: '20px'}}></div>
         <div>正在加载数据...</div>
       </div>
     );
@@ -299,7 +299,7 @@ const App = () => {
         flexDirection: 'column',
         background: '#f5f5f5'
       }}>
-        <h2 style={{color: '#dc3545'}}>❌ 连接错误</h2>
+        <h2 style={{color: '#dc3545'}}>连接错误</h2>
         <p>{error}</p>
         <button onClick={fetchData} style={{
           background: '#007bff',
@@ -342,7 +342,7 @@ const App = () => {
             marginTop: '20px',
             fontSize: '16px'
           }}>
-            {isRescraping ? '🔄 正在重新抓取...' : '🔄 重新抓取并刷新'}
+            {isRescraping ? '正在重新抓取...' : '重新抓取并刷新'}
           </button>
           <button onClick={() => setShowAlerts(!showAlerts)} style={{
             background: '#17a2b8',
@@ -355,7 +355,7 @@ const App = () => {
             marginLeft: '10px',
             fontSize: '16px'
           }}>
-            {showAlerts ? '📋 关闭价格提醒' : '🔔 价格提醒管理'}
+            {showAlerts ? '关闭价格提醒' : '价格提醒管理'}
           </button>
         </div>
 
@@ -390,7 +390,7 @@ const App = () => {
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               borderLeft: '4px solid #28a745'
             }}>
-              <div style={{fontSize: '3em', marginBottom: '10px'}}>📊</div>
+              <div style={{fontSize: '3em', marginBottom: '10px'}}></div>
               <h3 style={{margin: 0, color: '#666'}}>总记录数</h3>
               <div style={{fontSize: '3em', color: '#28a745', fontWeight: 'bold'}}>
                 {dashboardStats.total_records?.toLocaleString()}
@@ -405,7 +405,7 @@ const App = () => {
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               borderLeft: '4px solid #ffc107'
             }}>
-              <div style={{fontSize: '3em', marginBottom: '10px'}}>🔄</div>
+              <div style={{fontSize: '3em', marginBottom: '10px'}}></div>
               <h3 style={{margin: 0, color: '#666'}}>24小时抓取</h3>
               <div style={{fontSize: '3em', color: '#ffc107', fontWeight: 'bold'}}>
                 {dashboardStats.recent_scrapes}
@@ -420,7 +420,7 @@ const App = () => {
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               borderLeft: '4px solid #dc3545'
             }}>
-              <div style={{fontSize: '3em', marginBottom: '10px'}}>🔥</div>
+              <div style={{fontSize: '3em', marginBottom: '10px'}}></div>
               <h3 style={{margin: 0, color: '#666'}}>Upsized商家</h3>
               <div style={{fontSize: '3em', color: '#dc3545', fontWeight: 'bold'}}>
                 {dashboardStats.upsized_stores}
@@ -456,7 +456,7 @@ const App = () => {
             marginBottom: '30px'
           }}>
             <h2 style={{margin: '0 0 25px 0', color: '#333'}}>
-              🔥 Upsized优惠商家 ({upsizedStores.length})
+              Upsized优惠商家 ({upsizedStores.length})
             </h2>
             {upsizedStores.map((store, index) => (
               <div key={index} style={{
@@ -608,7 +608,7 @@ const App = () => {
             {/* 商家历史记录 */}
             {storeHistory.length > 0 && (
               <div>
-                <h3 style={{color: '#333', marginBottom: '20px'}}>📊 Cashback历史记录</h3>
+                <h3 style={{color: '#333', marginBottom: '20px'}}>Cashback历史记录</h3>
                 
                 {/* 按日期分组显示 */}
                 {Object.entries(
@@ -655,7 +655,7 @@ const App = () => {
                                 color: record.category === 'Main' ? '#007bff' : '#333',
                                 fontSize: '1.1em'
                               }}>
-                                {record.category === 'Main' ? '🌟 主要优惠' : `📂 ${record.category}`}
+                                {record.category === 'Main' ? '主要优惠' : record.category}
                               </h5>
                               {record.is_upsized && (
                                 <span style={{
@@ -666,7 +666,7 @@ const App = () => {
                                   fontSize: '0.8em',
                                   fontWeight: 'bold'
                                 }}>
-                                  🔥 UPSIZED
+                                  UPSIZED
                                 </span>
                               )}
                             </div>
@@ -711,7 +711,7 @@ const App = () => {
                                       color: '#dc3545',
                                       marginBottom: '3px'
                                     }}>
-                                      📈 史高: {categoryStats.highest_rate}%
+                                      史高: {categoryStats.highest_rate}%
                                     </div>
                                     <div style={{color: '#666', fontSize: '0.8em'}}>
                                       {formatDate(categoryStats.highest_date)}
@@ -735,7 +735,7 @@ const App = () => {
                                 <div style={{marginTop: '8px', padding: '5px 0', borderTop: '1px solid #dee2e6'}}>
                                   {categoryStats.current_rate === categoryStats.highest_rate && (
                                     <span style={{color: '#dc3545', fontWeight: 'bold', fontSize: '0.8em'}}>
-                                      🎯 当前为史高！
+                                      当前为史高！
                                     </span>
                                   )}
                                   {categoryStats.current_rate === categoryStats.lowest_rate && (
@@ -746,7 +746,7 @@ const App = () => {
                                   {categoryStats.current_rate !== categoryStats.highest_rate && 
                                    categoryStats.current_rate !== categoryStats.lowest_rate && (
                                     <span style={{color: '#666', fontSize: '0.8em'}}>
-                                      📊 史高差距: {(categoryStats.highest_rate - categoryStats.current_rate).toFixed(1)}%
+                                      史高差距: {(categoryStats.highest_rate - categoryStats.current_rate).toFixed(1)}%
                                     </span>
                                   )}
                                 </div>
@@ -790,7 +790,7 @@ const App = () => {
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             marginTop: '30px'
           }}>
-            <h2 style={{margin: '0 0 25px 0', color: '#333'}}>🔔 价格提醒管理</h2>
+            <h2 style={{margin: '0 0 25px 0', color: '#333'}}>价格提醒管理</h2>
             <button
               onClick={async () => {
                 try {
@@ -819,7 +819,7 @@ const App = () => {
                         {/* 邮箱输入 */}
             <div style={{marginBottom: '25px'}}>
               <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>
-                📧 邮箱地址：
+                邮箱地址：
               </label>
               <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
                 <input
@@ -887,7 +887,7 @@ const App = () => {
               }}>
                 <div>
                   <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                    📊 提醒类型：
+                    提醒类型：
                   </label>
                   <select
                     value={alertThresholdType}
@@ -908,7 +908,7 @@ const App = () => {
 
                 <div>
                   <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-                    🎯 阈值 (%)：
+                    阈值 (%)：
                   </label>
                   <input
                     type="number"
@@ -1030,7 +1030,7 @@ const App = () => {
           textAlign: 'center',
           border: '1px solid #c3e6cb'
         }}>
-          <h3>🎉 恭喜！ShopBack管理平台部署成功！</h3>
+          <h3>恭喜！ShopBack管理平台部署成功！</h3>
           <p>所有功能正常工作，API连接正常，数据加载成功。</p>
         </div>
       </div>

@@ -79,22 +79,22 @@ const ModelConfidence = ({
         <div className="confidence-info">
           {confidence < 40 && (
             <p className="info-message warning">
-              ⚠️ Low confidence due to limited data. Predictions will improve as more data is collected.
+              Low confidence due to limited data. Predictions will improve as more data is collected.
             </p>
           )}
           {confidence >= 40 && confidence < 60 && (
             <p className="info-message moderate">
-              ℹ️ Moderate confidence. Model is learning patterns and accuracy is improving.
+              Moderate confidence. Model is learning patterns and accuracy is improving.
             </p>
           )}
           {confidence >= 60 && confidence < 80 && (
             <p className="info-message good">
-              ✓ Good confidence level. Predictions are generally reliable.
+              Good confidence level. Predictions are generally reliable.
             </p>
           )}
           {confidence >= 80 && (
             <p className="info-message excellent">
-              ✨ Excellent confidence! Model has sufficient data for accurate predictions.
+              Excellent confidence! Model has sufficient data for accurate predictions.
             </p>
           )}
         </div>

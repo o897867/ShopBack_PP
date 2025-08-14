@@ -6,6 +6,7 @@ export const useDashboard = () => {
   const [dashboardStats, setDashboardStats] = useState(null);
   const [upsizedStores, setUpsizedStores] = useState([]);
   const [statistics, setStatistics] = useState([]);
+  const [performanceData, setPerformanceData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRescraping, setIsRescraping] = useState(false);
@@ -16,22 +17,24 @@ export const useDashboard = () => {
       setLoading(true);
       setError(null);
       
-      const [dashboard, storesData, upsizedData, statisticsData, comparableData] = await Promise.all([
+      const [dashboard, storesData, upsizedData, statisticsData, comparableData, performance] = await Promise.all([
         apiService.getDashboard(),
         apiService.getStores(),
         apiService.getUpsizedStores(),
         apiService.getStatistics(),
-        comparisonService.getComparableStores()
+        comparisonService.getComparableStores(),
+        apiService.getPerformanceMetrics()
       ]);
       
       setDashboardStats(dashboard);
       setStores(storesData);
       setUpsizedStores(upsizedData);
       setStatistics(statisticsData);
+      setPerformanceData(performance);
       
       return { storesData, comparableData };
     } catch (error) {
-      console.error('❌ 获取数据失败:', error);
+      console.error('获取数据失败:', error);
       setError(error.message);
       return null;
     } finally {
@@ -61,6 +64,7 @@ export const useDashboard = () => {
     dashboardStats,
     upsizedStores,
     statistics,
+    performanceData,
     loading,
     error,
     isRescraping,

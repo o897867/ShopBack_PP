@@ -88,7 +88,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                           color: record.category === 'Main' ? '#007bff' : '#333',
                           fontSize: '1.1em'
                         }}>
-                          {record.category === 'Main' ? '🌟 主要优惠' : `📂 ${record.category}`}
+                          {record.category === 'Main' ? '主要优惠' : record.category}
                         </h5>
                         {record.is_upsized && (
                           <span style={{
@@ -99,7 +99,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                             fontSize: '0.8em',
                             fontWeight: 'bold'
                           }}>
-                            🔥 UPSIZED
+                            UPSIZED
                           </span>
                         )}
                       </div>

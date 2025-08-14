@@ -52,7 +52,7 @@ const AlertManagement = ({ alertHook, translate }) => {
       {/* Email Input */}
       <div style={{marginBottom: '25px'}}>
         <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>
-          📧 {translate('alerts.email')}：
+          {translate('alerts.email')}：
         </label>
         <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
           <input

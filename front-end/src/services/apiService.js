@@ -54,6 +54,12 @@ const apiService = {
       throw new Error(error.detail);
     }
     return response.json();
+  },
+  
+  getPerformanceMetrics: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/performance`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
   }
 };
 

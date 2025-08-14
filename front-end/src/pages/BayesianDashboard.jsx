@@ -172,7 +172,7 @@ const BayesianDashboard = () => {
               title="Expected Change"
               prediction={`${predictions.predictions.magnitude.expected_change > 0 ? '+' : ''}${predictions.predictions.magnitude.expected_change}%`}
               confidence={modelConfidence}
-              icon="📊"
+              icon=""
               color="green"
               details={[
                 { 
@@ -194,7 +194,7 @@ const BayesianDashboard = () => {
               title="Upsize Probability"
               prediction={`${predictions.predictions.upsize_probability.probability}%`}
               confidence={predictions.predictions.upsize_probability.confidence}
-              icon="🚀"
+              icon=""
               color="purple"
               details={[
                 { 
@@ -229,7 +229,7 @@ const BayesianDashboard = () => {
               <div className="insights-list">
                 {insights.map((insight, index) => (
                   <div key={index} className="insight-item">
-                    <span className="insight-icon">💡</span>
+                    <span className="insight-icon"></span>
                     <span className="insight-text">{insight}</span>
                   </div>
                 ))}

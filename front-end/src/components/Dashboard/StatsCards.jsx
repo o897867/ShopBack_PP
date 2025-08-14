@@ -61,7 +61,7 @@ const StatsCards = ({ dashboardStats, translate }) => {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         borderLeft: '4px solid #dc3545'
       }}>
-        <div style={{fontSize: '3em', marginBottom: '10px'}}>🔥</div>
+        <div style={{fontSize: '3em', marginBottom: '10px'}}></div>
         <h3 style={{margin: 0, color: '#666'}}>{translate('dashboard.upsizedStores')}</h3>
         <div style={{fontSize: '3em', color: '#dc3545', fontWeight: 'bold'}}>
           {dashboardStats.upsized_stores}

@@ -75,6 +75,12 @@ class CashbackHistoryResponse(BaseModel):
     previous_offer: Optional[str]
     scraped_at: str
 
+class PerformanceMetricsResponse(BaseModel):
+    scraping_performance: Dict[str, Any]
+    data_scale: Dict[str, int]
+    alert_latency: Dict[str, float]
+    timestamp: str
+
 class RateStatisticsResponse(BaseModel):
     store_name: str
     category: str
@@ -327,6 +333,96 @@ async def get_dashboard_stats():
             recent_scrapes=recent_scrapes,
             upsized_stores=upsized_stores,
             avg_cashback_rate=round(avg_rate, 2)
+        )
+    
+    finally:
+        conn.close()
+
+@app.get("/api/performance", response_model=PerformanceMetricsResponse, summary="获取性能指标")
+async def get_performance_metrics():
+    """获取系统性能指标"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # 获取最近的性能指标
+        cursor.execute("""
+            SELECT * FROM performance_metrics 
+            WHERE metric_type = 'batch_scrape' 
+            ORDER BY timestamp DESC 
+            LIMIT 1
+        """)
+        latest_metric = cursor.fetchone()
+        
+        # 获取最近24小时的平均指标
+        yesterday = (datetime.now() - timedelta(days=1)).isoformat()
+        cursor.execute("""
+            SELECT 
+                AVG(requests_count) as avg_requests,
+                AVG(success_count) as avg_success,
+                AVG(failure_count) as avg_failure,
+                AVG(avg_response_time) as avg_response_time,
+                AVG(p95_response_time) as avg_p95_response_time,
+                AVG(concurrency_level) as avg_concurrency,
+                SUM(requests_count) as total_requests,
+                SUM(success_count) as total_success
+            FROM performance_metrics 
+            WHERE timestamp > ? AND metric_type = 'batch_scrape'
+        """, (yesterday,))
+        daily_stats = cursor.fetchone()
+        
+        # 计算成功率
+        success_rate = 0
+        if daily_stats and daily_stats['total_requests'] > 0:
+            success_rate = (daily_stats['total_success'] / daily_stats['total_requests']) * 100
+        
+        # 获取数据规模
+        cursor.execute("SELECT COUNT(*) FROM stores")
+        total_stores = cursor.fetchone()[0]
+        
+        cursor.execute("SELECT COUNT(*) FROM cashback_history")
+        total_records = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM cashback_history 
+            WHERE DATE(scraped_at) = DATE('now', 'localtime')
+        """)
+        daily_new_records = cursor.fetchone()[0]
+        
+        # 计算告警延迟（示例：获取最近的告警处理时间）
+        cursor.execute("""
+            SELECT AVG(CAST((julianday(last_notified_at) - julianday(created_at)) * 24 * 60 as REAL)) as avg_latency
+            FROM price_alerts 
+            WHERE last_notified_at IS NOT NULL
+        """)
+        alert_latency = cursor.fetchone()
+        alert_latency_p95 = alert_latency['avg_latency'] * 1.5 if alert_latency['avg_latency'] else 0  # 估算95分位
+        
+        # 计算每分钟请求数
+        requests_per_minute = 0
+        if latest_metric:
+            try:
+                metadata = json.loads(latest_metric['metadata']) if latest_metric['metadata'] else {}
+                requests_per_minute = metadata.get('requests_per_minute', 0)
+            except:
+                pass
+        
+        return PerformanceMetricsResponse(
+            scraping_performance={
+                'concurrency': latest_metric['concurrency_level'] if latest_metric else 0,
+                'requests_per_minute': round(requests_per_minute, 2),
+                'avg_response_time': round(daily_stats['avg_response_time'], 2) if daily_stats and daily_stats['avg_response_time'] else 0,
+                'success_rate': round(success_rate, 2)
+            },
+            data_scale={
+                'total_stores': total_stores,
+                'total_records': total_records,
+                'daily_new_records': daily_new_records
+            },
+            alert_latency={
+                'p95_minutes': round(alert_latency_p95, 2)
+            },
+            timestamp=datetime.now().isoformat()
         )
     
     finally:

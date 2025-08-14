@@ -144,9 +144,9 @@ export const translations = {
       title: 'TradingView Charts',
       selectSymbol: 'Select Trading Pair',
       theme: 'Theme',
-      darkTheme: '🌙 Dark Theme',
+      darkTheme: 'Dark Theme',
       lightTheme: 'Light Theme',
-      quickSwitch: '🚀 Quick Switch'
+      quickSwitch: 'Quick Switch'
     },
     
     // Trading Symbols
@@ -197,6 +197,24 @@ export const translations = {
       hoursAgo: 'hours ago',
       minutesAgo: 'minutes ago',
       justNow: 'Just now'
+    },
+    
+    // Performance Metrics
+    performance: {
+      title: 'System Performance Metrics',
+      scraping: 'Scraping Performance',
+      dataScale: 'Data Scale',
+      alertLatency: 'Alert Latency',
+      concurrency: 'Concurrency',
+      requestsPerMinute: 'Requests/Min',
+      avgResponseTime: 'Avg Response Time',
+      successRate: 'Success Rate',
+      totalStores: 'Total Stores',
+      totalRecords: 'History Records',
+      dailyNewRecords: 'Daily New Records',
+      p95Latency: '95th Percentile Latency',
+      minutes: 'minutes',
+      latencyDesc: 'From rate change to email delivery'
     },
     
     // Donation Page
@@ -391,9 +409,9 @@ export const translations = {
       title: 'TradingView图表',
       selectSymbol: '选择交易对',
       theme: '主题',
-      darkTheme: '🌙 深色主题',
+      darkTheme: '深色主题',
       lightTheme: '浅色主题',
-      quickSwitch: '🚀 快速切换'
+      quickSwitch: '快速切换'
     },
     
     // Trading Symbols
@@ -444,6 +462,24 @@ export const translations = {
       hoursAgo: '小时前',
       minutesAgo: '分钟前',
       justNow: '刚刚'
+    },
+    
+    // Performance Metrics
+    performance: {
+      title: '系统性能指标',
+      scraping: '抓取性能',
+      dataScale: '数据规模',
+      alertLatency: '告警时效',
+      concurrency: '并发量',
+      requestsPerMinute: '每分钟请求数',
+      avgResponseTime: '平均响应时间',
+      successRate: '成功率',
+      totalStores: '商家数',
+      totalRecords: '历史记录量',
+      dailyNewRecords: '每日新增量',
+      p95Latency: '95分位延迟',
+      minutes: '分钟',
+      latencyDesc: '从费率变化到邮件送达'
     },
     
     // Donation Page

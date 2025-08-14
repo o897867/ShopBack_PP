@@ -17,6 +17,7 @@ import { useComparison } from './hooks/useComparison.js';
 import StatsCards from './components/Dashboard/StatsCards.jsx';
 import AverageCashback from './components/Dashboard/AverageCashback.jsx';
 import UpsizedStoresList from './components/Dashboard/UpsizedStoresList.jsx';
+import PerformanceCard from './components/Dashboard/PerformanceCard.jsx';
 
 // Comparison Components
 import CompareModal from './components/Comparison/CompareModal.jsx';
@@ -36,7 +37,7 @@ const App = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
   
   // Custom hooks
-  const { dashboardStats, upsizedStores, statistics, loading, error, isRescraping, stores, setStores, fetchData, handleRescrape } = useDashboard();
+  const { dashboardStats, upsizedStores, statistics, performanceData, loading, error, isRescraping, stores, setStores, fetchData, handleRescrape } = useDashboard();
   const storeHook = useStores();
   const alertHook = useAlerts();
   const comparisonHook = useComparison();
@@ -81,7 +82,7 @@ if (languageLoading || loading) {
         flexDirection: 'column',
         background: '#f5f5f5'
       }}>
-        <h2 style={{color: '#dc3545'}}>❌ {translate('messages.connectionError')}</h2>
+        <h2 style={{color: '#dc3545'}}>{translate('messages.connectionError')}</h2>
         <p>{error}</p>
         <button onClick={fetchData} style={{
           background: '#007bff',
@@ -157,6 +158,9 @@ if (languageLoading || loading) {
 )}
    {currentPage === 'dashboard' ? (
 <div>
+        {/* 性能卡片 */}
+        <PerformanceCard performanceData={performanceData} translate={translate} />
+        
         {/* 统计卡片 */}
         <StatsCards dashboardStats={dashboardStats} translate={translate} />
         

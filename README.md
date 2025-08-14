@@ -1,7 +1,7 @@
 # ShopBack Cashback管理平台文档
 # ShopBack Cashback Management Platform Documentation
 
-> 🚀 **一句话介绍 / In a Nutshell**
+> **一句话介绍 / In a Nutshell**
 > 
 > 中文：AI驱动的智能返现监控平台，通过贝叶斯预测模型帮您在最佳时机获得最高返现率。
 > 
@@ -24,23 +24,23 @@
 
 ## 核心亮点 / Core Highlights
 
-### 🤖 AI预测引擎 / AI Prediction Engine
+### AI预测引擎 / AI Prediction Engine
 - **中文**: 基于贝叶斯统计的自适应学习模型，通过分析历史数据模式预测最佳购买时机
 - **English**: Self-adaptive learning model based on Bayesian statistics that analyzes historical data patterns to predict optimal purchase timing
 
-### 📊 智能分析 / Smart Analytics  
+### 智能分析 / Smart Analytics  
 - **中文**: 实时分析多平台数据，自动识别异常波动和趋势，提供可行的洞察
 - **English**: Real-time multi-platform data analysis with automatic anomaly and trend detection, providing actionable insights
 
-### 🔄 自动化运营 / Automated Operations
+### 自动化运营 / Automated Operations
 - **中文**: 模型自动更新和训练，无需人工干预即可持续优化预测准确性
 - **English**: Auto-updating and training models that continuously optimize prediction accuracy without manual intervention
 
-### 🎯 精准提醒 / Precision Alerts
+### 精准提醒 / Precision Alerts
 - **中文**: 基于历史模式和概率分布的智能价格提醒，确保您不错过最佳返现机会
 - **English**: Intelligent price alerts based on historical patterns and probability distributions, ensuring you never miss the best cashback opportunities
 
-### 📈 多平台整合 / Multi-Platform Integration
+### 多平台整合 / Multi-Platform Integration
 - **中文**: 同时支持ShopBack和CashRewards，一站式管理所有返现机会
 - **English**: Supports both ShopBack and CashRewards simultaneously, managing all cashback opportunities in one place
 

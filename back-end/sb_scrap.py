@@ -311,6 +311,28 @@ class ShopBackSQLiteScraper:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
+            
+            # 创建性能指标表
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS performance_metrics (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    metric_type TEXT NOT NULL,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    requests_count INTEGER DEFAULT 0,
+                    success_count INTEGER DEFAULT 0,
+                    failure_count INTEGER DEFAULT 0,
+                    avg_response_time REAL DEFAULT 0,
+                    min_response_time REAL DEFAULT 0,
+                    max_response_time REAL DEFAULT 0,
+                    p95_response_time REAL DEFAULT 0,
+                    concurrency_level INTEGER DEFAULT 0,
+                    total_stores INTEGER DEFAULT 0,
+                    total_records INTEGER DEFAULT 0,
+                    daily_new_records INTEGER DEFAULT 0,
+                    alert_latency_p95 REAL DEFAULT 0,
+                    metadata TEXT
+                )
+            ''')
 
             # 创建所有索引
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_alerts_email ON price_alerts (user_email)')
@@ -324,6 +346,8 @@ class ShopBackSQLiteScraper:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_cashback_platform ON cashback_history (platform)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_stats_store_category ON rate_statistics (store_id, category)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_stats_platform ON rate_statistics (platform)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_perf_timestamp ON performance_metrics (timestamp)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_perf_type ON performance_metrics (metric_type)')
             
             conn.commit()
             self.logger.info(f"SQLite数据库初始化成功: {self.db_path}")
@@ -333,6 +357,59 @@ class ShopBackSQLiteScraper:
             raise
         finally:
             conn.close()
+    
+    def save_performance_metrics(self, metric_type: str, metrics: Dict):
+        """保存性能指标到数据库"""
+        conn = self.get_connection()
+        try:
+            cursor = conn.cursor()
+            
+            # 获取当前商家和记录总数
+            cursor.execute("SELECT COUNT(*) FROM stores")
+            total_stores = cursor.fetchone()[0]
+            
+            cursor.execute("SELECT COUNT(*) FROM cashback_history")
+            total_records = cursor.fetchone()[0]
+            
+            # 获取今日新增记录数
+            cursor.execute("""
+                SELECT COUNT(*) FROM cashback_history 
+                WHERE DATE(scraped_at) = DATE('now', 'localtime')
+            """)
+            daily_new_records = cursor.fetchone()[0]
+            
+            # 保存性能指标
+            cursor.execute('''
+                INSERT INTO performance_metrics (
+                    metric_type, requests_count, success_count, failure_count,
+                    avg_response_time, min_response_time, max_response_time, 
+                    p95_response_time, concurrency_level, total_stores, 
+                    total_records, daily_new_records, metadata
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                metric_type,
+                metrics.get('requests_count', 0),
+                metrics.get('success_count', 0),
+                metrics.get('failure_count', 0),
+                metrics.get('avg_response_time', 0),
+                metrics.get('min_response_time', 0),
+                metrics.get('max_response_time', 0),
+                metrics.get('p95_response_time', 0),
+                metrics.get('concurrency_level', self.max_concurrent),
+                total_stores,
+                total_records,
+                daily_new_records,
+                json.dumps(metrics.get('metadata', {}))
+            ))
+            
+            conn.commit()
+            self.logger.info(f"Performance metrics saved: {metric_type}")
+            
+        except Exception as e:
+            self.logger.error(f"Failed to save performance metrics: {e}")
+        finally:
+            conn.close()
+    
     def migrate_database_for_platform(self):
         """迁移现有数据库以支持platform字段"""
         conn = self.get_connection()
@@ -995,8 +1072,29 @@ class ShopBackSQLiteScraper:
         """批量异步抓取多个商家"""
         self.logger.info(f"开始批量异步抓取 {len(urls)} 个商家，最大并发数: {self.max_concurrent}")
         
-        tasks = [self.scrape_store_page(url) for url in urls]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # 记录开始时间和初始化性能指标
+        batch_start_time = time.time()
+        response_times = []
+        
+        # 创建任务并记录每个任务的开始时间
+        tasks = []
+        for url in urls:
+            task_start_time = time.time()
+            task = self.scrape_store_page(url)
+            tasks.append((task, task_start_time, url))
+        
+        # 执行所有任务
+        results = []
+        for task, start_time, url in tasks:
+            try:
+                result = await task
+                response_time = time.time() - start_time
+                response_times.append(response_time)
+                results.append(result)
+            except Exception as e:
+                response_time = time.time() - start_time
+                response_times.append(response_time)
+                results.append(e)
         
         # 处理异常结果
         processed_results = []
@@ -1018,8 +1116,40 @@ class ShopBackSQLiteScraper:
             else:
                 processed_results.append(result)
         
+        # 计算性能指标
         success_count = sum(1 for r in processed_results if r.scraping_success)
-        self.logger.info(f"批量异步抓取完成: {success_count}/{len(urls)} 成功")
+        failure_count = len(processed_results) - success_count
+        
+        # 计算响应时间统计
+        if response_times:
+            response_times.sort()
+            avg_response_time = sum(response_times) / len(response_times)
+            min_response_time = response_times[0]
+            max_response_time = response_times[-1]
+            p95_index = int(len(response_times) * 0.95)
+            p95_response_time = response_times[min(p95_index, len(response_times) - 1)]
+        else:
+            avg_response_time = min_response_time = max_response_time = p95_response_time = 0
+        
+        # 保存性能指标
+        performance_metrics = {
+            'requests_count': len(urls),
+            'success_count': success_count,
+            'failure_count': failure_count,
+            'avg_response_time': avg_response_time,
+            'min_response_time': min_response_time,
+            'max_response_time': max_response_time,
+            'p95_response_time': p95_response_time,
+            'concurrency_level': self.max_concurrent,
+            'metadata': {
+                'batch_duration': time.time() - batch_start_time,
+                'requests_per_minute': (len(urls) / (time.time() - batch_start_time)) * 60 if (time.time() - batch_start_time) > 0 else 0
+            }
+        }
+        
+        self.save_performance_metrics('batch_scrape', performance_metrics)
+        
+        self.logger.info(f"批量异步抓取完成: {success_count}/{len(urls)} 成功，平均响应时间: {avg_response_time:.2f}秒")
         
         return processed_results
     

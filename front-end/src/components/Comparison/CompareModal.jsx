@@ -141,7 +141,7 @@ const CompareModal = ({ showComparison, selectedComparison, setShowComparison, t
                   marginBottom: '10px',
                   display: 'inline-block'
                 }}>
-                  🔥 UPSIZED
+                  UPSIZED
                 </div>
               )}
 
