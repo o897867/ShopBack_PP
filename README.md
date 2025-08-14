@@ -1,17 +1,48 @@
 # ShopBack Cashback管理平台文档
 # ShopBack Cashback Management Platform Documentation
 
+> 🚀 **一句话介绍 / In a Nutshell**
+> 
+> 中文：AI驱动的智能返现监控平台，通过贝叶斯预测模型帮您在最佳时机获得最高返现率。
+> 
+> English: AI-powered intelligent cashback monitoring platform that uses Bayesian prediction models to help you get the highest cashback rates at the optimal time.
+
+---
+
 ## 目录 / Table of Contents
 
-1. [项目概述 / Project Overview](#项目概述--project-overview)
-2. [系统架构 / System Architecture](#系统架构--system-architecture)
-3. [功能特性 / Features](#功能特性--features)
-4. [技术栈 / Technology Stack](#技术栈--technology-stack)
-5. [安装指南 / Installation Guide](#安装指南--installation-guide)
-6. [API文档 / API Documentation](#api文档--api-documentation)
-7. [用户指南 / User Guide](#用户指南--user-guide)
-8. [配置说明 / Configuration](#配置说明--configuration)
-9. [故障排除 / Troubleshooting](#故障排除--troubleshooting)
+1. [核心亮点 / Core Highlights](#核心亮点--core-highlights)
+2. [项目概述 / Project Overview](#项目概述--project-overview)
+3. [系统架构 / System Architecture](#系统架构--system-architecture)
+4. [功能特性 / Features](#功能特性--features)
+5. [技术栈 / Technology Stack](#技术栈--technology-stack)
+6. [安装指南 / Installation Guide](#安装指南--installation-guide)
+7. [API文档 / API Documentation](#api文档--api-documentation)
+8. [用户指南 / User Guide](#用户指南--user-guide)
+9. [配置说明 / Configuration](#配置说明--configuration)
+10. [故障排除 / Troubleshooting](#故障排除--troubleshooting)
+
+## 核心亮点 / Core Highlights
+
+### 🤖 AI预测引擎 / AI Prediction Engine
+- **中文**: 基于贝叶斯统计的自适应学习模型，通过分析历史数据模式预测最佳购买时机
+- **English**: Self-adaptive learning model based on Bayesian statistics that analyzes historical data patterns to predict optimal purchase timing
+
+### 📊 智能分析 / Smart Analytics  
+- **中文**: 实时分析多平台数据，自动识别异常波动和趋势，提供可行的洞察
+- **English**: Real-time multi-platform data analysis with automatic anomaly and trend detection, providing actionable insights
+
+### 🔄 自动化运营 / Automated Operations
+- **中文**: 模型自动更新和训练，无需人工干预即可持续优化预测准确性
+- **English**: Auto-updating and training models that continuously optimize prediction accuracy without manual intervention
+
+### 🎯 精准提醒 / Precision Alerts
+- **中文**: 基于历史模式和概率分布的智能价格提醒，确保您不错过最佳返现机会
+- **English**: Intelligent price alerts based on historical patterns and probability distributions, ensuring you never miss the best cashback opportunities
+
+### 📈 多平台整合 / Multi-Platform Integration
+- **中文**: 同时支持ShopBack和CashRewards，一站式管理所有返现机会
+- **English**: Supports both ShopBack and CashRewards simultaneously, managing all cashback opportunities in one place
 
 ## 项目概述 / Project Overview
 
@@ -23,23 +54,78 @@ The ShopBack Cashback Management Platform is a comprehensive cashback monitoring
 
 ## 系统架构 / System Architecture
 
-### 中文
+### 架构图 / Architecture Diagram
+
 ```
-前端 (React) ←→ 后端 (FastAPI) ←→ 数据库 (SQLite)
-                      ↓
-              网页抓取器 (aiohttp + BeautifulSoup)
-                      ↓
-             外部平台 (ShopBack, CashRewards)
+┌──────────────────────────────────────────────────────────────────┐
+│                     用户界面层 / User Interface Layer              │
+│               React + Vite + TradingView Charts + Recharts        │
+└──────────────────────────┬───────────────────────────────────────┘
+                           │ HTTP/WebSocket
+┌──────────────────────────▼───────────────────────────────────────┐
+│                      API网关层 / API Gateway Layer                │
+│                     FastAPI + CORS Middleware                     │
+├───────────────────────────────────────────────────────────────────┤
+│                    核心服务层 / Core Services Layer               │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  贝叶斯预测引擎  │  │  智能提醒系统   │  │  平台比较服务   │  │
+│  │ Bayesian        │  │ Smart Alert     │  │ Platform        │  │
+│  │ Prediction      │  │ System          │  │ Comparison      │  │
+│  │ Engine          │  │                 │  │ Service         │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  AI洞察生成器   │  │  数据聚合服务   │  │  支付集成服务   │  │
+│  │ AI Insights     │  │ Data            │  │ Payment         │  │
+│  │ Generator       │  │ Aggregation     │  │ Integration     │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+├───────────────────────────────────────────────────────────────────┤
+│                 数据处理层 / Data Processing Layer                │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  异步爬虫引擎   │  │  数据清洗处理   │  │  模型调度器     │  │
+│  │ Async Scraper   │  │ Data Cleaning   │  │ Model           │  │
+│  │ Engine          │  │ & Processing    │  │ Scheduler       │  │
+│  │ (aiohttp)       │  │ (BeautifulSoup) │  │ (APScheduler)   │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+├───────────────────────────────────────────────────────────────────┤
+│              机器学习层 / Machine Learning Layer                  │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │         贝叶斯统计模型 / Bayesian Statistical Model          │ │
+│  │              (NumPy + SciPy + Custom Algorithms)             │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────────────────────┘
+                           │
+┌──────────────────────────▼───────────────────────────────────────┐
+│                   数据存储层 / Data Storage Layer                 │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
+│  │  SQLite数据库   │  │  JSON模型存储   │  │  日志文件系统   │  │
+│  │ SQLite Database │  │ JSON Model      │  │ Log File        │  │
+│  │                 │  │ Storage         │  │ System          │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
+└───────────────────────────────────────────────────────────────────┘
+                           │
+┌──────────────────────────▼───────────────────────────────────────┐
+│                   外部数据源 / External Data Sources              │
+│         ShopBack API  |  CashRewards API  |  其他平台 / Others    │
+└───────────────────────────────────────────────────────────────────┘
 ```
 
-### English
-```
-Frontend (React) ←→ Backend (FastAPI) ←→ Database (SQLite)
-                        ↓
-              Web Scraper (aiohttp + BeautifulSoup)
-                        ↓
-           External Platforms (ShopBack, CashRewards)
-```
+### 数据流向说明 / Data Flow Description
+
+#### 中文
+1. **用户交互**: 用户通过React前端界面进行操作
+2. **API调用**: 前端通过FastAPI网关调用后端服务
+3. **智能处理**: 贝叶斯预测引擎分析数据并生成预测
+4. **数据采集**: 异步爬虫定期从外部平台获取最新数据
+5. **模型更新**: 调度器自动触发模型训练和更新
+6. **实时反馈**: 系统将预测结果和提醒推送给用户
+
+#### English
+1. **User Interaction**: Users interact through the React frontend interface
+2. **API Calls**: Frontend calls backend services through FastAPI gateway
+3. **Smart Processing**: Bayesian prediction engine analyzes data and generates predictions
+4. **Data Collection**: Async scrapers periodically fetch latest data from external platforms
+5. **Model Updates**: Scheduler automatically triggers model training and updates
+6. **Real-time Feedback**: System pushes predictions and alerts to users
 
 ## 功能特性 / Features
 
@@ -65,21 +151,37 @@ Frontend (React) ←→ Backend (FastAPI) ←→ Database (SQLite)
 
 ### 前端 / Frontend
 - **React** 19.1.0 - 用户界面框架 / UI Framework
+- **Vite** - 现代化构建工具 / Modern build tool
 - **Recharts** 3.1.0 - 数据可视化 / Data Visualization
 - **TradingView** - 交易图表 / Trading Charts
+- **React Hooks** - 状态管理 / State management
 
 ### 后端 / Backend
-- **FastAPI** - RESTful API框架 / RESTful API Framework
+- **FastAPI** - 高性能异步API框架 / High-performance async API framework
+- **Pydantic** - 数据验证 / Data validation
 - **aiohttp** - 异步HTTP客户端 / Asynchronous HTTP Client
 - **BeautifulSoup4** - HTML解析 / HTML Parsing
-- **SQLite** - 数据库 / Database
+- **SQLite** - 轻量级数据库 / Lightweight database
 - **smtplib** - 邮件发送 / Email Sending
 
-### 数据抓取 / Web Scraping
-- **异步抓取** / Asynchronous Scraping
-- **多线程安全** / Thread-safe
-- **错误处理** / Error Handling
-- **速率限制** / Rate Limiting
+### AI与机器学习 / AI & Machine Learning
+- **贝叶斯统计 / Bayesian Statistics** - 概率预测建模 / Probabilistic prediction modeling
+- **NumPy** - 科学计算库 / Scientific computing library
+- **SciPy** - 高级数学算法 / Advanced mathematical algorithms
+- **自适应学习 / Adaptive Learning** - 模型自我优化 / Model self-optimization
+- **后验分布 / Posterior Distribution** - 动态参数更新 / Dynamic parameter updating
+
+### 数据处理 / Data Processing
+- **异步爬虫引擎 / Async Scraping Engine** - 高并发数据采集 / High-concurrency data collection
+- **APScheduler** - 任务调度系统 / Task scheduling system
+- **JSON** - 模型持久化 / Model persistence
+- **Logging** - 日志管理 / Log management
+
+### 系统特性 / System Features
+- **多线程安全 / Thread-safe** - 并发操作保护 / Concurrent operation protection
+- **错误处理 / Error Handling** - 健壮的异常管理 / Robust exception management
+- **速率限制 / Rate Limiting** - API调用控制 / API call control
+- **实时更新 / Real-time Updates** - WebSocket支持 / WebSocket support
 
 ## 安装指南 / Installation Guide
 
