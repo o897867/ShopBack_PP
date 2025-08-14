@@ -147,15 +147,21 @@ async def auto_rescrape():
         urls = [row[0] for row in cursor.fetchall()]
         conn.close()
         
-        # 执行批量抓取
-        await scrape_multiple_background(urls, 2)
+        if not urls:
+            logger.info("没有商家需要抓取")
+            return
+        
+        logger.info(f"开始定时抓取 {len(urls)} 个商家")
+        
+        # 使用异步批量抓取
+        await scrape_multiple_background_async(urls, 2)
         
         # 检查价格提醒
         await check_price_alerts()
         
         logger.info(f"定时抓取完成，共处理 {len(urls)} 个商家")
     except Exception as e:
-        logger.error(f"定时抓取失败: {e}")
+        logger.error(f"定时抓取失败: {e}", exc_info=True)
 def get_db_connection():
     """获取数据库连接"""
     conn = sqlite3.connect(db_path)
@@ -174,6 +180,19 @@ def validate_cashback_url(url: str) -> bool:  # 改名并支持两个平台
     
     return bool(re.match(shopback_pattern, url)) or bool(re.match(cashrewards_pattern, url))
 # API路由
+@app.post("/api/trigger-auto-rescrape", summary="手动触发自动抓取")
+async def trigger_auto_rescrape():
+    """手动触发自动抓取任务（用于测试）"""
+    try:
+        await auto_rescrape()
+        return {
+            "success": True,
+            "message": "自动抓取任务已完成"
+        }
+    except Exception as e:
+        logger.error(f"手动触发自动抓取失败: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/rescrape-all", summary="异步重新抓取所有商家")
 async def rescrape_all_stores(background_tasks: BackgroundTasks):
     """异步重新抓取所有商家的数据"""
@@ -627,20 +646,9 @@ async def scrape_multiple_background_async(urls: List[str], delay_seconds: int =
                 success_count = sum(1 for r in results if not isinstance(r, Exception))
                 logger.info(f"并发异步抓取完成: {success_count}/{len(urls)} 成功")
 async def scrape_multiple_background(urls: List[str], delay_seconds: int):
-    """后台批量抓取任务"""
-    scraper = get_scraper()
-    
-    for i, url in enumerate(urls):
-        try:
-            result = scraper.scrape_store_page(url)
-            logger.info(f"批量抓取进度 {i+1}/{len(urls)}: {result.name} - {result.main_cashback}")
-            
-            # 添加延迟，避免过于频繁的请求
-            if i < len(urls) - 1:
-                time.sleep(delay_seconds)
-                
-        except Exception as e:
-            logger.error(f"批量抓取失败: {url} - {str(e)}")
+    """后台批量抓取任务 - 同步版本包装器"""
+    # 直接调用异步版本
+    await scrape_multiple_background_async(urls, delay_seconds)
 async def scrape_multiple_background_async(urls: List[str], delay_seconds: int = 0):
     """异步后台批量抓取任务"""
     async with ShopBackSQLiteScraper(db_path, max_concurrent=5) as scraper:
