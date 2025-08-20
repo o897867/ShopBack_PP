@@ -16,3 +16,5 @@ front-end/shopback-frontend/*
 back-end/venv/
 back-end/__pycache__/
 
+.env.production
+.env.development

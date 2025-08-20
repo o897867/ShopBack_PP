@@ -1253,10 +1253,10 @@ async def send_alert_email(alert, current_rate):
     def _send_email():
         # 原来的同步邮件发送代码
         try:
-            smtp_server = "smtp.gmail.com"
-            smtp_port = 587
-            sender_email = "suyingcin@gmail.com"
-            sender_password = "xoxl erjc bjrb yxlg"
+            smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+            smtp_port = int(os.getenv("SMTP_PORT", "587"))
+            sender_email = os.getenv("SMTP_EMAIL", "")
+            sender_password = os.getenv("SMTP_PASSWORD", "")
             
             msg = MIMEMultipart()
             msg['From'] = sender_email

@@ -35,6 +35,11 @@ services:
       - CORS_ORIGINS=https://yourdomain.com
       - LOG_LEVEL=INFO
       - WORKERS=4
+      - SMTP_ENABLED=true
+      - SMTP_SERVER=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_EMAIL=${SMTP_EMAIL}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/api/performance"]
