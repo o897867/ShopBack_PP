@@ -1,0 +1,63 @@
+services:
+  # Backend Service
+  backend:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    container_name: shopback-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./back-end:/app
+      - backend-data:/app/data
+      - backend-logs:/app/logs
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=development
+      - DATABASE_URL=sqlite:///data/shopback_data.db
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/performance"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shopback-network
+
+  # Frontend Service  
+  frontend:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    container_name: shopback-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./front-end/src:/app/src
+      - ./front-end/public:/app/public
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8001
+      - VITE_APP_ENV=development
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shopback-network
+
+volumes:
+  backend-data:
+    driver: local
+  backend-logs:
+    driver: local
+
+networks:
+  shopback-network:
+    driver: bridge

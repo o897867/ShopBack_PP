@@ -1,0 +1,125 @@
+services:
+  # Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: shopback-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    networks:
+      - shopback-network
+
+  # Backend Service (Production)
+  backend:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile.prod
+    container_name: shopback-backend-prod
+    expose:
+      - "8001"
+    volumes:
+      - backend-data:/app/data
+      - backend-logs:/app/logs
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite:///data/shopback_data.db
+      - CORS_ORIGINS=https://yourdomain.com
+      - LOG_LEVEL=INFO
+      - WORKERS=4
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/performance"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shopback-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # Frontend Service (Production)
+  frontend:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile.prod
+    container_name: shopback-frontend-prod
+    expose:
+      - "3000"
+    environment:
+      - VITE_API_BASE_URL=https://api.yourdomain.com
+      - VITE_APP_ENV=production
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shopback-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Optional: PostgreSQL for production
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: shopback-postgres
+  #   environment:
+  #     POSTGRES_DB: shopback
+  #     POSTGRES_USER: shopback_user
+  #     POSTGRES_PASSWORD: your_secure_password
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - shopback-network
+
+  # Optional: Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: shopback-redis
+  #   volumes:
+  #     - redis-data:/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - shopback-network
+
+volumes:
+  backend-data:
+    driver: local
+  backend-logs:
+    driver: local
+  nginx-logs:
+    driver: local
+  # postgres-data:
+  #   driver: local
+  # redis-data:
+  #   driver: local
+
+networks:
+  shopback-network:
+    driver: bridge

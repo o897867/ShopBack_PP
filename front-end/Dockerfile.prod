@@ -1,0 +1,50 @@
+# Production Dockerfile for ShopBack React Frontend
+# Multi-stage build with optimization
+
+# Stage 1: Build dependencies
+FROM node:18-alpine AS dependencies
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production --frozen-lockfile
+
+# Stage 2: Build application
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --frozen-lockfile
+COPY . .
+RUN npm run build
+
+# Stage 3: Production runtime
+FROM nginx:alpine AS production
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Copy custom nginx configuration
+COPY nginx.prod.conf /etc/nginx/nginx.conf
+
+# Copy built application
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs \
+    && adduser -S reactuser -u 1001 \
+    && chown -R reactuser:nodejs /usr/share/nginx/html \
+    && chown -R reactuser:nodejs /var/cache/nginx \
+    && chown -R reactuser:nodejs /var/log/nginx \
+    && chown -R reactuser:nodejs /etc/nginx/conf.d \
+    && touch /var/run/nginx.pid \
+    && chown -R reactuser:nodejs /var/run/nginx.pid
+
+USER reactuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/ || exit 1
+
+# Expose port
+EXPOSE 3000
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

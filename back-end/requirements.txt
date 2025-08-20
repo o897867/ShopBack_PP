@@ -6,7 +6,8 @@ python-multipart
 aiofiles
 aiohttp
 python-dotenv
-smtplib
+beautifulsoup4
+requests
 
 # New dependencies for Bayesian model
 numpy>=1.21.0
