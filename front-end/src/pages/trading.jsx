@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import TradingViewWidget from '../components/tradingWidget';
+import LeverageCalculator from '../components/LeverageCalculator';
 
 const TradingViewPage = () => {
   const [selectedSymbol, setSelectedSymbol] = useState('BINANCE:BTCUSDT');
@@ -123,6 +124,11 @@ const TradingViewPage = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* 杠杆交易计算器 */}
+      <div style={{ marginTop: '30px' }}>
+        <LeverageCalculator />
       </div>
     </div>
   );

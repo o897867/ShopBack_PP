@@ -27,6 +27,7 @@ from email.mime.multipart import MIMEMultipart
 from sb_scrap import ShopBackSQLiteScraper, StoreInfo, CashbackRate
 from bayesian_model import BayesianCashbackModel, ModelManager, train_model, update_all_models
 from model_scheduler import start_model_scheduler, get_scheduler_status
+from leverage_trading import LeveragePosition, LeverageCalculator
 import os
 from dotenv import load_dotenv
 from square import Square
@@ -98,6 +99,39 @@ class ScrapeResponse(BaseModel):
     success: bool
     message: str
     store_name: Optional[str] = None
+
+class LeveragePositionRequest(BaseModel):
+    user_email: str
+    symbol: str
+    direction: str  # 'long' or 'short'
+    principal: float
+    leverage: float
+    position_size: float
+    entry_price: float
+
+class LeverageCalculationRequest(BaseModel):
+    symbol: str
+    direction: str  # 'long' or 'short'
+    principal: float
+    leverage: float
+    entry_price: float
+    current_price: Optional[float] = None
+    position_size: Optional[float] = None  # Optional custom position size
+    
+class LeverageTargetLossRequest(BaseModel):
+    symbol: str
+    direction: str
+    principal: float
+    leverage: float
+    entry_price: float
+    max_loss_amount: float
+
+class LeverageAnalysisResponse(BaseModel):
+    position_info: Dict[str, Any]
+    liquidation_info: Dict[str, Any]
+    risk_levels: Dict[str, Any]
+    current_pnl: Optional[Dict[str, float]] = None
+    current_price: Optional[float] = None
     main_cashback: Optional[str] = None
     detailed_rates_count: Optional[int] = None
 
@@ -373,7 +407,7 @@ async def get_performance_metrics():
         
         # 计算成功率
         success_rate = 0
-        if daily_stats and daily_stats['total_requests'] > 0:
+        if daily_stats and daily_stats['total_requests'] and daily_stats['total_requests'] > 0:
             success_rate = (daily_stats['total_success'] / daily_stats['total_requests']) * 100
         
         # 获取数据规模
@@ -389,14 +423,9 @@ async def get_performance_metrics():
         """)
         daily_new_records = cursor.fetchone()[0]
         
-        # 计算告警延迟（示例：获取最近的告警处理时间）
-        cursor.execute("""
-            SELECT AVG(CAST((julianday(last_notified_at) - julianday(created_at)) * 24 * 60 as REAL)) as avg_latency
-            FROM price_alerts 
-            WHERE last_notified_at IS NOT NULL
-        """)
-        alert_latency = cursor.fetchone()
-        alert_latency_p95 = alert_latency['avg_latency'] * 1.5 if alert_latency['avg_latency'] else 0  # 估算95分位
+        # 计算告警延迟 - 暂时设为固定值，因为缺少触发时间跟踪
+        # TODO: 需要添加alert_triggers表来准确跟踪从价格变化到通知的延迟
+        alert_latency_p95 = 5.0  # 假设5分钟内处理告警
         
         # 计算每分钟请求数
         requests_per_minute = 0
@@ -411,7 +440,7 @@ async def get_performance_metrics():
             scraping_performance={
                 'concurrency': latest_metric['concurrency_level'] if latest_metric else 0,
                 'requests_per_minute': round(requests_per_minute, 2),
-                'avg_response_time': round(daily_stats['avg_response_time'], 2) if daily_stats and daily_stats['avg_response_time'] else 0,
+                'avg_response_time': round(daily_stats['avg_response_time'], 2) if daily_stats and daily_stats['avg_response_time'] is not None else 0,
                 'success_rate': round(success_rate, 2)
             },
             data_scale={
@@ -1302,6 +1331,291 @@ async def process_donation(request: DonationRequest):
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail="An internal server error occurred.")
+
+# ==================== 杠杆交易 API ==================== #
+
+@app.post("/api/leverage/calculate", response_model=LeverageAnalysisResponse, summary="计算杠杆交易分析")
+async def calculate_leverage_position(request: LeverageCalculationRequest):
+    """
+    计算杠杆交易的各种参数，包括强制平仓价格、盈亏等
+    """
+    try:
+        # 计算最大可用仓位
+        max_position_size = request.principal * request.leverage / request.entry_price
+        
+        # 使用自定义仓位或最大仓位
+        if request.position_size is not None:
+            # 验证自定义仓位不超过最大值
+            if request.position_size > max_position_size:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"仓位大小不能超过最大值: {max_position_size:.4f}"
+                )
+            if request.position_size <= 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="仓位大小必须大于0"
+                )
+            actual_position_size = request.position_size
+        else:
+            actual_position_size = max_position_size
+        
+        # 创建杠杆持仓对象
+        position = LeveragePosition(
+            principal=request.principal,
+            leverage=request.leverage,
+            position_size=actual_position_size,
+            entry_price=request.entry_price,
+            direction=request.direction,
+            symbol=request.symbol
+        )
+        
+        # 执行分析
+        analysis = LeverageCalculator.analyze_position(position, request.current_price)
+        
+        # 保存分析记录到数据库
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO leverage_analysis 
+            (user_email, symbol, analysis_type, principal, leverage, entry_price, direction, analysis_result, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            "anonymous",  # 如果没有用户登录，使用anonymous
+            request.symbol,
+            "liquidation",
+            request.principal,
+            request.leverage,
+            request.entry_price,
+            request.direction,
+            json.dumps(analysis),
+            datetime.now().isoformat()
+        ))
+        conn.commit()
+        conn.close()
+        
+        return LeverageAnalysisResponse(**analysis)
+    
+    except Exception as e:
+        logger.error(f"杠杆计算错误: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/leverage/target-loss", summary="计算达到目标亏损的价格")
+async def calculate_target_loss_price(request: LeverageTargetLossRequest):
+    """
+    计算达到目标亏损金额时的价格
+    """
+    try:
+        position = LeveragePosition(
+            principal=request.principal,
+            leverage=request.leverage,
+            position_size=request.principal * request.leverage / request.entry_price,
+            entry_price=request.entry_price,
+            direction=request.direction,
+            symbol=request.symbol
+        )
+        
+        target_price = position.price_for_target_loss(request.max_loss_amount)
+        
+        # 计算该价格下的详细信息
+        pnl_info = position.calculate_pnl(target_price) if target_price else None
+        
+        return {
+            "target_price": target_price,
+            "max_loss_amount": request.max_loss_amount,
+            "price_change": abs(target_price - request.entry_price) if target_price else None,
+            "price_change_percentage": abs((target_price - request.entry_price) / request.entry_price * 100) if target_price else None,
+            "pnl_info": pnl_info
+        }
+    
+    except Exception as e:
+        logger.error(f"目标亏损计算错误: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/leverage/position", summary="创建杠杆持仓")
+async def create_leverage_position(request: LeveragePositionRequest):
+    """
+    创建新的杠杆持仓记录
+    """
+    try:
+        position = LeveragePosition(
+            principal=request.principal,
+            leverage=request.leverage,
+            position_size=request.position_size,
+            entry_price=request.entry_price,
+            direction=request.direction,
+            symbol=request.symbol
+        )
+        
+        liquidation_price = position.liquidation_price
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO leverage_positions 
+            (user_email, symbol, direction, principal, leverage, position_size, 
+             entry_price, liquidation_price, current_price, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            request.user_email,
+            request.symbol,
+            request.direction,
+            request.principal,
+            request.leverage,
+            request.position_size,
+            request.entry_price,
+            liquidation_price,
+            request.entry_price,
+            datetime.now().isoformat(),
+            datetime.now().isoformat()
+        ))
+        
+        position_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        
+        return {
+            "position_id": position_id,
+            "liquidation_price": liquidation_price,
+            "message": "持仓创建成功"
+        }
+    
+    except Exception as e:
+        logger.error(f"创建持仓错误: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/leverage/positions/{user_email}", summary="获取用户杠杆持仓")
+async def get_user_positions(user_email: str, status: Optional[str] = Query(None)):
+    """
+    获取用户的杠杆持仓列表
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        if status:
+            cursor.execute("""
+                SELECT * FROM leverage_positions 
+                WHERE user_email = ? AND status = ?
+                ORDER BY created_at DESC
+            """, (user_email, status))
+        else:
+            cursor.execute("""
+                SELECT * FROM leverage_positions 
+                WHERE user_email = ?
+                ORDER BY created_at DESC
+            """, (user_email,))
+        
+        positions = cursor.fetchall()
+        return [dict(pos) for pos in positions]
+    
+    finally:
+        conn.close()
+
+@app.put("/api/leverage/position/{position_id}/close", summary="平仓")
+async def close_position(position_id: int, close_price: float):
+    """
+    平仓并记录交易历史
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # 获取持仓信息
+        cursor.execute("SELECT * FROM leverage_positions WHERE id = ?", (position_id,))
+        position_data = cursor.fetchone()
+        
+        if not position_data:
+            raise HTTPException(status_code=404, detail="持仓不存在")
+        
+        if position_data['status'] != 'open':
+            raise HTTPException(status_code=400, detail="持仓已关闭")
+        
+        # 创建持仓对象计算盈亏
+        position = LeveragePosition(
+            principal=position_data['principal'],
+            leverage=position_data['leverage'],
+            position_size=position_data['position_size'],
+            entry_price=position_data['entry_price'],
+            direction=position_data['direction'],
+            symbol=position_data['symbol']
+        )
+        
+        pnl_info = position.calculate_pnl(close_price)
+        
+        # 更新持仓状态
+        cursor.execute("""
+            UPDATE leverage_positions 
+            SET status = ?, close_price = ?, close_time = ?, 
+                pnl_amount = ?, pnl_percentage = ?, updated_at = ?
+            WHERE id = ?
+        """, (
+            'closed',
+            close_price,
+            datetime.now().isoformat(),
+            pnl_info['pnl_amount'],
+            pnl_info['pnl_percentage'],
+            datetime.now().isoformat(),
+            position_id
+        ))
+        
+        # 记录交易历史
+        cursor.execute("""
+            INSERT INTO leverage_trade_history 
+            (position_id, user_email, symbol, direction, principal, leverage, 
+             position_size, entry_price, close_price, pnl_amount, pnl_percentage, 
+             close_reason, open_time, close_time)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            position_id,
+            position_data['user_email'],
+            position_data['symbol'],
+            position_data['direction'],
+            position_data['principal'],
+            position_data['leverage'],
+            position_data['position_size'],
+            position_data['entry_price'],
+            close_price,
+            pnl_info['pnl_amount'],
+            pnl_info['pnl_percentage'],
+            'manual',
+            position_data['created_at'],
+            datetime.now().isoformat()
+        ))
+        
+        conn.commit()
+        
+        return {
+            "message": "平仓成功",
+            "pnl_amount": pnl_info['pnl_amount'],
+            "pnl_percentage": pnl_info['pnl_percentage']
+        }
+    
+    finally:
+        conn.close()
+
+@app.get("/api/leverage/history/{user_email}", summary="获取交易历史")
+async def get_trade_history(user_email: str, limit: int = Query(50)):
+    """
+    获取用户的交易历史记录
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT * FROM leverage_trade_history 
+            WHERE user_email = ?
+            ORDER BY close_time DESC
+            LIMIT ?
+        """, (user_email, limit))
+        
+        history = cursor.fetchall()
+        return [dict(trade) for trade in history]
+    
+    finally:
+        conn.close()
 
 # 错误处理
 @app.exception_handler(404)
