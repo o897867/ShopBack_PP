@@ -4,6 +4,7 @@ import Navigation from './components/Navigation.jsx';
 import TradingViewPage from './pages/trading.jsx';
 import DonationPage from './pages/DonationPage.jsx';
 import BayesianDashboard from './pages/BayesianDashboard.jsx';
+import EthKalmanPrediction from './pages/EthKalmanPrediction.jsx';
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
@@ -124,6 +125,7 @@ if (languageLoading || loading) {
 <h1 style={{margin: 0, color: '#333', fontSize: '2.5em'}}>
   {currentPage === 'dashboard' ? translate('dashboard.title') : 
    currentPage === 'predictions' ? 'AI Cashback Predictions' :
+   currentPage === 'eth' ? 'ETH Price Prediction' :
    currentPage === 'trading' ? translate('nav.trading') : 
    translate('nav.donations')}
 </h1>
@@ -201,6 +203,8 @@ if (languageLoading || loading) {
       </div>
 ) : currentPage === 'predictions' ? (
     <BayesianDashboard />
+) : currentPage === 'eth' ? (
+    <EthKalmanPrediction />
 ) : currentPage === 'trading' ? (
     <TradingViewPage />
    ) : (

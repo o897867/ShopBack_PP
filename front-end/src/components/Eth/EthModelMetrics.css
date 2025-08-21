@@ -1,0 +1,76 @@
+.eth-metrics-container {
+  width: 100%;
+}
+
+.eth-metrics-container h3 {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 20px 0;
+}
+
+.no-data {
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.metric-value.positive {
+  color: #4caf50;
+}
+
+.metric-value.negative {
+  color: #f44336;
+}
+
+.volatility-level {
+  font-size: 11px;
+  font-weight: normal;
+  margin-left: 5px;
+}
+
+.metrics-explanation {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.metrics-explanation p {
+  font-size: 12px;
+  color: #666;
+  margin: 5px 0;
+  line-height: 1.4;
+}
+
+.metrics-explanation strong {
+  color: #333;
+}

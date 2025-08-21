@@ -3,7 +3,7 @@
 ShopBack FastAPI后端
 为React前端提供RESTful API接口
 """
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Depends
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Depends, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl
@@ -28,6 +28,8 @@ from sb_scrap import ShopBackSQLiteScraper, StoreInfo, CashbackRate
 from bayesian_model import BayesianCashbackModel, ModelManager, train_model, update_all_models
 from model_scheduler import start_model_scheduler, get_scheduler_status
 from leverage_trading import LeveragePosition, LeverageCalculator
+from eth_kalman_model import ETHKalmanModelManager
+from binance_eth_data import BinanceDataManager
 import os
 from dotenv import load_dotenv
 from square import Square
@@ -165,6 +167,11 @@ app.add_middleware(
 # 全局变量
 scraper_instance = None
 db_path = "shopback_data.db"
+
+# Initialize ETH Kalman model
+eth_model_manager = ETHKalmanModelManager(db_path)
+eth_data_manager = BinanceDataManager(eth_model_manager)
+eth_ws_clients = set()  # WebSocket clients for ETH updates
 model_manager = ModelManager(db_path)
 
 # 初始化Square客户端
@@ -1646,6 +1653,195 @@ def run_scheduler():
 
 # 启动定时器线程
 threading.Thread(target=run_scheduler, daemon=True).start()
+
+# ============= ETH Kalman Model Endpoints =============
+
+@app.on_event("startup")
+async def startup_eth_model():
+    """Initialize ETH model on startup"""
+    try:
+        # Load saved state if exists
+        if eth_model_manager.load_state():
+            logger.info("Loaded ETH Kalman model state from database")
+        
+        # Create wrapper for broadcasting updates
+        async def broadcast_candle_updates(candle: dict):
+            """Wrapper to broadcast candle updates via WebSocket"""
+            try:
+                # Call the original on_new_candle method
+                predictions = await eth_data_manager.on_new_candle(candle)
+                
+                # Broadcast to WebSocket clients if we have predictions
+                if predictions and eth_ws_clients:
+                    await broadcast_eth_update({
+                        "type": "update",
+                        "candle": candle,
+                        "predictions": predictions,
+                        "model_state": eth_model_manager.get_model_metrics()
+                    })
+                
+                return predictions
+            except Exception as e:
+                logger.error(f"Error in broadcast_candle_updates: {e}")
+                return None
+        
+        # Start data manager with the broadcasting callback
+        async def start_with_callback():
+            await eth_data_manager.initialize()
+            await eth_data_manager.fetcher.start_websocket_stream(broadcast_candle_updates)
+        
+        asyncio.create_task(start_with_callback())
+        logger.info("Started ETH data manager with Binance WebSocket")
+    except Exception as e:
+        logger.error(f"Failed to start ETH model: {e}")
+
+@app.get("/api/eth/current-price", summary="Get current ETH price and model state")
+async def get_eth_current_price():
+    """Get current ETH price with model state"""
+    try:
+        current_price = eth_data_manager.fetcher.get_current_price()
+        model_metrics = eth_model_manager.get_model_metrics()
+        
+        return {
+            "current_price": current_price,
+            "model_state": model_metrics,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/eth/predictions", summary="Get ETH price predictions")
+async def get_eth_predictions():
+    """Get ETH price predictions for multiple horizons"""
+    try:
+        # Get latest candle
+        candles = eth_data_manager.fetcher.get_recent_candles(2)
+        if len(candles) < 2:
+            return {"error": "Insufficient data for predictions"}
+        
+        # Generate predictions
+        predictions = eth_model_manager.update_with_new_candle(candles[-1])
+        
+        return predictions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/eth/candles-3m", summary="Get historical 3-minute candles")
+async def get_eth_candles(limit: int = Query(100, le=500)):
+    """Get historical 3-minute ETH candles"""
+    try:
+        candles = eth_data_manager.fetcher.get_recent_candles(limit)
+        return {
+            "candles": candles,
+            "count": len(candles)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/eth/model/half-life", summary="Adjust Kalman filter half-life")
+async def set_eth_half_life(half_life_candles: int = Query(..., ge=4, le=6)):
+    """Adjust the half-life parameter (4-6 candles, i.e., 12-18 minutes)"""
+    try:
+        eth_model_manager.model.set_half_life(half_life_candles)
+        eth_model_manager.save_state()
+        
+        return {
+            "half_life_candles": half_life_candles,
+            "half_life_minutes": half_life_candles * 3,
+            "delta": eth_model_manager.model.delta
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/eth/model/metrics", summary="Get model performance metrics")
+async def get_eth_model_metrics():
+    """Get detailed model metrics and parameters"""
+    try:
+        metrics = eth_model_manager.get_model_metrics()
+        state = eth_model_manager.model.get_state()
+        
+        return {
+            "metrics": metrics,
+            "state": state,
+            "config": {
+                "half_life_candles": eth_model_manager.model.half_life,
+                "c_level": eth_model_manager.model.c_level,
+                "c_trend": eth_model_manager.model.c_trend,
+                "r0_mult": eth_model_manager.model.r0_mult
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.websocket("/ws/eth/kalman-updates")
+async def eth_kalman_websocket(websocket: WebSocket):
+    """WebSocket for real-time ETH Kalman model updates"""
+    await websocket.accept()
+    eth_ws_clients.add(websocket)
+    
+    try:
+        # Send initial state
+        current_price = eth_data_manager.fetcher.get_current_price()
+        initial_data = {
+            "type": "initial",
+            "current_price": current_price,
+            "model_state": eth_model_manager.get_model_metrics()
+        }
+        await websocket.send_json(initial_data)
+        logger.info(f"New WebSocket client connected. Total clients: {len(eth_ws_clients)}")
+        
+        # Keep connection alive with periodic ping
+        ping_interval = 30  # Send ping every 30 seconds
+        last_ping = time.time()
+        
+        while True:
+            try:
+                # Check if we should send a ping
+                current_time = time.time()
+                if current_time - last_ping > ping_interval:
+                    await websocket.send_json({"type": "ping", "timestamp": current_time})
+                    last_ping = current_time
+                
+                # Try to receive data with timeout
+                try:
+                    await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
+                except asyncio.TimeoutError:
+                    continue  # No data received, continue loop
+                    
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"Error in WebSocket loop: {e}")
+                break
+                
+    except WebSocketDisconnect:
+        logger.info(f"WebSocket client disconnected. Remaining clients: {len(eth_ws_clients) - 1}")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+    finally:
+        if websocket in eth_ws_clients:
+            eth_ws_clients.remove(websocket)
+        try:
+            await websocket.close()
+        except:
+            pass
+
+# Broadcast function for ETH updates
+async def broadcast_eth_update(update_data: dict):
+    """Broadcast ETH model updates to all WebSocket clients"""
+    disconnected = set()
+    for ws in eth_ws_clients:
+        try:
+            await ws.send_json(update_data)
+        except:
+            disconnected.add(ws)
+    
+    # Remove disconnected clients
+    for ws in disconnected:
+        eth_ws_clients.remove(ws)
+
+# Note: The callback for broadcasting is now set in startup_eth_model()
+# This prevents the recursion issue that was causing the maximum recursion depth error
 
 if __name__ == "__main__":
     # Start the model scheduler
