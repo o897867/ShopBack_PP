@@ -1,7 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_BASE_URL = '/api';
-const WS_URL = 'ws://localhost:8001/ws/eth/kalman-updates';
+
+// Dynamic WebSocket URL that works through nginx proxy
+const getWebSocketUrl = () => {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const host = window.location.host; // includes hostname and port
+  return `${protocol}//${host}/ws/eth/kalman-updates`;
+};
+
+const WS_URL = getWebSocketUrl();
 
 export const useEthKalman = () => {
   const [currentPrice, setCurrentPrice] = useState(null);

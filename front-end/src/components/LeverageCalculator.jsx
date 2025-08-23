@@ -47,7 +47,7 @@ const LeverageCalculator = () => {
         requestBody.position_size = parseFloat(formData.positionSize);
       }
       
-      const response = await fetch('http://localhost:8001/api/leverage/calculate', {
+      const response = await fetch('/api/leverage/calculate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ const LeverageCalculator = () => {
   const calculateTargetLoss = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8001/api/leverage/target-loss', {
+      const response = await fetch('/api/leverage/target-loss', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
