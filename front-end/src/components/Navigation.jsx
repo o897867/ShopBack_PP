@@ -3,6 +3,7 @@ import React from 'react';
 const Navigation = ({ currentPage, setCurrentPage }) => {
   const navItems = [
     { id: 'dashboard', label: 'ShopBack管理', icon: '' },
+    { id: 'showcase', label: 'Showcase', icon: '' },
     { id: 'predictions', label: 'AI Predictions', icon: '' },
     { id: 'eth', label: 'ETH Prediction', icon: '' },
     { id: 'trading', label: 'TradingView', icon: '' },

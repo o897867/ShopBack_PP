@@ -3,9 +3,10 @@
 ShopBack FastAPI后端
 为React前端提供RESTful API接口
 """
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Depends, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Depends, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
 from typing import List, Optional, Dict, Any
 import sqlite3
@@ -148,6 +149,33 @@ class DonationRequest(BaseModel):
     token: str
     amount: float
 
+# ===== Showcase (Forum-like) Models ===== #
+class ShowcaseCategory(BaseModel):
+    id: int
+    name: str
+    image_url: str | None = None
+    created_at: str
+
+class ShowcaseCategoryCreate(BaseModel):
+    name: str
+    image_url: str | None = None
+
+class ShowcaseEvent(BaseModel):
+    id: int
+    category_id: int
+    title: str
+    content: str | None = None
+    images: list[str] | None = None
+    submitted_by: str | None = None
+    created_at: str
+
+class ShowcaseEventCreate(BaseModel):
+    category_id: int
+    title: str
+    content: str | None = None
+    images: list[str] | None = None
+    submitted_by: str | None = None
+
 # 初始化FastAPI应用
 app = FastAPI(
     title="ShopBack Cashback API",
@@ -163,6 +191,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+UPLOAD_DIR = STATIC_DIR / "uploads" / "showcase"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # 全局变量
 scraper_instance = None
@@ -183,6 +219,56 @@ square_client = Square(
 # 日志设置
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def _ensure_showcase_write_enabled():
+    """Guard write endpoints so only backend-admin (e.g., via notebook) can enable them.
+    Set env SHOWCASE_WRITE_ENABLED=true to allow HTTP writes; otherwise raise 403.
+    """
+    if str(os.getenv("SHOWCASE_WRITE_ENABLED", "false")).lower() not in ("1", "true", "yes"): 
+        raise HTTPException(status_code=403, detail="Showcase write API disabled. Use backend admin notebook.")
+
+# Ensure showcase tables exist
+def ensure_showcase_tables():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS showcase_categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                image_url TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS showcase_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                content TEXT,
+                images_json TEXT,
+                submitted_by TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (category_id) REFERENCES showcase_categories (id)
+            )
+            """
+        )
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_showcase_events_category ON showcase_events (category_id)')
+        conn.commit()
+    except Exception as e:
+        logger.error(f"Failed to ensure showcase tables: {e}")
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+# (Call placed after get_db_connection() definition below to avoid NameError)
 async def auto_rescrape():
     """定时自动抓取函数"""
     try:
@@ -214,6 +300,9 @@ def get_db_connection():
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
+
+# Ensure showcase tables now that DB connection helper exists
+ensure_showcase_tables()
 
 def get_scraper():
     """获取抓取器实例"""
@@ -269,6 +358,201 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs"
     }
+
+# ============= Showcase (Forum-like) Endpoints =============
+
+@app.get("/api/showcase/categories", response_model=List[ShowcaseCategory], summary="List showcase categories")
+async def list_showcase_categories():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT id, name, image_url, created_at FROM showcase_categories ORDER BY id DESC")
+        rows = cur.fetchall()
+        categories = []
+        for row in rows:
+            cat_dict = dict(row)
+            # Convert relative URLs to absolute backend URLs
+            if cat_dict.get('image_url') and cat_dict['image_url'].startswith('/static/'):
+                cat_dict['image_url'] = f"http://localhost:8001{cat_dict['image_url']}"
+            categories.append(ShowcaseCategory(**cat_dict))
+        return categories
+    finally:
+        conn.close()
+
+@app.post("/api/showcase/categories", response_model=ShowcaseCategory, summary="Create showcase category")
+async def create_showcase_category(payload: ShowcaseCategoryCreate):
+    _ensure_showcase_write_enabled()
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO showcase_categories (name, image_url) VALUES (?, ?)",
+            (payload.name, payload.image_url)
+        )
+        cat_id = cur.lastrowid
+        conn.commit()
+        cur.execute("SELECT id, name, image_url, created_at FROM showcase_categories WHERE id = ?", (cat_id,))
+        row = cur.fetchone()
+        return ShowcaseCategory(**dict(row))
+    finally:
+        conn.close()
+
+@app.get("/api/showcase/categories/{category_id}/events", response_model=List[ShowcaseEvent], summary="List events by category")
+async def list_showcase_events(category_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT id, category_id, title, content, images_json, submitted_by, created_at
+            FROM showcase_events
+            WHERE category_id = ?
+            ORDER BY created_at DESC, id DESC
+            """,
+            (category_id,)
+        )
+        rows = cur.fetchall()
+        result: List[ShowcaseEvent] = []
+        for r in rows:
+            d = dict(r)
+            images = []
+            try:
+                images_raw = json.loads(d.get('images_json') or '[]')
+                # Convert relative URLs to absolute backend URLs
+                images = []
+                for img in images_raw:
+                    if img and img.startswith('/static/'):
+                        images.append(f"http://localhost:8001{img}")
+                    else:
+                        images.append(img)
+            except Exception:
+                images = []
+            result.append(ShowcaseEvent(
+                id=d['id'],
+                category_id=d['category_id'],
+                title=d['title'],
+                content=d.get('content') or None,
+                images=images,
+                submitted_by=d.get('submitted_by') or None,
+                created_at=d['created_at']
+            ))
+        return result
+    finally:
+        conn.close()
+
+@app.get("/api/showcase/events/{event_id}", response_model=ShowcaseEvent, summary="Get event detail")
+async def get_showcase_event(event_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT id, category_id, title, content, images_json, submitted_by, created_at FROM showcase_events WHERE id = ?",
+            (event_id,)
+        )
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Event not found")
+        d = dict(row)
+        images = []
+        try:
+            images_raw = json.loads(d.get('images_json') or '[]')
+            # Convert relative URLs to absolute backend URLs
+            images = []
+            for img in images_raw:
+                if img and img.startswith('/static/'):
+                    images.append(f"http://localhost:8001{img}")
+                else:
+                    images.append(img)
+        except Exception:
+            images = []
+        return ShowcaseEvent(
+            id=d['id'],
+            category_id=d['category_id'],
+            title=d['title'],
+            content=d.get('content') or None,
+            images=images,
+            submitted_by=d.get('submitted_by') or None,
+            created_at=d['created_at']
+        )
+    finally:
+        conn.close()
+
+@app.post("/api/showcase/events", response_model=ShowcaseEvent, summary="Create event")
+async def create_showcase_event(payload: ShowcaseEventCreate):
+    _ensure_showcase_write_enabled()
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # ensure category exists
+        cur.execute("SELECT id FROM showcase_categories WHERE id = ?", (payload.category_id,))
+        if not cur.fetchone():
+            raise HTTPException(status_code=404, detail="Category not found")
+        images_json = json.dumps(payload.images or [])
+        cur.execute(
+            """
+            INSERT INTO showcase_events (category_id, title, content, images_json, submitted_by)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (payload.category_id, payload.title, payload.content, images_json, payload.submitted_by)
+        )
+        ev_id = cur.lastrowid
+        conn.commit()
+        cur.execute(
+            "SELECT id, category_id, title, content, images_json, submitted_by, created_at FROM showcase_events WHERE id = ?",
+            (ev_id,)
+        )
+        row = cur.fetchone()
+        d = dict(row)
+        return ShowcaseEvent(
+            id=d['id'],
+            category_id=d['category_id'],
+            title=d['title'],
+            content=d.get('content') or None,
+            images=json.loads(d.get('images_json') or '[]'),
+            submitted_by=d.get('submitted_by') or None,
+            created_at=d['created_at']
+        )
+    finally:
+        conn.close()
+
+@app.post("/api/showcase/upload-image", summary="Upload image for showcase")
+async def upload_showcase_image(file: UploadFile = File(...)):
+    """Upload an image file and return its public URL.
+    Requires SHOWCASE_WRITE_ENABLED to be true.
+    """
+    _ensure_showcase_write_enabled()
+    # Basic validation
+    content_type = (file.content_type or "").lower()
+    if not any(ct in content_type for ct in ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"]):
+        raise HTTPException(status_code=400, detail="Unsupported image type")
+
+    # Safe filename with uuid
+    import uuid
+    suffix = os.path.splitext(file.filename or "")[1].lower()
+    if suffix not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
+        # map content-type to default suffix
+        mapping = {
+            "image/png": ".png",
+            "image/jpeg": ".jpg",
+            "image/jpg": ".jpg",
+            "image/webp": ".webp",
+            "image/gif": ".gif"
+        }
+        suffix = mapping.get(content_type, ".jpg")
+    fname = f"{uuid.uuid4().hex}{suffix}"
+    dest = UPLOAD_DIR / fname
+    try:
+        with open(dest, "wb") as out:
+            while True:
+                chunk = await file.read(1024 * 1024)
+                if not chunk:
+                    break
+                out.write(chunk)
+    finally:
+        await file.close()
+
+    public_url = f"/static/uploads/showcase/{fname}"
+    return {"url": public_url, "filename": fname}
 @app.post("/api/add-store", summary="添加新商家")
 async def add_store(request: AddStoreRequest, background_tasks: BackgroundTasks):
     """添加新的ShopBack或CashRewards商家"""

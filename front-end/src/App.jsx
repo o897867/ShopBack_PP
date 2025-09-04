@@ -5,6 +5,7 @@ import TradingViewPage from './pages/trading.jsx';
 import DonationPage from './pages/DonationPage.jsx';
 import BayesianDashboard from './pages/BayesianDashboard.jsx';
 import EthKalmanPrediction from './pages/EthKalmanPrediction.jsx';
+import Showcase from './pages/Showcase.jsx';
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
@@ -124,6 +125,7 @@ if (languageLoading || loading) {
 <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 <h1 style={{margin: 0, color: '#333', fontSize: '2.5em'}}>
   {currentPage === 'dashboard' ? translate('dashboard.title') : 
+   currentPage === 'showcase' ? 'Showcase' :
    currentPage === 'predictions' ? 'AI Cashback Predictions' :
    currentPage === 'eth' ? 'ETH Price Prediction' :
    currentPage === 'trading' ? translate('nav.trading') : 
@@ -201,6 +203,8 @@ if (languageLoading || loading) {
         {/* 价格提醒管理界面 */}
         <AlertManagement alertHook={alertHook} translate={translate} />
       </div>
+) : currentPage === 'showcase' ? (
+    <Showcase />
 ) : currentPage === 'predictions' ? (
     <BayesianDashboard />
 ) : currentPage === 'eth' ? (

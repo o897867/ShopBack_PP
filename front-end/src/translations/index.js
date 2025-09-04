@@ -305,6 +305,16 @@ export const translations = {
       topDonors: 'Top Supporters'
     },
     
+    // Showcase Page
+    showcase: {
+      title: 'Showcase',
+      categories: 'Categories',
+      events: 'Events',
+      submittedBy: 'Submitted by',
+      createdAt: 'Created',
+      back: 'Back'
+    },
+    
     // Validation Messages
     validation: {
       required: 'This field is required',
@@ -619,6 +629,16 @@ export const translations = {
       transparency: '透明度',
       transparencyText: '我们相信透明度。所有捐赠都专门用于项目开发和维护。我们定期向社区更新资金使用情况。',
       topDonors: '主要支持者'
+    },
+    
+    // Showcase Page
+    showcase: {
+      title: '展示',
+      categories: '分类',
+      events: '事件',
+      submittedBy: '提交者',
+      createdAt: '创建时间',
+      back: '返回'
     },
     
     // Validation Messages

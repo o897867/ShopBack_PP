@@ -1,0 +1,78 @@
+{
+ "cells": [
+  {"cell_type":"markdown","metadata":{},"source":["# Showcase 图片上传\n","将图片保存到后端 static/uploads/showcase，并输出可用 URL（/static/...）。\n","如未安装：先运行 `!pip install ipywidgets` 并重启内核。"]},
+  {"cell_type":"code","execution_count":null,"metadata":{},"outputs":[],"source":[
+   "# !pip install ipywidgets\n",
+   "from ipywidgets import FileUpload\n",
+   "from pathlib import Path\n",
+   "from IPython.display import display\n",
+   "import os, uuid\n",
+   "\n",
+   "uploader = FileUpload(accept='image/*', multiple=False)\n",
+   "display(uploader)\n",
+   "\n",
+   "def handle_upload(change):\n",
+   "    if not uploader.value:\n",
+   "        return\n",
+   "    for fname, meta in uploader.value.items():\n",
+   "        content = meta['content']\n",
+   "        ext = os.path.splitext(fname)[1] or '.jpg'\n",
+   "        new_name = f"{uuid.uuid4().hex}{ext}"\n",
+   "        target_dir = (Path(__file__).resolve().parent / 'static' / 'uploads' / 'showcase')\n",
+   "        target_dir.mkdir(parents=True, exist_ok=True)\n",
+   "        target = target_dir / new_name\n",
+   "        with open(target, 'wb') as f: f.write(content)\n",
+   "        print('已保存:', target)\n",
+   "        print('图片URL:', f"/static/uploads/showcase/{new_name}")\n",
+   "    uploader.value.clear()\n",
+   "    uploader._counter = 0\n",
+   "\n",
+   "uploader.observe(handle_upload, names='value')\n"
+  ]}
+ ],
+ "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"name": "python"}},
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
+{
+ "cells": [
+  {"cell_type":"markdown","metadata":{},"source":["# Showcase 图片上传\n","将图片保存到后端 static/uploads/showcase，并输出可用 URL（/static/...）。\n","如未安装：先运行 `!pip install ipywidgets` 并重启内核。\n"]},
+  {"cell_type":"code","execution_count":null,"metadata":{},"outputs":[],"source":[
+   "from ipywidgets import FileUpload, Output\n",
+   "from pathlib import Path\n",
+   "from IPython.display import display\n",
+   "import os, uuid\n",
+   "\n",
+   "# 使用当前工作目录，确保与后端 back-end/static 对齐\n",
+   "upload_dir = (Path.cwd() / 'static' / 'uploads' / 'showcase')\n",
+   "upload_dir.mkdir(parents=True, exist_ok=True)\n",
+   "\n",
+   "uploader = FileUpload(accept='image/*', multiple=False)\n",
+   "out = Output()\n",
+   "display(uploader, out)\n",
+   "print('保存目录:', upload_dir)\n",
+   "\n",
+   "def handle_upload(change):\n",
+   "    out.clear_output()\n",
+   "    if not uploader.value:\n",
+   "        return\n",
+   "    for fname, meta in uploader.value.items():\n",
+   "        content = meta['content']  # bytes\n",
+   "        ext = os.path.splitext(fname)[1] or '.jpg'\n",
+   "        new_name = f"{uuid.uuid4().hex}{ext}"\n",
+   "        target = upload_dir / new_name\n",
+   "        with open(target, 'wb') as f: f.write(content)\n",
+   "        with out:\n",
+   "            print('已保存:', target)\n",
+   "            print('图片URL:', f"/static/uploads/showcase/{new_name}")\n",
+   "    uploader.value.clear()\n",
+   "    uploader._counter = 0\n",
+   "\n",
+   "uploader.observe(handle_upload, names='value')\n"
+  ]}
+ ],
+ "metadata": {"kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"}, "language_info": {"name": "python"}},
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
+
