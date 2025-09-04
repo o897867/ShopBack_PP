@@ -1,36 +1,45 @@
 :root {
-  --s-bg: #f7f7f8;
+  --s-bg: #f7faff; /* Tender very light blue base */
   --s-card-bg: #ffffff;
   --s-border: #e5e7eb;
   --s-text: #111827;
   --s-muted: #6b7280;
   --s-primary: #3b82f6;
   --s-radius: 12px;
-  --s-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  --s-glass-bg: rgba(255, 255, 255, 0.7);
-  --s-glass-border: rgba(255, 255, 255, 0.3);
+  --s-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --s-glass-bg: rgba(255, 255, 255, 0.72);
+  --s-glass-border: rgba(173, 216, 255, 0.35);
+  --s-blue-1: #f3f9ff;
+  --s-blue-2: #e9f2ff;
+  --s-blue-3: #f6fbff;
 }
 
 .s-container {
   position: relative;
   min-height: 60vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #ffc0cb 75%, #667eea 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  background: transparent; /* Use global page background */
   overflow: hidden;
 }
 
-.s-container::before {
+/* Add subtle aurora background, consistent with home but lightweight */
+.s-aurora-bg::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.2) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.2) 0%, transparent 50%),
-              radial-gradient(circle at 40% 40%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+  inset: -20% -10% -10% -20%;
+  background:
+    radial-gradient(280px 160px at 15% 30%, rgba(120, 200, 255, 0.28), transparent 60%),
+    radial-gradient(340px 200px at 85% 18%, rgba(170, 230, 255, 0.22), transparent 60%),
+    radial-gradient(260px 180px at 62% 78%, rgba(90, 150, 255, 0.22), transparent 60%),
+    radial-gradient(240px 160px at 10% 84%, rgba(180, 220, 255, 0.18), transparent 60%);
+  filter: blur(28px) saturate(1.08);
+  animation: s-aurora 16s ease-in-out infinite alternate;
   pointer-events: none;
+}
+
+@keyframes s-aurora {
+  0%   { transform: translate3d(-3%, 1%, 0) scale(1.01); }
+  50%  { transform: translate3d(3%, -1%, 0) scale(1.04); }
+  100% { transform: translate3d(-1%, 1%, 0) scale(1.02); }
 }
 
 @keyframes gradientShift {
@@ -110,7 +119,7 @@
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 12px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f5faff 0%, #e6f2ff 100%);
   box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
 }
 
@@ -134,6 +143,112 @@
 
 .s-section { margin-top: 10px; }
 .s-section-title { color: var(--s-text); font-weight: 600; margin-bottom: 12px; }
+
+/* Landing: three big bubbles */
+.s-landing { display: flex; align-items: center; justify-content: center; padding: 28px 0 8px; }
+.s-sections { display: flex; gap: clamp(24px, 6vw, 64px); flex-wrap: wrap; align-items: center; justify-content: center; }
+.s-section-bubble {
+  position: relative;
+  width: clamp(200px, 28vw, 360px);
+  height: clamp(200px, 28vw, 360px);
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(120% 120% at 80% 10%, rgba(255,255,255,0.60), rgba(255,255,255,0.16) 58%, rgba(255,255,255,0.06) 100%),
+    radial-gradient(60% 60% at 20% 80%, rgba(163,210,255,0.26), rgba(163,210,255,0.06) 75%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 22px 80px rgba(88, 142, 255, 0.26),
+    0 8px 22px rgba(88, 142, 255, 0.18),
+    inset 0 1px 10px rgba(255,255,255,0.55);
+  color: #2a5ea8;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+  animation: s-float 7s ease-in-out infinite, s-breath 6s ease-in-out infinite;
+}
+
+.s-section-bubble:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow:
+    0 34px 120px rgba(88, 142, 255, 0.30),
+    0 12px 28px rgba(88, 142, 255, 0.22),
+    inset 0 2px 12px rgba(255,255,255,0.7);
+}
+
+.s-section-bubble span { font-size: clamp(1.4rem, 3.6vw, 2.4rem); }
+
+@keyframes s-float { 0%{transform: translateY(0)} 50%{transform: translateY(-12px)} 100%{transform: translateY(0)} }
+@keyframes s-breath { 0%{transform: scale(1)} 50%{transform: scale(1.04)} 100%{transform: scale(1)} }
+
+/* Broker profile */
+.s-broker { padding: 18px; }
+.s-broker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.s-broker-brand { display: flex; align-items: center; gap: 14px; }
+.s-broker-logo {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: #2a5ea8;
+  background:
+    radial-gradient(120% 120% at 80% 10%, rgba(255,255,255,0.65), rgba(255,255,255,0.18) 58%, rgba(255,255,255,0.06) 100%),
+    radial-gradient(60% 60% at 20% 80%, rgba(163, 210, 255, 0.28), rgba(163, 210, 255, 0.06) 75%);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 30px rgba(88,142,255,0.18), inset 0 1px 8px rgba(255,255,255,0.6);
+}
+
+.s-broker-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.s-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(173, 216, 255, 0.5);
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #2a5ea8; font-weight: 700; font-size: 12px;
+}
+
+.s-broker-rating { text-align: right; }
+.s-rating-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 54px; height: 36px; padding: 0 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #60a5fa, #3b82f6);
+  color: #fff; font-weight: 800; letter-spacing: .02em;
+  box-shadow: 0 10px 20px rgba(59,130,246,.25);
+}
+
+.s-broker-body {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px;
+}
+
+.s-info-title { font-weight: 700; color: var(--s-text); margin-bottom: 8px; }
+.s-info-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.s-info-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--s-glass-border); border-radius: 10px; background: rgba(255,255,255,0.6); }
+.s-info-list li span { color: var(--s-muted); font-size: 13px; }
+.s-info-list li strong { color: var(--s-text); font-weight: 700; font-size: 14px; }
+.s-info-list a { color: #2a5ea8; text-decoration: none; }
+
+.s-news-list { display: grid; gap: 10px; }
+.s-news-item { padding: 12px; border: 1px solid var(--s-glass-border); border-radius: 10px; background: rgba(255,255,255,0.6); transition: transform .2s ease, box-shadow .2s ease; }
+.s-news-item:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(31,38,135,.18); }
+.s-news-title { font-weight: 600; color: var(--s-text); }
+
+@media (max-width: 800px) {
+  .s-broker-body { grid-template-columns: 1fr; }
+  .s-broker-rating { text-align: left; }
+}
 
 .s-detail { 
   position: relative;
@@ -288,4 +403,3 @@
   position: relative;
   z-index: 1;
 }
-

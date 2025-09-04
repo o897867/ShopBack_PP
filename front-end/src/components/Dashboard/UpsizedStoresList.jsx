@@ -81,7 +81,7 @@ const UpsizedStoresList = ({ upsizedStores, translate }) => {
             
             {/* 其他信息 */}
             <p style={{color: '#007bff', fontSize: '14px', margin: '5px 0'}}>
-              🔗 {store.url}
+              {store.url}
             </p>
             <p style={{color: '#999', fontSize: '12px', margin: 0}}>
               {translate('upsized.scraped')}: {new Date(store.scraped_at).toLocaleString()}

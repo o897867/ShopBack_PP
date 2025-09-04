@@ -13,6 +13,7 @@ const Showcase = () => {
   const [categories, setCategories] = useState([]);
   const [events, setEvents] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(null); // CFD/股票/虚拟币 landing sections
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ const Showcase = () => {
   };
 
   return (
-    <div className="s-container">
+    <div className="s-container s-aurora-bg">
       <div className="s-particles">
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="s-particle" style={{
@@ -83,7 +84,15 @@ const Showcase = () => {
       <div className="s-header">
         <div className="s-breadcrumb">
           {!selectedCategory && !selectedEvent && (
-            <span className="s-crumb s-crumb-active">{tr('showcase.categories')}</span>
+            <>
+              {!selectedSection && <span className="s-crumb s-crumb-active">行业</span>}
+              {selectedSection && (
+                <>
+                  <button className="s-btn s-btn-ghost" onClick={() => setSelectedSection(null)}>← 返回</button>
+                  <span className="s-crumb s-crumb-active">{selectedSection}</span>
+                </>
+              )}
+            </>
           )}
           {selectedCategory && !selectedEvent && (
             <>
@@ -113,24 +122,85 @@ const Showcase = () => {
         </div>
       )}
 
-      {!loading && !selectedCategory && !selectedEvent && (
-        <>
-          <div className="s-grid">
-            {categories.map((cat) => (
-              <div key={cat.id} className="s-card s-card-hover" onClick={() => loadEvents(cat)}>
-                {cat.image_url && (
-                  <div className="s-image">
-                    <img src={cat.image_url} alt={cat.name} />
-                  </div>
-                )}
-                <div className="s-card-title">{cat.name}</div>
-              </div>
-            ))}
-            {categories.length === 0 && (
-              <div className="s-empty">{tr('messages.noData')}</div>
-            )}
+      {/* Landing sections: CFD / 股票 / 虚拟币 */}
+      {!loading && !selectedCategory && !selectedEvent && !selectedSection && (
+        <div className="s-landing">
+          <div className="s-sections">
+            <button className="s-section-bubble" onClick={() => setSelectedSection('CFD')}>
+              <span>CFD</span>
+            </button>
+            <button className="s-section-bubble" onClick={() => setSelectedSection('股票')}>
+              <span>股票</span>
+            </button>
+            <button className="s-section-bubble" onClick={() => setSelectedSection('虚拟币')}>
+              <span>虚拟币</span>
+            </button>
           </div>
-        </>
+        </div>
+      )}
+
+      {/* After selecting a section */}
+      {!loading && !selectedCategory && !selectedEvent && selectedSection && (
+        <div className="s-section">
+          <div className="s-section-title">{selectedSection}</div>
+
+          {selectedSection === 'CFD' ? (
+            <div className="s-broker s-card">
+              <div className="s-broker-header">
+                <div className="s-broker-brand">
+                  <div className="s-broker-logo">TMGM</div>
+                  <div className="s-broker-tags">
+                    <span className="s-chip">ASIC</span>
+                    <span className="s-chip">VFSCN</span>
+                  </div>
+                </div>
+                <div className="s-broker-rating">
+                  <div className="s-rating-badge">A+</div>
+                  <div className="s-meta">综合评分</div>
+                </div>
+              </div>
+
+              <div className="s-broker-body">
+                <div className="s-broker-info">
+                  <div className="s-info-title">基础信息</div>
+                  <ul className="s-info-list">
+                    <li><span>名称</span><strong>TMGM</strong></li>
+                    <li><span>类别</span><strong>CFD 经纪商</strong></li>
+                    <li><span>监管</span><strong>ASIC, VFSCN</strong></li>
+                    <li><span>评分</span><strong>A+</strong></li>
+                    <li><span>官方网址</span><strong><a href="#" onClick={(e)=>e.preventDefault()}>tmgm.com</a></strong></li>
+                  </ul>
+                </div>
+                <div className="s-broker-news">
+                  <div className="s-info-title">公司消息</div>
+                  <div className="s-news-list">
+                    <div className="s-news-item">
+                      <div className="s-news-title">TMGM 推出新产品升级与平台优化</div>
+                      <div className="s-meta">近期 · 简讯</div>
+                    </div>
+                    <div className="s-news-item">
+                      <div className="s-news-title">合规动态：维持 ASIC、VFSCN 多重监管</div>
+                      <div className="s-meta">行业观察</div>
+                    </div>
+                    <div className="s-news-item">
+                      <div className="s-news-title">服务体验升级：客户支持与教育内容丰富</div>
+                      <div className="s-meta">平台更新</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="s-grid s-grid-events">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="s-card s-card-hover">
+                  <div className="s-card-title">{selectedSection} · 内容预留</div>
+                  <div className="s-meta">敬请期待</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {!loading && selectedCategory && !selectedEvent && (

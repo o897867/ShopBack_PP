@@ -91,7 +91,7 @@ const AlertManagement = ({ alertHook, translate }) => {
         borderRadius: '6px',
         marginBottom: '25px'
       }}>
-        <h4 style={{margin: '0 0 15px 0', color: '#333'}}>➕ {translate('alerts.createNew')}</h4>
+        <h4 style={{margin: '0 0 15px 0', color: '#333'}}>{translate('alerts.createNew')}</h4>
         
         <div style={{marginBottom: '15px'}}>
           <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
@@ -247,7 +247,7 @@ const AlertManagement = ({ alertHook, translate }) => {
           padding: '40px',
           color: '#666'
         }}>
-          <div style={{fontSize: '3em', marginBottom: '15px'}}>📭</div>
+          <div style={{fontSize: '3em', marginBottom: '15px'}}></div>
           <p>暂无价格提醒</p>
         </div>
       )}

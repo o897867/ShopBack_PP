@@ -150,7 +150,7 @@ const BayesianDashboard = () => {
               title="Next Rate Change"
               prediction={`${predictions.predictions.next_change.expected_days} days`}
               confidence={predictions.predictions.next_change.probabilities.within_14_days * 100}
-              icon="📅"
+              icon=""
               color="blue"
               details={[
                 { 

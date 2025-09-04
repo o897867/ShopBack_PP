@@ -20,7 +20,7 @@ const StoreList = ({ stores, storeHook, fetchData, translate }) => {
         marginBottom: '20px',
         border: '1px solid #dee2e6'
       }}>
-        <h4 style={{margin: '0 0 15px 0', color: '#333'}}>➕ {translate('stores.addNew')}</h4>
+        <h4 style={{margin: '0 0 15px 0', color: '#333'}}>{translate('stores.addNew')}</h4>
         <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
           <input
             type="text"

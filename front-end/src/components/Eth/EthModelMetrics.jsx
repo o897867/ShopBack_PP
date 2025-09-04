@@ -75,8 +75,8 @@ const EthModelMetrics = ({ metrics }) => {
         <div className="metric-item">
           <span className="metric-label">Model Confidence</span>
           <span className="metric-value">
-            {metrics.covariance_trace < 0.1 ? '🟢 High' : 
-             metrics.covariance_trace < 1.0 ? '🟡 Medium' : '🔴 Low'}
+            {metrics.covariance_trace < 0.1 ? 'High' : 
+             metrics.covariance_trace < 1.0 ? 'Medium' : 'Low'}
           </span>
         </div>
       </div>

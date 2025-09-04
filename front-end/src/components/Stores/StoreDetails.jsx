@@ -59,7 +59,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                 borderBottom: '2px solid #e9ecef',
                 paddingBottom: '5px'
               }}>
-                📅 {date}
+                {date}
               </h4>
               
               <div style={{
@@ -156,7 +156,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                                 color: '#6c757d',
                                 marginBottom: '3px'
                               }}>
-                                 📉 {translate('stats.lowestRate')}: {categoryStats.lowest_rate}%
+                                 {translate('stats.lowestRate')}: {categoryStats.lowest_rate}%
                               </div>
                               <div style={{color: '#666', fontSize: '0.8em'}}>
                                 {formatDate(categoryStats.lowest_date)}
@@ -173,7 +173,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                             )}
                             {categoryStats.current_rate === categoryStats.lowest_rate && (
                               <span style={{color: '#6c757d', fontWeight: 'bold', fontSize: '0.8em'}}>
-                                📉 {translate('stats.currentIsLowest')}
+                                {translate('stats.currentIsLowest')}
                               </span>
                             )}
                             {categoryStats.current_rate !== categoryStats.highest_rate && 
@@ -208,7 +208,7 @@ const StoreDetails = ({ storeHook, translate }) => {
           padding: '40px',
           color: '#666'
         }}>
-          <div style={{fontSize: '3em', marginBottom: '15px'}}>📭</div>
+          <div style={{fontSize: '3em', marginBottom: '15px'}}></div>
           <p>{translate('stores.noHistory')}</p>
         </div>
       )}
