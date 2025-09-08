@@ -8,7 +8,8 @@
   --s-radius: 12px;
   --s-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --s-glass-bg: rgba(255, 255, 255, 0.72);
-  --s-glass-border: rgba(173, 216, 255, 0.35);
+  /* soften glass border tone for more blended look */
+  --s-glass-border: rgba(173, 216, 255, 0.12);
   --s-blue-1: #f3f9ff;
   --s-blue-2: #e9f2ff;
   --s-blue-3: #f6fbff;
@@ -34,7 +35,13 @@
   filter: blur(28px) saturate(1.08);
   animation: s-aurora 16s ease-in-out infinite alternate;
   pointer-events: none;
+  /* softly fade at container edges to avoid visible borders */
+  -webkit-mask-image: radial-gradient(140% 100% at 50% 40%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0) 92%);
+          mask-image: radial-gradient(140% 100% at 50% 40%, rgba(0,0,0,0.95) 60%, rgba(0,0,0,0) 92%);
 }
+
+/* Allow aurora layer to bleed past container for better blending */
+.s-aurora-bg { overflow: visible; }
 
 @keyframes s-aurora {
   0%   { transform: translate3d(-3%, 1%, 0) scale(1.01); }
@@ -75,10 +82,11 @@
   background: var(--s-glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--s-glass-border);
+  /* remove hard outline to blend with page */
+  border: none;
   border-radius: var(--s-radius);
   padding: 14px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  box-shadow: 0 10px 28px rgba(31,38,135,0.12);
   overflow: hidden;
 }
 
@@ -106,10 +114,10 @@
 }
 
 .s-card-hover:hover { 
-  border-color: rgba(59, 130, 246, 0.5);
+  /* keep lift without adding a visible border */
   transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-5px) scale(1.02);
-  box-shadow: 0 25px 40px -10px rgba(31, 38, 135, 0.25);
-  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 30px 50px -16px rgba(31,38,135,0.22);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .s-image { 
@@ -235,13 +243,13 @@
 
 .s-info-title { font-weight: 700; color: var(--s-text); margin-bottom: 8px; }
 .s-info-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-.s-info-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--s-glass-border); border-radius: 10px; background: rgba(255,255,255,0.6); }
+.s-info-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: none; border-radius: 10px; background: rgba(255,255,255,0.6); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18); }
 .s-info-list li span { color: var(--s-muted); font-size: 13px; }
 .s-info-list li strong { color: var(--s-text); font-weight: 700; font-size: 14px; }
 .s-info-list a { color: #2a5ea8; text-decoration: none; }
 
 .s-news-list { display: grid; gap: 10px; }
-.s-news-item { padding: 12px; border: 1px solid var(--s-glass-border); border-radius: 10px; background: rgba(255,255,255,0.6); transition: transform .2s ease, box-shadow .2s ease; }
+.s-news-item { padding: 12px; border: none; border-radius: 10px; background: rgba(255,255,255,0.6); transition: transform .2s ease, box-shadow .2s ease; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); }
 .s-news-item:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(31,38,135,.18); }
 .s-news-title { font-weight: 600; color: var(--s-text); }
 
@@ -255,10 +263,10 @@
   background: var(--s-glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--s-glass-border);
+  border: none;
   border-radius: var(--s-radius);
   padding: 18px;
-  box-shadow: var(--s-shadow);
+  box-shadow: 0 14px 40px rgba(31,38,135,0.18);
   animation: fadeInUp .5s ease;
 }
 
@@ -277,11 +285,11 @@
 .s-content { color: var(--s-text); line-height: 1.75; white-space: pre-wrap; margin: 10px 0 16px 0; }
 
 .s-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-.s-thumb { border-radius: 10px; overflow: hidden; border: 1px solid var(--s-border); background: #fafafa; }
+.s-thumb { border-radius: 10px; overflow: hidden; border: none; background: #fafafa; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
 .s-thumb img { width: 100%; height: 180px; object-fit: cover; display: block; }
 
 .s-alert { 
-  border: 1px solid var(--s-glass-border);
+  border: none;
   background: var(--s-glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -314,7 +322,7 @@
   background: var(--s-glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--s-glass-border);
+  border: none;
   border-radius: var(--s-radius);
   padding: 24px;
   color: var(--s-muted);

@@ -38,7 +38,19 @@ import AlertManagement from './components/Alerts/AlertManagement.jsx';
 const App = () => {
   const { currentLanguage, isLoading: languageLoading } = useLanguage();
   const translate = (key) => t(key, currentLanguage);
-  const [currentPage, setCurrentPage] = useState('home');
+  // Initialize page from URL hash or localStorage; fallback to 'home'
+  const getInitialPage = () => {
+    try {
+      const raw = (window.location.hash || '').replace('#', '').trim();
+      const hash = raw.split('?')[0];
+      const known = ['home','dashboard','showcase','predictions','eth','trading','donations'];
+      if (hash && known.includes(hash)) return hash;
+      const saved = localStorage.getItem('currentPage');
+      if (saved && known.includes(saved)) return saved;
+    } catch (e) { /* ignore */ }
+    return 'home';
+  };
+  const [currentPage, setCurrentPage] = useState(getInitialPage);
   
   // Custom hooks
   const { dashboardStats, upsizedStores, statistics, performanceData, loading, error, isRescraping, stores, setStores, fetchData, handleRescrape } = useDashboard();
@@ -57,6 +69,17 @@ const App = () => {
     };
     initializeData();
   }, []);
+
+  // Persist page selection and reflect in URL hash
+  useEffect(() => {
+    try {
+      localStorage.setItem('currentPage', currentPage);
+      const currentHash = (window.location.hash || '').replace('#','');
+      if (currentHash !== currentPage) {
+        window.location.hash = currentPage;
+      }
+    } catch (e) { /* ignore */ }
+  }, [currentPage]);
 
 
 

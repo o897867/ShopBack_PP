@@ -21,6 +21,29 @@ const Showcase = () => {
   const [cfdNews, setCfdNews] = useState({}); // { [brokerId]: news[] }
   const [cfdLoading, setCfdLoading] = useState(false);
   const [cfdError, setCfdError] = useState(null);
+  const [selectedBroker, setSelectedBroker] = useState(null); // broker detail
+  const [selectedBrokerNews, setSelectedBrokerNews] = useState([]);
+
+  // Hash helpers: read and write #showcase?section=CFD&broker=ID
+  const parseShowcaseHash = () => {
+    const raw = (window.location.hash || '').replace('#','');
+    const [page, query] = raw.split('?');
+    if (page !== 'showcase') return {};
+    const params = new URLSearchParams(query || '');
+    const section = params.get('section') || null;
+    const broker = params.get('broker');
+    const brokerId = broker ? parseInt(broker, 10) : null;
+    return { section, brokerId: Number.isFinite(brokerId) ? brokerId : null };
+  };
+
+  const writeShowcaseHash = (opts = {}) => {
+    const params = new URLSearchParams();
+    if (opts.section) params.set('section', opts.section);
+    if (opts.brokerId) params.set('broker', String(opts.brokerId));
+    const newHash = `showcase${params.toString() ? `?${params.toString()}` : ''}`;
+    const current = (window.location.hash || '').replace('#','');
+    if (current !== newHash) window.location.hash = newHash;
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -70,6 +93,8 @@ const Showcase = () => {
   useEffect(() => {
     const loadCFD = async () => {
       if (selectedSection !== 'CFD') return;
+      setSelectedBroker(null);
+      setSelectedBrokerNews([]);
       try {
         setCfdLoading(true);
         setCfdError(null);
@@ -96,6 +121,61 @@ const Showcase = () => {
     };
     loadCFD();
   }, [selectedSection]);
+
+  // Initialize from hash (details deep link) and listen to hash changes
+  useEffect(() => {
+    const applyFromHash = async () => {
+      const { section, brokerId } = parseShowcaseHash();
+      if (section === 'CFD') {
+        setSelectedSection('CFD');
+        if (brokerId) {
+          await openBroker(brokerId);
+        }
+      }
+    };
+    applyFromHash();
+    const onHash = () => {
+      applyFromHash();
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  const openBroker = async (brokerId) => {
+    try {
+      setCfdLoading(true);
+      setCfdError(null);
+      const [detail, news] = await Promise.all([
+        cfdService.getBroker(brokerId),
+        cfdService.getBrokerNews(brokerId)
+      ]);
+      setSelectedBroker(detail);
+      setSelectedBrokerNews(Array.isArray(news) ? news : []);
+      writeShowcaseHash({ section: 'CFD', brokerId });
+    } catch (e) {
+      setCfdError(e.message);
+    } finally {
+      setCfdLoading(false);
+    }
+  };
+
+  const backToCFDList = () => {
+    setSelectedBroker(null);
+    setSelectedBrokerNews([]);
+    writeShowcaseHash({ section: 'CFD' });
+  };
+
+  // Keep hash in sync when only section changes to CFD
+  useEffect(() => {
+    if (selectedSection === 'CFD' && !selectedBroker) {
+      writeShowcaseHash({ section: 'CFD' });
+    }
+    if (!selectedSection) {
+      // Clear showcase query when leaving section
+      const current = (window.location.hash || '').replace('#','');
+      if (current.startsWith('showcase?')) window.location.hash = 'showcase';
+    }
+  }, [selectedSection, selectedBroker]);
 
   const backToCategories = () => {
     setSelectedCategory(null);
@@ -190,15 +270,91 @@ const Showcase = () => {
                   ))}
                 </div>
               )}
-              {!cfdLoading && cfdBrokers.length === 0 && (
+              {!cfdLoading && !selectedBroker && cfdBrokers.length === 0 && (
                 <div className="s-empty">暂无经纪商数据</div>
               )}
-              {!cfdLoading && cfdBrokers.map((b) => {
+              {/* Broker detail view */}
+              {!cfdLoading && selectedBroker && (
+                <div className="s-detail">
+                  <div className="s-detail-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <button className="s-btn s-btn-ghost" onClick={backToCFDList}>← 返回</button>
+                    <h1 className="s-detail-title" style={{ marginLeft: 8 }}>{selectedBroker.name}</h1>
+                  </div>
+                  <div className="s-broker-header">
+                    <div className="s-broker-brand">
+                      <div className="s-broker-logo" style={{ overflow: 'hidden' }}>
+                        {selectedBroker.logo_url ? (
+                          <img src={selectedBroker.logo_url} alt={selectedBroker.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          (selectedBroker.name || '?').slice(0, 4).toUpperCase()
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 800, color: '#2a5ea8' }}>{selectedBroker.name}</div>
+                        <div className="s-broker-tags">
+                          {(selectedBroker.regulators || '').split(',').map(s => s.trim()).filter(Boolean).map((r, idx) => (
+                            <span key={idx} className="s-chip">{r}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="s-broker-rating">
+                      <div className="s-rating-badge">{selectedBroker.rating || '-'}</div>
+                      <div className="s-meta">综合评分</div>
+                    </div>
+                  </div>
+
+                  <div className="s-broker-body">
+                    <div className="s-broker-info">
+                      <div className="s-info-title">基础信息</div>
+                      <ul className="s-info-list">
+                        <li><span>名称</span><strong>{selectedBroker.name}</strong></li>
+                        <li><span>类别</span><strong>CFD 经纪商</strong></li>
+                        <li><span>监管</span><strong>{(selectedBroker.regulators || '').split(',').map(s => s.trim()).filter(Boolean).join(', ') || '-'}</strong></li>
+                        <li><span>评分</span><strong>{selectedBroker.rating || '-'}</strong></li>
+                        <li><span>官方网址</span><strong>{selectedBroker.website ? <a href={selectedBroker.website} target="_blank" rel="noreferrer">{(selectedBroker.website || '').replace(/^https?:\/\//,'').replace(/\/$/,'')}</a> : '-'}</strong></li>
+                      </ul>
+                      {selectedBroker.rating_breakdown && (
+                        <div style={{ marginTop: 10 }}>
+                          <div className="s-info-title">评分拆解</div>
+                          <div className="s-news-list">
+                            {Object.entries(selectedBroker.rating_breakdown).map(([k, v]) => {
+                              const score = typeof v === 'object' && v !== null ? v.score : v;
+                              const weight = typeof v === 'object' && v !== null ? v.weight : undefined;
+                              return (
+                                <div key={k} className="s-news-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div className="s-news-title">{k}</div>
+                                  <div className="s-meta">{weight != null ? `权重 ${Math.round(weight*100)}% · ` : ''}得分 {score}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="s-broker-news">
+                      <div className="s-info-title">公司消息</div>
+                      <div className="s-news-list">
+                        {selectedBrokerNews.length === 0 && <div className="s-meta">暂无新闻</div>}
+                        {selectedBrokerNews.map(n => (
+                          <div key={n.id} className="s-news-item">
+                            <div className="s-news-title">{n.title}</div>
+                            <div className="s-meta">{n.tag || '更新'}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/* Broker list view */}
+              {!cfdLoading && !selectedBroker && cfdBrokers.map((b) => {
                 const regs = (b.regulators || '').split(',').map(s => s.trim()).filter(Boolean);
                 const news = cfdNews[b.id] || [];
                 const siteText = (b.website || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
                 return (
-                  <div key={b.id} className="s-broker s-card" style={{ marginBottom: 12 }}>
+                  <div key={b.id} className="s-broker s-card" style={{ marginBottom: 12, cursor: 'pointer' }} onClick={() => openBroker(b.id)}>
                     <div className="s-broker-header">
                       <div className="s-broker-brand">
                         <div className="s-broker-logo" style={{ overflow: 'hidden' }}>
@@ -229,7 +385,7 @@ const Showcase = () => {
                           <li><span>类别</span><strong>CFD 经纪商</strong></li>
                           <li><span>监管</span><strong>{regs.join(', ') || '-'}</strong></li>
                           <li><span>评分</span><strong>{b.rating || '-'}</strong></li>
-                          <li><span>官方网址</span><strong>{b.website ? <a href={b.website} target="_blank" rel="noreferrer">{siteText}</a> : '-'}</strong></li>
+                          <li><span>官方网址</span><strong>{b.website ? <a href={b.website} target="_blank" rel="noreferrer" onClick={(e)=> e.stopPropagation()}>{siteText}</a> : '-'}</strong></li>
                         </ul>
                         {b.rating_breakdown && (
                           <div style={{ marginTop: 10 }}>

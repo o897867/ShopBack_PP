@@ -4,6 +4,7 @@ const Navigation = ({ currentPage, setCurrentPage }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
+    { id: 'home', label: '首页' },
     { id: 'dashboard', label: 'ShopBack管理' },
     { id: 'showcase', label: 'Showcase' },
     { id: 'predictions', label: 'AI Predictions' },
