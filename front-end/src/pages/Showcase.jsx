@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import showcaseService from '../services/showcaseService.js';
+import cfdService from '../services/cfdService.js';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 import './Showcase.css';
@@ -15,6 +16,11 @@ const Showcase = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null); // CFD/股票/虚拟币 landing sections
   const [selectedEvent, setSelectedEvent] = useState(null);
+  // CFD data
+  const [cfdBrokers, setCfdBrokers] = useState([]);
+  const [cfdNews, setCfdNews] = useState({}); // { [brokerId]: news[] }
+  const [cfdLoading, setCfdLoading] = useState(false);
+  const [cfdError, setCfdError] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -59,6 +65,37 @@ const Showcase = () => {
       setLoading(false);
     }
   };
+
+  // Load CFD brokers + news when section is chosen
+  useEffect(() => {
+    const loadCFD = async () => {
+      if (selectedSection !== 'CFD') return;
+      try {
+        setCfdLoading(true);
+        setCfdError(null);
+        const brokers = await cfdService.getBrokers();
+        setCfdBrokers(Array.isArray(brokers) ? brokers : []);
+        // fetch news for each broker in parallel
+        const newsEntries = await Promise.all(
+          (Array.isArray(brokers) ? brokers : []).map(async (b) => {
+            try {
+              const news = await cfdService.getBrokerNews(b.id);
+              return [b.id, news];
+            } catch (e) {
+              return [b.id, []];
+            }
+          })
+        );
+        const newsMap = Object.fromEntries(newsEntries);
+        setCfdNews(newsMap);
+      } catch (e) {
+        setCfdError(e.message);
+      } finally {
+        setCfdLoading(false);
+      }
+    };
+    loadCFD();
+  }, [selectedSection]);
 
   const backToCategories = () => {
     setSelectedCategory(null);
@@ -143,53 +180,92 @@ const Showcase = () => {
       {!loading && !selectedCategory && !selectedEvent && selectedSection && (
         <div className="s-section">
           <div className="s-section-title">{selectedSection}</div>
-
           {selectedSection === 'CFD' ? (
-            <div className="s-broker s-card">
-              <div className="s-broker-header">
-                <div className="s-broker-brand">
-                  <div className="s-broker-logo">TMGM</div>
-                  <div className="s-broker-tags">
-                    <span className="s-chip">ASIC</span>
-                    <span className="s-chip">VFSCN</span>
-                  </div>
+            <>
+              {cfdError && <div className="s-alert s-alert-error">{cfdError}</div>}
+              {cfdLoading && (
+                <div className="s-grid">
+                  {Array.from({ length: 2 }).map((_, i) => (
+                    <div key={i} className="s-card s-skeleton" />
+                  ))}
                 </div>
-                <div className="s-broker-rating">
-                  <div className="s-rating-badge">A+</div>
-                  <div className="s-meta">综合评分</div>
-                </div>
-              </div>
+              )}
+              {!cfdLoading && cfdBrokers.length === 0 && (
+                <div className="s-empty">暂无经纪商数据</div>
+              )}
+              {!cfdLoading && cfdBrokers.map((b) => {
+                const regs = (b.regulators || '').split(',').map(s => s.trim()).filter(Boolean);
+                const news = cfdNews[b.id] || [];
+                const siteText = (b.website || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+                return (
+                  <div key={b.id} className="s-broker s-card" style={{ marginBottom: 12 }}>
+                    <div className="s-broker-header">
+                      <div className="s-broker-brand">
+                        <div className="s-broker-logo" style={{ overflow: 'hidden' }}>
+                          {b.logo_url ? (
+                            <img src={b.logo_url} alt={b.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            (b.name || '?').slice(0, 4).toUpperCase()
+                          )}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 800, color: '#2a5ea8' }}>{b.name}</div>
+                          <div className="s-broker-tags">
+                            {regs.map((r, idx) => <span key={idx} className="s-chip">{r}</span>)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="s-broker-rating">
+                        <div className="s-rating-badge">{b.rating || '-'}</div>
+                        <div className="s-meta">综合评分</div>
+                      </div>
+                    </div>
 
-              <div className="s-broker-body">
-                <div className="s-broker-info">
-                  <div className="s-info-title">基础信息</div>
-                  <ul className="s-info-list">
-                    <li><span>名称</span><strong>TMGM</strong></li>
-                    <li><span>类别</span><strong>CFD 经纪商</strong></li>
-                    <li><span>监管</span><strong>ASIC, VFSCN</strong></li>
-                    <li><span>评分</span><strong>A+</strong></li>
-                    <li><span>官方网址</span><strong><a href="#" onClick={(e)=>e.preventDefault()}>tmgm.com</a></strong></li>
-                  </ul>
-                </div>
-                <div className="s-broker-news">
-                  <div className="s-info-title">公司消息</div>
-                  <div className="s-news-list">
-                    <div className="s-news-item">
-                      <div className="s-news-title">TMGM 推出新产品升级与平台优化</div>
-                      <div className="s-meta">近期 · 简讯</div>
-                    </div>
-                    <div className="s-news-item">
-                      <div className="s-news-title">合规动态：维持 ASIC、VFSCN 多重监管</div>
-                      <div className="s-meta">行业观察</div>
-                    </div>
-                    <div className="s-news-item">
-                      <div className="s-news-title">服务体验升级：客户支持与教育内容丰富</div>
-                      <div className="s-meta">平台更新</div>
+                    <div className="s-broker-body">
+                      <div className="s-broker-info">
+                        <div className="s-info-title">基础信息</div>
+                        <ul className="s-info-list">
+                          <li><span>名称</span><strong>{b.name}</strong></li>
+                          <li><span>类别</span><strong>CFD 经纪商</strong></li>
+                          <li><span>监管</span><strong>{regs.join(', ') || '-'}</strong></li>
+                          <li><span>评分</span><strong>{b.rating || '-'}</strong></li>
+                          <li><span>官方网址</span><strong>{b.website ? <a href={b.website} target="_blank" rel="noreferrer">{siteText}</a> : '-'}</strong></li>
+                        </ul>
+                        {b.rating_breakdown && (
+                          <div style={{ marginTop: 10 }}>
+                            <div className="s-info-title">评分拆解</div>
+                            <div className="s-news-list">
+                              {Object.entries(b.rating_breakdown).map(([k, v]) => {
+                                const score = typeof v === 'object' && v !== null ? v.score : v;
+                                const weight = typeof v === 'object' && v !== null ? v.weight : undefined;
+                                return (
+                                  <div key={k} className="s-news-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div className="s-news-title">{k}</div>
+                                    <div className="s-meta">{weight != null ? `权重 ${Math.round(weight*100)}% · ` : ''}得分 {score}</div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="s-broker-news">
+                        <div className="s-info-title">公司消息</div>
+                        <div className="s-news-list">
+                          {news.length === 0 && <div className="s-meta">暂无新闻</div>}
+                          {news.map((n) => (
+                            <div key={n.id} className="s-news-item">
+                              <div className="s-news-title">{n.title}</div>
+                              <div className="s-meta">{n.tag || '更新'}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
+                );
+              })}
+            </>
           ) : (
             <div className="s-grid s-grid-events">
               {Array.from({ length: 6 }).map((_, i) => (

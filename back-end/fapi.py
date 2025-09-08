@@ -176,6 +176,24 @@ class ShowcaseEventCreate(BaseModel):
     images: list[str] | None = None
     submitted_by: str | None = None
 
+# ===== CFD (Industry) Models ===== #
+class CFDBroker(BaseModel):
+    id: int
+    name: str
+    regulators: str | None = None
+    rating: str | None = None
+    website: str | None = None
+    logo_url: str | None = None
+    rating_breakdown: dict | None = None
+    created_at: str
+
+class CFDBrokerNews(BaseModel):
+    id: int
+    broker_id: int
+    title: str
+    tag: str | None = None
+    created_at: str
+
 # 初始化FastAPI应用
 app = FastAPI(
     title="ShopBack Cashback API",
@@ -199,6 +217,8 @@ STATIC_DIR = BASE_DIR / "static"
 UPLOAD_DIR = STATIC_DIR / "uploads" / "showcase"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+CFD_UPLOAD_DIR = STATIC_DIR / "uploads" / "cfd"
+os.makedirs(CFD_UPLOAD_DIR, exist_ok=True)
 
 # 全局变量
 scraper_instance = None
@@ -303,6 +323,59 @@ def get_db_connection():
 
 # Ensure showcase tables now that DB connection helper exists
 ensure_showcase_tables()
+
+# Ensure CFD tables exist
+def ensure_cfd_tables():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS cfd_brokers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                regulators TEXT,
+                rating TEXT,
+                website TEXT,
+                logo_url TEXT,
+                rating_breakdown_json TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS cfd_broker_news (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                broker_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                tag TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (broker_id) REFERENCES cfd_brokers (id)
+            )
+            """
+        )
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_cfd_news_broker ON cfd_broker_news (broker_id)')
+        # Backfill missing column if needed
+        try:
+            cur.execute("PRAGMA table_info(cfd_brokers)")
+            cols = {r[1] for r in cur.fetchall()}
+            if 'rating_breakdown_json' not in cols:
+                cur.execute("ALTER TABLE cfd_brokers ADD COLUMN rating_breakdown_json TEXT")
+        except Exception:
+            pass
+        conn.commit()
+    except Exception as e:
+        logger.error(f"Failed to ensure CFD tables: {e}")
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+ensure_cfd_tables()
 
 def get_scraper():
     """获取抓取器实例"""
@@ -553,6 +626,80 @@ async def upload_showcase_image(file: UploadFile = File(...)):
 
     public_url = f"/static/uploads/showcase/{fname}"
     return {"url": public_url, "filename": fname}
+
+# ============= CFD (Industry) Endpoints =============
+
+@app.get("/api/cfd/brokers", response_model=List[CFDBroker], summary="List CFD brokers")
+async def list_cfd_brokers():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT id, name, regulators, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers ORDER BY id DESC"
+        )
+        rows = cur.fetchall()
+        result: List[CFDBroker] = []
+        for r in rows:
+            d = dict(r)
+            logo = d.get('logo_url')
+            if logo and logo.startswith('/static/'):
+                d['logo_url'] = f"http://localhost:8001{logo}"
+            rb = None
+            try:
+                rb = json.loads(d.get('rating_breakdown_json') or 'null')
+            except Exception:
+                rb = None
+            d['rating_breakdown'] = rb
+            d.pop('rating_breakdown_json', None)
+            result.append(CFDBroker(**d))
+        return result
+    finally:
+        conn.close()
+
+@app.get("/api/cfd/brokers/{broker_id}", response_model=CFDBroker, summary="Get CFD broker detail")
+async def get_cfd_broker(broker_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT id, name, regulators, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers WHERE id = ?",
+            (broker_id,)
+        )
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Broker not found")
+        d = dict(row)
+        logo = d.get('logo_url')
+        if logo and logo.startswith('/static/'):
+            d['logo_url'] = f"http://localhost:8001{logo}"
+        rb = None
+        try:
+            rb = json.loads(d.get('rating_breakdown_json') or 'null')
+        except Exception:
+            rb = None
+        d['rating_breakdown'] = rb
+        d.pop('rating_breakdown_json', None)
+        return CFDBroker(**d)
+    finally:
+        conn.close()
+
+@app.get("/api/cfd/brokers/{broker_id}/news", response_model=List[CFDBrokerNews], summary="List news for a broker")
+async def list_cfd_broker_news(broker_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # ensure broker exists
+        cur.execute("SELECT 1 FROM cfd_brokers WHERE id = ?", (broker_id,))
+        if not cur.fetchone():
+            raise HTTPException(status_code=404, detail="Broker not found")
+        cur.execute(
+            "SELECT id, broker_id, title, tag, created_at FROM cfd_broker_news WHERE broker_id = ? ORDER BY created_at DESC, id DESC",
+            (broker_id,)
+        )
+        rows = cur.fetchall()
+        return [CFDBrokerNews(**dict(r)) for r in rows]
+    finally:
+        conn.close()
 @app.post("/api/add-store", summary="添加新商家")
 async def add_store(request: AddStoreRequest, background_tasks: BackgroundTasks):
     """添加新的ShopBack或CashRewards商家"""

@@ -181,6 +181,95 @@ code {
   border-color: transparent;
 }
 
+/* Collapsible Nav (Top-left) */
+.nav-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.nav-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-toggle:active {
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.nav-toggle.open {
+  background: linear-gradient(180deg, var(--primary), var(--primary-700));
+  color: #fff;
+  border-color: transparent;
+}
+
+.nav-toggle-icon { pointer-events: none; }
+
+.nav-drawer {
+  position: fixed;
+  top: 68px; /* below toggle */
+  left: 16px;
+  z-index: 999;
+  width: 220px;
+  max-height: calc(100vh - 84px);
+  overflow: auto;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.nav-drawer.open {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-item {
+  width: 100%;
+  text-align: left;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  margin: 6px 0;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.nav-item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.nav-item:active {
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.nav-item.active {
+  background: linear-gradient(180deg, var(--primary), var(--primary-700));
+  color: #fff;
+  border-color: transparent;
+}
+
 /* Utility */
 .grid {
   display: grid;

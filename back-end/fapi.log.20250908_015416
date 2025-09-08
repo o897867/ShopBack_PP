@@ -1,0 +1,27 @@
+INFO:binance_eth_data:✓ Binance API key loaded - higher rate limits available
+/root/shopback/ShopBack_PP/back-end/fapi.py:2066: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:model_scheduler:Starting model scheduler...
+INFO:model_scheduler:Model scheduler started successfully
+INFO:__main__:Started Bayesian model scheduler
+INFO:     Started server process [1794078]
+INFO:     Waiting for application startup.
+INFO:__main__:Loaded ETH Kalman model state from database
+INFO:__main__:Started ETH data manager with Binance WebSocket
+INFO:binance_eth_data:Initializing Binance Data Manager...
+INFO:binance_eth_data:Starting initialization with gap fill...
+INFO:binance_eth_data:Latest candle in DB: 2025-09-08 00:45:00
+INFO:binance_eth_data:No gaps to fill
+INFO:binance_eth_data:Initialization complete. Total candles: 8973
+INFO:binance_eth_data:Initializing model with 3360 candles
+INFO:binance_eth_data:Data continuity check: ✓ No gaps found
+INFO:binance_eth_data:Connecting to Binance WebSocket (attempt 1/5)...
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8001): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
