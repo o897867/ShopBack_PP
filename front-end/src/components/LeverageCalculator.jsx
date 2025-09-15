@@ -55,13 +55,13 @@ const LeverageCalculator = () => {
         body: JSON.stringify(requestBody)
       });
 
-      if (!response.ok) throw new Error('计算失败');
+      if (!response.ok) throw new Error('CALC_FAILED');
       
       const data = await response.json();
       setAnalysis(data);
     } catch (error) {
-      console.error('计算错误:', error);
-      alert('计算失败，请检查输入参数');
+      console.error('Calculation error:', error);
+      alert(t('messages.operationFailed', currentLanguage));
     } finally {
       setLoading(false);
     }
@@ -85,13 +85,13 @@ const LeverageCalculator = () => {
         })
       });
 
-      if (!response.ok) throw new Error('计算失败');
+      if (!response.ok) throw new Error('CALC_FAILED');
       
       const data = await response.json();
       setTargetLossResult(data);
     } catch (error) {
-      console.error('计算错误:', error);
-      alert('计算失败，请检查输入参数');
+      console.error('Calculation error:', error);
+      alert(t('messages.operationFailed', currentLanguage));
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ const LeverageCalculator = () => {
 
   const formatNumber = (num) => {
     if (num === null || num === undefined) return '-';
-    return new Intl.NumberFormat('zh-CN', {
+    return new Intl.NumberFormat(currentLanguage, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(num);
@@ -107,7 +107,7 @@ const LeverageCalculator = () => {
 
   const formatPrice = (price) => {
     if (price === null || price === undefined) return '-';
-    return new Intl.NumberFormat('zh-CN', {
+    return new Intl.NumberFormat(currentLanguage, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 8
     }).format(price);
@@ -144,7 +144,7 @@ const LeverageCalculator = () => {
                 name="symbol"
                 value={formData.symbol}
                 onChange={handleInputChange}
-                placeholder="例如: BTCUSDT"
+                placeholder={t('leverage.symbolPlaceholder', currentLanguage)}
               />
             </div>
 
@@ -277,87 +277,87 @@ const LeverageCalculator = () => {
           </div>
         </div>
 
-        {/* 综合分析结果 */}
+        {/* Analysis Results */}
         {activeTab === 'calculator' && analysis && (
           <div className="results-section">
             <h3>{t('leverage.analysisResults', currentLanguage)}</h3>
             
-            {/* 持仓信息 */}
+            {/* Position info */}
             <div className="result-card">
               <h4>{t('leverage.positionInfo', currentLanguage)}</h4>
               <div className="info-grid">
                 <div className="info-item">
-                  <span className="label">总仓位价值:</span>
+                  <span className="label">{t('leverage.totalPositionValue', currentLanguage)}:</span>
                   <span className="value">${formatNumber(analysis.position_info.total_position_value)}</span>
                 </div>
                 <div className="info-item">
-                  <span className="label">仓位大小:</span>
+                  <span className="label">{t('leverage.positionSizeLots', currentLanguage)}:</span>
                   <span className="value">{formatNumber(analysis.position_info.position_size)}</span>
                 </div>
               </div>
             </div>
 
-            {/* 强制平仓信息 */}
+            {/* Liquidation info */}
             <div className="result-card warning">
-              <h4>强制平仓信息（保证金40%）</h4>
+              <h4>{t('leverage.liquidationInfo', currentLanguage)}</h4>
               <div className="info-grid">
                 <div className="info-item">
-                  <span className="label">强平价格:</span>
+                  <span className="label">{t('leverage.liquidationPrice', currentLanguage)}:</span>
                   <span className="value danger">${formatPrice(analysis.liquidation_info.liquidation_price)}</span>
                 </div>
                 <div className="info-item">
-                  <span className="label">价格需要{analysis.liquidation_info.direction_description}:</span>
+                  <span className="label">{t('leverage.priceNeedsToMove', currentLanguage)} {analysis.liquidation_info.price_change >= 0 ? t('leverage.up', currentLanguage) : t('leverage.down', currentLanguage)}:</span>
                   <span className="value">{formatNumber(analysis.liquidation_info.price_change_percentage)}%</span>
                 </div>
                 <div className="info-item">
-                  <span className="label">价格变动:</span>
+                  <span className="label">{t('leverage.priceChange', currentLanguage)}:</span>
                   <span className="value">${formatNumber(analysis.liquidation_info.price_change)}</span>
                 </div>
               </div>
             </div>
 
-            {/* 当前盈亏 */}
+            {/* Current P&L */}
             {analysis.current_pnl && (
               <div className={`result-card ${analysis.current_pnl.pnl_amount >= 0 ? 'success' : 'danger'}`}>
-                <h4>当前盈亏</h4>
+                <h4>{t('leverage.currentPnl', currentLanguage)}</h4>
                 <div className="info-grid">
                   <div className="info-item">
-                    <span className="label">盈亏金额:</span>
+                    <span className="label">{t('leverage.pnlAmount', currentLanguage)}:</span>
                     <span className={`value ${analysis.current_pnl.pnl_amount >= 0 ? 'profit' : 'loss'}`}>
                       ${formatNumber(analysis.current_pnl.pnl_amount)}
                     </span>
                   </div>
                   <div className="info-item">
-                    <span className="label">盈亏比例:</span>
+                    <span className="label">{t('leverage.pnlPercentage', currentLanguage)}:</span>
                     <span className={`value ${analysis.current_pnl.pnl_percentage >= 0 ? 'profit' : 'loss'}`}>
                       {formatNumber(analysis.current_pnl.pnl_percentage)}%
                     </span>
                   </div>
                   <div className="info-item">
-                    <span className="label">保证金比例:</span>
+                    <span className="label">{t('leverage.marginLevel', currentLanguage)}:</span>
                     <span className="value">{formatNumber(analysis.current_pnl.margin_ratio * 100)}%</span>
                   </div>
                   <div className="info-item">
-                    <span className="label">当前权益:</span>
+                    <span className="label">{t('leverage.currentEquity', currentLanguage)}:</span>
                     <span className="value">${formatNumber(analysis.current_pnl.current_equity)}</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* 风险级别 */}
+            {/* Risk levels */}
             <div className="result-card">
-              <h4>风险级别参考</h4>
+              <h4>{t('leverage.riskLevels', currentLanguage)}</h4>
               <div className="risk-levels">
                 {Object.entries(analysis.risk_levels).map(([level, info]) => (
                   <div key={level} className="risk-level-item">
                     <div className="risk-level-header">
-                      <span className="level-name">{level === 'liquidation' ? '强制平仓' : level}</span>
+                      <span className="level-name">{level === 'liquidation' ? t('leverage.liquidation', currentLanguage) : level}</span>
                       <span className="level-price">${formatPrice(info.price)}</span>
                     </div>
                     <div className="risk-level-details">
-                      <span>亏损: ${formatNumber(info.loss_amount)}</span>
-                      <span>保证金: {formatNumber(info.margin_ratio * 100)}%</span>
+                      <span>{t('leverage.pnlAmount', currentLanguage)}: ${formatNumber(info.loss_amount)}</span>
+                      <span>{t('leverage.marginLevel', currentLanguage)}: {formatNumber(info.margin_ratio * 100)}%</span>
                     </div>
                   </div>
                 ))}
@@ -366,28 +366,28 @@ const LeverageCalculator = () => {
           </div>
         )}
 
-        {/* 止损计算结果 */}
+        {/* Stop loss calculation results */}
         {activeTab === 'target-loss' && targetLossResult && (
           <div className="results-section">
-            <h3>止损计算结果</h3>
+            <h3>{t('leverage.stopLossResults', currentLanguage)}</h3>
             
             <div className="result-card">
-              <h4>目标止损位置</h4>
+              <h4>{t('leverage.targetStopLoss', currentLanguage)}</h4>
               <div className="info-grid">
                 <div className="info-item">
-                  <span className="label">止损价格:</span>
+                  <span className="label">{t('leverage.stopLossPrice', currentLanguage)}:</span>
                   <span className="value danger">${formatPrice(targetLossResult.target_price)}</span>
                 </div>
                 <div className="info-item">
-                  <span className="label">最大亏损金额:</span>
+                  <span className="label">{t('leverage.maxLossAmountLabel', currentLanguage)}:</span>
                   <span className="value">${formatNumber(targetLossResult.max_loss_amount)}</span>
                 </div>
                 <div className="info-item">
-                  <span className="label">价格变动:</span>
+                  <span className="label">{t('leverage.priceChange', currentLanguage)}:</span>
                   <span className="value">${formatNumber(targetLossResult.price_change)}</span>
                 </div>
                 <div className="info-item">
-                  <span className="label">价格变动百分比:</span>
+                  <span className="label">{t('leverage.priceChangePercentage', currentLanguage)}:</span>
                   <span className="value">{formatNumber(targetLossResult.price_change_percentage)}%</span>
                 </div>
               </div>
@@ -395,20 +395,20 @@ const LeverageCalculator = () => {
 
             {targetLossResult.pnl_info && (
               <div className="result-card warning">
-                <h4>该价格下的详细信息</h4>
+                <h4>{t('leverage.detailsAtPrice', currentLanguage)}</h4>
                 <div className="info-grid">
                   <div className="info-item">
-                    <span className="label">保证金比例:</span>
+                    <span className="label">{t('leverage.marginLevel', currentLanguage)}:</span>
                     <span className="value">{formatNumber(targetLossResult.pnl_info.margin_ratio * 100)}%</span>
                   </div>
                   <div className="info-item">
-                    <span className="label">剩余权益:</span>
+                    <span className="label">{t('leverage.remainingEquity', currentLanguage)}:</span>
                     <span className="value">${formatNumber(targetLossResult.pnl_info.current_equity)}</span>
                   </div>
                   <div className="info-item">
-                    <span className="label">是否触发强平:</span>
+                    <span className="label">{t('leverage.triggerLiquidation', currentLanguage)}:</span>
                     <span className={`value ${targetLossResult.pnl_info.is_liquidated ? 'danger' : 'safe'}`}>
-                      {targetLossResult.pnl_info.is_liquidated ? '是' : '否'}
+                      {targetLossResult.pnl_info.is_liquidated ? t('leverage.yes', currentLanguage) : t('leverage.no', currentLanguage)}
                     </span>
                   </div>
                 </div>

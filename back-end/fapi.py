@@ -3,7 +3,7 @@
 ShopBack FastAPI后端
 为React前端提供RESTful API接口
 """
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Depends, WebSocket, WebSocketDisconnect, UploadFile, File
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Depends, WebSocket, WebSocketDisconnect, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -36,6 +36,7 @@ from dotenv import load_dotenv
 from square import Square
 from square.environment import SquareEnvironment  # 正确的导入
 import uuid
+from forum_api import get_forum_router
 
 # 加载环境变量
 load_dotenv()
@@ -153,45 +154,45 @@ class DonationRequest(BaseModel):
 class ShowcaseCategory(BaseModel):
     id: int
     name: str
-    image_url: str | None = None
+    image_url: Optional[str] = None
     created_at: str
 
 class ShowcaseCategoryCreate(BaseModel):
     name: str
-    image_url: str | None = None
+    image_url: Optional[str] = None
 
 class ShowcaseEvent(BaseModel):
     id: int
     category_id: int
     title: str
-    content: str | None = None
-    images: list[str] | None = None
-    submitted_by: str | None = None
+    content: Optional[str] = None
+    images: Optional[List[str]] = None
+    submitted_by: Optional[str] = None
     created_at: str
 
 class ShowcaseEventCreate(BaseModel):
     category_id: int
     title: str
-    content: str | None = None
-    images: list[str] | None = None
-    submitted_by: str | None = None
+    content: Optional[str] = None
+    images: Optional[List[str]] = None
+    submitted_by: Optional[str] = None
 
 # ===== CFD (Industry) Models ===== #
 class CFDBroker(BaseModel):
     id: int
     name: str
-    regulators: str | None = None
-    rating: str | None = None
-    website: str | None = None
-    logo_url: str | None = None
-    rating_breakdown: dict | None = None
+    regulators: Optional[str] = None
+    rating: Optional[str] = None
+    website: Optional[str] = None
+    logo_url: Optional[str] = None
+    rating_breakdown: Optional[Dict[str, Any]] = None
     created_at: str
 
 class CFDBrokerNews(BaseModel):
     id: int
     broker_id: int
     title: str
-    tag: str | None = None
+    tag: Optional[str] = None
     created_at: str
 
 # 初始化FastAPI应用
@@ -201,14 +202,31 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS中间件配置 - nginx handles CORS, but keeping for direct access
+# CORS中间件配置 - 限制允许的源以提高安全性
+# 在生产环境中，应该设置具体的前端域名
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # nginx reverse proxy will handle CORS
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,  # 明确指定允许的域名
+    allow_credentials=False,  # 不允许跨域凭证以增加安全性
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],  # 明确指定允许的方法
+    allow_headers=["Content-Type", "Authorization", "X-User-Id"],  # 明确指定允许的头部
 )
+
+def _get_base_url(request: Request) -> str:
+    """Build a base URL respecting reverse proxy headers if present.
+    Falls back to request.base_url when headers are absent.
+    """
+    proto = request.headers.get("x-forwarded-proto")
+    if proto:
+        proto = proto.split(",")[0].strip()
+    else:
+        proto = request.url.scheme
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    if host:
+        return f"{proto}://{host}"
+    return str(request.base_url).rstrip('/')
 
 # Mount static files
 from pathlib import Path
@@ -222,7 +240,17 @@ os.makedirs(CFD_UPLOAD_DIR, exist_ok=True)
 
 # 全局变量
 scraper_instance = None
-db_path = "shopback_data.db"
+# Database path: allow env override; default to file next to this module
+DB_PATH_ENV = os.getenv("DB_PATH")
+if DB_PATH_ENV and DB_PATH_ENV.strip():
+    db_path = DB_PATH_ENV.strip()
+else:
+    db_path = str((Path(__file__).resolve().parent / "shopback_data.db"))
+# Ensure parent dir exists for absolute/custom paths
+try:
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 
 # Initialize ETH Kalman model
 eth_model_manager = ETHKalmanModelManager(db_path)
@@ -317,12 +345,16 @@ async def auto_rescrape():
         logger.error(f"定时抓取失败: {e}", exc_info=True)
 def get_db_connection():
     """获取数据库连接"""
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
 # Ensure showcase tables now that DB connection helper exists
 ensure_showcase_tables()
+ 
+# Include Forum API after DB helper is defined
+# (router will use get_db_connection provided here)
+app.include_router(get_forum_router(get_db_connection))
 
 # Ensure CFD tables exist
 def ensure_cfd_tables():
@@ -435,7 +467,7 @@ async def root():
 # ============= Showcase (Forum-like) Endpoints =============
 
 @app.get("/api/showcase/categories", response_model=List[ShowcaseCategory], summary="List showcase categories")
-async def list_showcase_categories():
+async def list_showcase_categories(request: Request):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -444,9 +476,10 @@ async def list_showcase_categories():
         categories = []
         for row in rows:
             cat_dict = dict(row)
-            # Convert relative URLs to absolute backend URLs
+            # Convert relative URLs to absolute using current request base URL
             if cat_dict.get('image_url') and cat_dict['image_url'].startswith('/static/'):
-                cat_dict['image_url'] = f"http://localhost:8001{cat_dict['image_url']}"
+                base = _get_base_url(request)
+                cat_dict['image_url'] = f"{base}{cat_dict['image_url']}"
             categories.append(ShowcaseCategory(**cat_dict))
         return categories
     finally:
@@ -471,7 +504,7 @@ async def create_showcase_category(payload: ShowcaseCategoryCreate):
         conn.close()
 
 @app.get("/api/showcase/categories/{category_id}/events", response_model=List[ShowcaseEvent], summary="List events by category")
-async def list_showcase_events(category_id: int):
+async def list_showcase_events(category_id: int, request: Request):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -491,11 +524,12 @@ async def list_showcase_events(category_id: int):
             images = []
             try:
                 images_raw = json.loads(d.get('images_json') or '[]')
-                # Convert relative URLs to absolute backend URLs
+                # Convert relative URLs to absolute using current request base URL
                 images = []
                 for img in images_raw:
                     if img and img.startswith('/static/'):
-                        images.append(f"http://localhost:8001{img}")
+                        base = _get_base_url(request)
+                        images.append(f"{base}{img}")
                     else:
                         images.append(img)
             except Exception:
@@ -514,7 +548,7 @@ async def list_showcase_events(category_id: int):
         conn.close()
 
 @app.get("/api/showcase/events/{event_id}", response_model=ShowcaseEvent, summary="Get event detail")
-async def get_showcase_event(event_id: int):
+async def get_showcase_event(event_id: int, request: Request):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -529,11 +563,12 @@ async def get_showcase_event(event_id: int):
         images = []
         try:
             images_raw = json.loads(d.get('images_json') or '[]')
-            # Convert relative URLs to absolute backend URLs
+            # Convert relative URLs to absolute using current request base URL
             images = []
             for img in images_raw:
                 if img and img.startswith('/static/'):
-                    images.append(f"http://localhost:8001{img}")
+                    base = _get_base_url(request)
+                    images.append(f"{base}{img}")
                 else:
                     images.append(img)
         except Exception:
@@ -630,7 +665,7 @@ async def upload_showcase_image(file: UploadFile = File(...)):
 # ============= CFD (Industry) Endpoints =============
 
 @app.get("/api/cfd/brokers", response_model=List[CFDBroker], summary="List CFD brokers")
-async def list_cfd_brokers():
+async def list_cfd_brokers(request: Request):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -643,7 +678,8 @@ async def list_cfd_brokers():
             d = dict(r)
             logo = d.get('logo_url')
             if logo and logo.startswith('/static/'):
-                d['logo_url'] = f"http://localhost:8001{logo}"
+                base = _get_base_url(request)
+                d['logo_url'] = f"{base}{logo}"
             rb = None
             try:
                 rb = json.loads(d.get('rating_breakdown_json') or 'null')
@@ -657,7 +693,7 @@ async def list_cfd_brokers():
         conn.close()
 
 @app.get("/api/cfd/brokers/{broker_id}", response_model=CFDBroker, summary="Get CFD broker detail")
-async def get_cfd_broker(broker_id: int):
+async def get_cfd_broker(broker_id: int, request: Request):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
@@ -671,7 +707,8 @@ async def get_cfd_broker(broker_id: int):
         d = dict(row)
         logo = d.get('logo_url')
         if logo and logo.startswith('/static/'):
-            d['logo_url'] = f"http://localhost:8001{logo}"
+            base = _get_base_url(request)
+            d['logo_url'] = f"{base}{logo}"
         rb = None
         try:
             rb = json.loads(d.get('rating_breakdown_json') or 'null')

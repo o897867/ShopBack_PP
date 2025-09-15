@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import TradingViewWidget from '../components/tradingWidget';
 import LeverageCalculator from '../components/LeverageCalculator';
+import { useLanguage } from '../hooks/useLanguage.jsx';
+import { t } from '../translations/index';
 
 const TradingViewPage = () => {
   const [selectedSymbol, setSelectedSymbol] = useState('BINANCE:BTCUSDT');
   const [theme, setTheme] = useState('dark');
+  const { currentLanguage } = useLanguage();
+  const translate = (key, params) => t(key, currentLanguage, params);
 
   const popularSymbols = [
     { label: 'Bitcoin (BTC/USDT)', value: 'BINANCE:BTCUSDT' },
@@ -27,7 +31,7 @@ const TradingViewPage = () => {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
         <h2 style={{ margin: '0 0 20px 0', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          TradingView图表
+          {translate('trading.title')}
         </h2>
         
         <div style={{
@@ -38,7 +42,7 @@ const TradingViewPage = () => {
         }}>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
-              选择交易对:
+              {translate('trading.selectSymbol')}
             </label>
             <select 
               value={selectedSymbol}
@@ -53,7 +57,7 @@ const TradingViewPage = () => {
             >
               {popularSymbols.map(symbol => (
                 <option key={symbol.value} value={symbol.value}>
-                  {symbol.label}
+                  {symbol.labelKey ? translate(symbol.labelKey) : symbol.label}
                 </option>
               ))}
             </select>
@@ -61,7 +65,7 @@ const TradingViewPage = () => {
           
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#333' }}>
-              主题:
+              {translate('trading.theme')}
             </label>
             <select 
               value={theme}
@@ -74,8 +78,8 @@ const TradingViewPage = () => {
                 fontSize: '14px'
               }}
             >
-              <option value="dark">深色主题</option>
-              <option value="light">浅色主题</option>
+              <option value="dark">{translate('trading.darkTheme')}</option>
+              <option value="light">{translate('trading.lightTheme')}</option>
             </select>
           </div>
         </div>
@@ -91,7 +95,7 @@ const TradingViewPage = () => {
         <TradingViewWidget symbol={selectedSymbol} theme={theme} />
       </div>
 
-      {/* 快速访问按钮 */}
+      {/* Quick access */}
       <div style={{
         background: 'white',
         padding: '20px',
@@ -99,7 +103,7 @@ const TradingViewPage = () => {
         marginTop: '20px',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
-        <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>快速切换:</h3>
+        <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>{translate('trading.quickSwitch')}:</h3>
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -120,13 +124,13 @@ const TradingViewPage = () => {
                 transition: 'all 0.3s ease'
               }}
             >
-              {symbol.label}
+              {symbol.labelKey ? translate(symbol.labelKey) : symbol.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* 杠杆交易计算器 */}
+      {/* Leverage calculator */}
       <div style={{ marginTop: '30px' }}>
         <LeverageCalculator />
       </div>

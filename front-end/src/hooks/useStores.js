@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import apiService from '../services/apiService.js';
+import { useLanguage } from './useLanguage.jsx';
+import { t } from '../translations/index';
 
 export const useStores = () => {
+  const { currentLanguage } = useLanguage();
   const [stores, setStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState(null);
   const [storeHistory, setStoreHistory] = useState([]);
@@ -20,7 +23,7 @@ export const useStores = () => {
       setStoreHistory(history);
       setStoreStatistics(stats);
     } catch (error) {
-      console.error('获取商家历史失败:', error);
+      console.error('Failed to fetch store history:', error);
     }
   };
 
@@ -31,12 +34,12 @@ export const useStores = () => {
       setIsAdding(true);
       setAddMessage(null);
       await apiService.addStore(addStoreUrl);
-      setAddMessage({ type: 'success', text: '商家添加成功！' });
+      setAddMessage({ type: 'success', text: t('stores.addSuccess', currentLanguage) });
       setAddStoreUrl('');
       // 刷新商家列表
       setTimeout(() => onDataRefresh(), 2000);
     } catch (error) {
-      setAddMessage({ type: 'error', text: error.message });
+      setAddMessage({ type: 'error', text: error.message || t('stores.addError', currentLanguage) });
     } finally {
       setIsAdding(false);
     }

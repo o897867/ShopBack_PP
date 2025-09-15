@@ -51,13 +51,11 @@ const AlertManagement = ({ alertHook, translate }) => {
 
       {/* Email Input */}
       <div style={{marginBottom: '25px'}}>
-        <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>
-          {translate('alerts.email')}：
-        </label>
+        <label style={{display: 'block', marginBottom: '8px', fontWeight: 'bold'}}>{translate('alerts.email')}</label>
         <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
           <input
             type="email"
-            placeholder=" "
+            placeholder={translate('alerts.emailPlaceholder')}
             value={alertEmail}
             onChange={(e) => setAlertEmail(e.target.value)}
             style={{
@@ -94,12 +92,10 @@ const AlertManagement = ({ alertHook, translate }) => {
         <h4 style={{margin: '0 0 15px 0', color: '#333'}}>{translate('alerts.createNew')}</h4>
         
         <div style={{marginBottom: '15px'}}>
-          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-            URL：
-          </label>
+          <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>{translate('alerts.storeUrl')}</label>
           <input
             type="text"
-            placeholder="URL..."
+            placeholder={translate('alerts.storeUrlPlaceholder')}
             value={alertUrl}
             onChange={(e) => setAlertUrl(e.target.value)}
             style={{
@@ -119,9 +115,7 @@ const AlertManagement = ({ alertHook, translate }) => {
           marginBottom: '15px'
         }}>
           <div>
-            <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-              {translate('alerts.thresholdType')}：
-            </label>
+            <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>{translate('alerts.thresholdType')}</label>
             <select
               value={alertThresholdType}
               onChange={(e) => setAlertThresholdType(e.target.value)}
@@ -140,14 +134,12 @@ const AlertManagement = ({ alertHook, translate }) => {
           </div>
 
           <div>
-            <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>
-              {translate('alerts.threshold')}：
-            </label>
+            <label style={{display: 'block', marginBottom: '5px', fontWeight: 'bold'}}>{translate('alerts.threshold')}</label>
             <input
               type="number"
               step="0.1"
               min="0"
-              placeholder="enter"
+              placeholder={translate('alerts.thresholdPlaceholder')}
               value={alertThresholdValue}
               onChange={(e) => setAlertThresholdValue(e.target.value)}
               style={{
@@ -174,7 +166,7 @@ const AlertManagement = ({ alertHook, translate }) => {
             fontWeight: 'bold'
           }}
         >
-          {isCreatingAlert ? 'Creating...' : 'Create'}
+          {isCreatingAlert ? translate('alerts.creating') : translate('alerts.create')}
         </button>
       </div>
 
@@ -195,7 +187,7 @@ const AlertManagement = ({ alertHook, translate }) => {
       {/* User Alerts List */}
       {userAlerts.length > 0 && (
         <div>
-          <h4 style={{margin: '0 0 15px 0', color: '#333'}}>我的提醒列表</h4>
+          <h4 style={{margin: '0 0 15px 0', color: '#333'}}>{translate('alerts.myAlerts')}</h4>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
@@ -209,16 +201,16 @@ const AlertManagement = ({ alertHook, translate }) => {
                 padding: '15px'
               }}>
                 <h5 style={{margin: '0 0 10px 0', color: '#333'}}>
-                  {alert.store_name || '商家'}
+                  {alert.store_name || translate('stores.title')}
                 </h5>
                 <p style={{margin: '5px 0', fontSize: '14px', color: '#666'}}>
-                  <strong>网址:</strong> {alert.store_url}
+                  <strong>{translate('alerts.website')}:</strong> {alert.store_url}
                 </p>
                 <p style={{margin: '5px 0', fontSize: '14px', color: '#666'}}>
-                  <strong>提醒条件:</strong> {getThresholdTypeText(alert.threshold_type)} {alert.threshold_value}%
+                  <strong>{translate('alerts.alertCondition')}:</strong> {getThresholdTypeText(alert.threshold_type, translate)} {alert.threshold_value}%
                 </p>
                 <p style={{margin: '5px 0', fontSize: '12px', color: '#999'}}>
-                  创建时间: {new Date(alert.created_at).toLocaleString()}
+                  {translate('alerts.createdTime')}: {new Date(alert.created_at).toLocaleString()}
                 </p>
                 <button
                   onClick={() => handleDeleteAlert(alert.id)}
@@ -233,7 +225,7 @@ const AlertManagement = ({ alertHook, translate }) => {
                     marginTop: '10px'
                   }}
                 >
-                  删除
+                  {translate('alerts.delete')}
                 </button>
               </div>
             ))}
@@ -248,7 +240,7 @@ const AlertManagement = ({ alertHook, translate }) => {
           color: '#666'
         }}>
           <div style={{fontSize: '3em', marginBottom: '15px'}}></div>
-          <p>暂无价格提醒</p>
+          <p>{translate('alerts.noAlerts')}</p>
         </div>
       )}
     </div>

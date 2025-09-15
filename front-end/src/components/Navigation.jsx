@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../hooks/useLanguage.jsx';
+import { t } from '../translations/index';
 
 const Navigation = ({ currentPage, setCurrentPage }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { currentLanguage } = useLanguage();
+  const translate = (key) => t(key, currentLanguage);
 
   const navItems = [
-    { id: 'home', label: '首页' },
-    { id: 'dashboard', label: 'ShopBack管理' },
-    { id: 'showcase', label: 'Showcase' },
+    { id: 'home', label: translate('showcase.categories') },
+    { id: 'dashboard', label: translate('nav.dashboard') },
+    { id: 'showcase', label: translate('showcase.title') },
+    { id: 'forum', label: 'Forum' },
+    { id: 'forum-mod', label: 'Forum Mod' },
     { id: 'predictions', label: 'AI Predictions' },
     { id: 'eth', label: 'ETH Prediction' },
-    { id: 'trading', label: 'TradingView' },
-    { id: 'donations', label: 'Donations' }
+    { id: 'trading', label: translate('nav.trading') },
+    { id: 'donations', label: translate('nav.donations') }
   ];
 
   const handleSelect = (id) => {

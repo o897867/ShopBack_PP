@@ -12,7 +12,7 @@ const StoreList = ({ stores, storeHook, fetchData, translate }) => {
         {translate('stores.title')} ({stores.length})
       </h2>
       
-      {/* 添加商家表单 */}
+      {/* Add Store form */}
       <div style={{
         background: '#f8f9fa',
         padding: '20px',
@@ -47,7 +47,7 @@ const StoreList = ({ stores, storeHook, fetchData, translate }) => {
               cursor: storeHook.isAdding ? 'not-allowed' : 'pointer'
             }}
           >
-            {storeHook.isAdding ? '添加中...' : '添加'}
+            {storeHook.isAdding ? translate('stores.adding') : translate('stores.add')}
           </button>
         </div>
         {storeHook.addMessage && (
@@ -64,7 +64,7 @@ const StoreList = ({ stores, storeHook, fetchData, translate }) => {
         )}
       </div>
 
-      {/* 商家列表 */}
+      {/* Store list */}
       {stores.map((store) => (
         <div key={store.id} onClick={() => storeHook.handleStoreClick(store)} style={{
           padding: '20px',
@@ -82,7 +82,7 @@ const StoreList = ({ stores, storeHook, fetchData, translate }) => {
             {store.url}
           </p>
           <p style={{color: '#999', fontSize: '12px', margin: 0}}>
-            {translate('store.updateTime')}: {new Date(store.updated_at).toLocaleString()}
+            {translate('stores.updateTime')}: {new Date(store.updated_at).toLocaleString()}
           </p>
         </div>
       ))}

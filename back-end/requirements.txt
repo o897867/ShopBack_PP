@@ -9,6 +9,9 @@ python-dotenv
 beautifulsoup4
 requests
 
+# Security and content sanitization
+bleach>=6.1.0
+
 # New dependencies for Bayesian model
 numpy>=1.21.0
 scipy>=1.7.0

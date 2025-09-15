@@ -34,7 +34,7 @@ const StoreDetails = ({ storeHook, translate }) => {
             cursor: 'pointer'
           }}
         >
-          关闭
+          {translate('common.close')}
         </button>
       </div>
 
@@ -88,7 +88,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                           color: record.category === 'Main' ? '#007bff' : '#333',
                           fontSize: '1.1em'
                         }}>
-                          {record.category === 'Main' ? '主要优惠' : record.category}
+                          {record.category === 'Main' ? translate('stats.mainOffer') : record.category}
                         </h5>
                         {record.is_upsized && (
                           <span style={{
@@ -120,7 +120,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                           fontSize: '0.9em',
                           marginBottom: '5px'
                         }}>
-                          之前: {record.previous_offer}
+                          {translate('stores.previous')}: {record.previous_offer}
                         </div>
                       )}
 
@@ -144,7 +144,7 @@ const StoreDetails = ({ storeHook, translate }) => {
                                 color: '#dc3545',
                                 marginBottom: '3px'
                               }}>
-                                {translate('stats.highestRate')}:: {categoryStats.highest_rate}%
+                                {translate('stats.highestRate')}: {categoryStats.highest_rate}%
                               </div>
                               <div style={{color: '#666', fontSize: '0.8em'}}>
                                 {formatDate(categoryStats.highest_date)}

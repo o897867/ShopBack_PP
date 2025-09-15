@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './App.css';
 import './index.css';
 import Navigation from './components/Navigation.jsx';
@@ -7,6 +7,8 @@ import DonationPage from './pages/DonationPage.jsx';
 import BayesianDashboard from './pages/BayesianDashboard.jsx';
 import EthKalmanPrediction from './pages/EthKalmanPrediction.jsx';
 import Showcase from './pages/Showcase.jsx';
+const Forum = lazy(() => import('./pages/Forum.jsx'));
+const ForumModeration = lazy(() => import('./pages/ForumModeration.jsx'));
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
@@ -43,7 +45,7 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['home','dashboard','showcase','predictions','eth','trading','donations'];
+      const known = ['home','dashboard','showcase','forum','forum-mod','predictions','eth','trading','donations'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
@@ -57,8 +59,9 @@ const App = () => {
   const storeHook = useStores();
   const alertHook = useAlerts();
   const comparisonHook = useComparison();
-  // Initialize data on component mount
+  // Load dashboard data only when viewing the dashboard
   useEffect(() => {
+    if (currentPage !== 'dashboard') return;
     const initializeData = async () => {
       const result = await fetchData();
       if (result) {
@@ -68,7 +71,8 @@ const App = () => {
       }
     };
     initializeData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   // Persist page selection and reflect in URL hash
   useEffect(() => {
@@ -83,7 +87,7 @@ const App = () => {
 
 
 
-if (currentPage !== 'home' && (languageLoading || loading)) {
+if (currentPage === 'dashboard' && (languageLoading || loading)) {
   return (
     <div className="center" style={{ minHeight: '100vh' }}>
       <div className="card card-padded" style={{ minWidth: 260, textAlign: 'center' }}>
@@ -94,7 +98,7 @@ if (currentPage !== 'home' && (languageLoading || loading)) {
   );
 }
 
-  if (error) {
+  if (currentPage === 'dashboard' && error) {
     return (
       <div className="center" style={{ minHeight: '100vh' }}>
         <div className="card card-padded" style={{ maxWidth: 560 }}>
@@ -116,10 +120,10 @@ if (currentPage !== 'home' && (languageLoading || loading)) {
       <div className="home-bubbles">
         <div className="bubble-container">
           <button className="bubble" onClick={() => setCurrentPage('showcase')}>
-            <span className="bubble-label">行业</span>
+            <span className="bubble-label">{translate('showcase.title')}</span>
           </button>
           <button className="bubble" onClick={() => setCurrentPage('trading')}>
-            <span className="bubble-label">工具</span>
+            <span className="bubble-label">{translate('nav.trading')}</span>
           </button>
         </div>
       </div>
@@ -141,7 +145,9 @@ if (currentPage !== 'home' && (languageLoading || loading)) {
           <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
           <h1 className="title" style={{ fontSize: '2rem' }}>
             {currentPage === 'dashboard' ? translate('dashboard.title') :
-             currentPage === 'showcase' ? 'Showcase' :
+             currentPage === 'showcase' ? translate('showcase.title') :
+             currentPage === 'forum' ? 'Forum' :
+             currentPage === 'forum-mod' ? 'Forum Moderation' :
              currentPage === 'predictions' ? 'AI Cashback Predictions' :
              currentPage === 'eth' ? 'ETH Price Prediction' :
              currentPage === 'trading' ? translate('nav.trading') :
@@ -197,6 +203,14 @@ if (currentPage !== 'home' && (languageLoading || loading)) {
           </div>
         ) : currentPage === 'showcase' ? (
           <Showcase />
+        ) : currentPage === 'forum' ? (
+          <Suspense fallback={<div className="muted">Loading…</div>}>
+            <Forum />
+          </Suspense>
+        ) : currentPage === 'forum-mod' ? (
+          <Suspense fallback={<div className="muted">Loading…</div>}>
+            <ForumModeration />
+          </Suspense>
         ) : currentPage === 'predictions' ? (
           <BayesianDashboard />
         ) : currentPage === 'eth' ? (

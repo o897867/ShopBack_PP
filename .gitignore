@@ -5,16 +5,94 @@ front-end/shopback-frontend/*
 !front-end/shopback-frontend/src/
 !front-end/shopback-frontend/src/**
 
-# 忽略 node_modules、build、日志等
+# 日志文件
+*.log
+*.log.*
+logs/
+**/*.log
+**/*.log.*
+back-end/fapi.log*
+back-end/*.log.*
+
+# 数据库文件（保留主要数据库，忽略测试和临时数据库）
+back-end/test*.db
+back-end/temp*.db
+back-end/*_test.db
+back-end/*_debug.db
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# 保留以下重要数据库文件：
+# back-end/shopback_data.db (主数据库)
+# 如果你想忽略所有数据库文件，请取消下面的注释：
+# *.db
+# *.sqlite
+# *.sqlite3
+
+# 临时文件和缓存
+*.tmp
+*.temp
+*.cache
+*.pid
+back-end/fapi.pid
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE和编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node.js
 **/node_modules/
 **/build/
-*.log
-.DS_Store
-.env
+**/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# 忽略 Python 虚拟环境和缓存
+# Python 虚拟环境
 back-end/venv/
-back-end/__pycache__/
+back-end/env/
+.venv/
+.env/
 
-.env.production
+# 环境变量文件
+.env
+.env.local
 .env.development
+.env.production
+.env.test
+
+# 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 备份文件
+*.bak
+*.backup
+*.old
+*.orig
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 运行时文件
+*.sock
+*.socket
