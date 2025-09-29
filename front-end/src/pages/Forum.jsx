@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLanguage } from '../hooks/useLanguage.jsx';
+import { t } from '../translations/index';
+import './Forum.css';
 
 const api = {
   listThreads: async ({ limit = 20, offset = 0, tag, author } = {}) => {
@@ -60,6 +63,49 @@ export default function Forum() {
   const { name, setName } = useLocalName();
   const titleLimit = 120;
   const contentLimit = 10000;
+  const [me, setMe] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  const { currentLanguage } = useLanguage();
+  const translate = useCallback((key, params = {}) => t(key, currentLanguage, params), [currentLanguage]);
+
+  const forumMetrics = useMemo(() => {
+    const authorSet = new Set();
+    threads.forEach((thread) => {
+      if (thread?.author_name) {
+        authorSet.add(thread.author_name);
+      }
+    });
+    if (selected?.thread?.author_name) {
+      authorSet.add(selected.thread.author_name);
+    }
+    (selected?.posts || []).forEach((post) => {
+      if (post?.author_name) {
+        authorSet.add(post.author_name);
+      }
+    });
+
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const threadsToday = threads.filter((thread) => {
+      const ts = thread?.last_post_at || thread?.created_at;
+      if (!ts) return false;
+      const date = new Date(ts);
+      if (Number.isNaN(date.getTime())) return false;
+      return now - date.getTime() <= dayMs;
+    }).length;
+
+    const repliesToday = (selected?.posts || []).filter((post) => {
+      const date = new Date(post?.created_at ?? 0);
+      if (Number.isNaN(date.getTime())) return false;
+      return now - date.getTime() <= dayMs;
+    }).length;
+
+    return {
+      threads: threads.length,
+      members: authorSet.size,
+      activity: threadsToday + repliesToday
+    };
+  }, [threads, selected]);
 
   const refreshThreads = async () => {
     setLoading(true);
@@ -68,7 +114,7 @@ export default function Forum() {
       const data = await api.listThreads({ limit: 20, offset: 0 });
       setThreads(data || []);
     } catch (e) {
-      setError(e.message || 'Failed to load');
+      setError(e.message || translate('forum.errors.loadThreads'));
     } finally {
       setLoading(false);
     }
@@ -76,13 +122,24 @@ export default function Forum() {
 
   useEffect(() => { refreshThreads(); }, []);
 
+  useEffect(() => {
+    const checkMe = async () => {
+      try {
+        const res = await fetch('/auth/me');
+        if (res.ok) setMe(await res.json());
+      } catch {}
+      setAuthChecked(true);
+    };
+    checkMe();
+  }, []);
+
   const openThread = async (id) => {
     setError('');
     try {
       const data = await api.getThread(id, { page: 1, page_size: 50 });
       setSelected(data);
       setReplyContent('');
-    } catch (e) { setError(e.message || 'Failed to load thread'); }
+    } catch (e) { setError(e.message || translate('forum.errors.openThread')); }
   };
 
   const createThread = async () => {
@@ -96,7 +153,7 @@ export default function Forum() {
       await refreshThreads();
       await openThread(created.id);
     } catch (e) {
-      setError(e.message || 'Failed to create thread');
+      setError(e.message || translate('forum.errors.createThread'));
     } finally {
       setCreating(false);
     }
@@ -110,137 +167,194 @@ export default function Forum() {
       const id = selected.thread.id;
       await openThread(id);
     } catch (e) {
-      setError(e.message || 'Failed to reply');
+      setError(e.message || translate('forum.errors.sendReply'));
     }
   };
 
   // MVP: plain textarea editor to avoid peer-deps issues
 
+  const anonymousLabel = translate('forum.common.anonymous');
+
+  const heroTiles = [
+    {
+      label: translate('forum.metrics.liveThreads'),
+      value: forumMetrics.threads
+    },
+    {
+      label: translate('forum.metrics.activeMembers'),
+      value: forumMetrics.members
+    },
+    {
+      label: translate('forum.metrics.newActivity'),
+      value: forumMetrics.activity
+    }
+  ];
+
   return (
-    <div>
-      <div className="card card-padded" style={{ marginBottom: 16 }}>
-        <h2 className="title" style={{ margin: 0 }}>Forum</h2>
-        <p className="muted" style={{ marginTop: 6 }}>支持基础格式（粗体、斜体、列表、引用、链接）。图片上传暂未开放，发帖可能进入审核队列。</p>
-        <div style={{ display: 'flex', gap: 12, marginTop: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="Your name (optional)"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="input"
-            style={{ minWidth: 200 }}
-          />
-          <button className="btn btn-secondary" onClick={refreshThreads}>Refresh</button>
-        </div>
+    <div className="forum-container">
+      <div className="forum-header">
+        <h1 className="forum-title">{translate('forum.title')}</h1>
+        <p className="forum-subtitle">{translate('forum.subtitle')}</p>
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: '1fr 2fr', gap: 16 }}>
-        <div>
-          <div className="card card-padded" style={{ marginBottom: 16 }}>
-            <h3 className="subtitle">New Thread</h3>
-            <div className="input-row">
+      <div className="forum-content">
+        <div className="forum-sidebar">
+          <div className="forum-compose">
+            <h3 className="forum-card__title">{translate('forum.newThread.title')}</h3>
+
+            {me ? (
+              <span className="forum-inline-hint">{translate('forum.common.loggedIn', { name: me.username || me.display_name })}</span>
+            ) : (
               <input
-                className="input"
-                placeholder="标题（最多 120 字）"
-                value={title}
-                onChange={(e) => setTitle(e.target.value.slice(0, titleLimit))}
-                maxLength={titleLimit}
+                type="text"
+                placeholder={translate('forum.common.namePlaceholder')}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="forum-input"
               />
-              <span className="counter">{title.length}/{titleLimit}</span>
-            </div>
+            )}
+
+            <input
+              className="forum-input"
+              placeholder={translate('forum.newThread.titlePlaceholder', { limit: titleLimit })}
+              value={title}
+              onChange={(e) => setTitle(e.target.value.slice(0, titleLimit))}
+              maxLength={titleLimit}
+            />
+            <div className="forum-counter">{translate('forum.common.counter', { current: title.length, limit: titleLimit })}</div>
+
             <textarea
-              className="input"
-              placeholder="内容（支持基础 HTML；图片禁用）"
+              className="forum-textarea"
+              placeholder={translate('forum.newThread.contentPlaceholder')}
               value={content}
               onChange={(e) => setContent(e.target.value.slice(0, contentLimit))}
               rows={6}
-              style={{ marginTop: 8 }}
             />
-            <div className="input-row" style={{ marginTop: 6 }}>
-              <span className="input-hint">提示：请文明发言，含敏感词或异常链接的内容将进入审核。</span>
-              <span className="counter">{content.length}/{contentLimit}</span>
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <button className="btn btn-primary" onClick={createThread} disabled={creating || !title.trim() || !content.trim()}>
-                {creating ? 'Creating…' : 'Create Thread'}
+            <div className="forum-compose__footer">
+              <span className="forum-inline-hint">{translate('forum.newThread.hint')}</span>
+              {!me && authChecked && (
+                <div className="forum-error">{translate('forum.newThread.loginRequired')}</div>
+              )}
+              <button className="forum-btn forum-btn-primary" onClick={createThread} disabled={!me || creating || !title.trim() || !content.trim()}>
+                {creating ? translate('forum.newThread.creating') : translate('forum.newThread.create')}
               </button>
             </div>
           </div>
 
-          <div className="card card-padded">
-            <h3 className="subtitle" style={{ marginBottom: 8 }}>Threads</h3>
+          <div className="forum-thread-list">
+            <div className="forum-thread-list__header">
+              <h3 className="forum-card__title">{translate('forum.threadList.title')}</h3>
+              <button className="forum-btn forum-btn-secondary" onClick={refreshThreads}>{translate('forum.common.refresh')}</button>
+            </div>
+
             {loading ? (
-              <div className="muted">Loading…</div>
+              <div className="forum-loading">
+                <div className="forum-spinner"></div>
+                {translate('forum.common.loading')}
+              </div>
             ) : error ? (
-              <div className="muted" style={{ color: 'var(--danger)' }}>{error}</div>
+              <div className="forum-error">{error}</div>
             ) : threads.length === 0 ? (
-              <div className="callout">暂无主题，快来发布第一条帖子吧！</div>
+              <div className="forum-empty">{translate('forum.threadList.empty')}</div>
             ) : (
-              <ul className="list">
-                {threads.map(t => (
-                  <li key={t.id} className={`list-item ${selected?.thread?.id === t.id ? 'active' : ''}`} onClick={() => openThread(t.id)}>
-                    <div className="input-row" style={{ alignItems: 'baseline' }}>
-                      <div className="title" style={{ fontSize: '1rem' }}>{t.title}</div>
-                      <span className="badge published">thread</span>
-                    </div>
-                    <div className="thread-meta">
-                      <span>by {t.author_name || 'anonymous'}</span>
-                      <span>·</span>
-                      <span>{new Date(t.created_at).toLocaleString()}</span>
-                    </div>
-                  </li>
-                ))}
+              <ul>
+                {threads.map((thread) => {
+                  const author = thread.author_name || anonymousLabel;
+                  const isActive = selected?.thread?.id === thread.id;
+                  return (
+                    <li
+                      key={thread.id}
+                      className={`forum-thread ${isActive ? 'active' : ''}`}
+                      onClick={() => openThread(thread.id)}
+                    >
+                      <div className="forum-thread__header">
+                        <p className="forum-thread__title">{thread.title}</p>
+                        <span className="forum-thread__badge">{translate('forum.threadList.badge')}</span>
+                      </div>
+                      <div className="forum-thread__meta">
+                        <span>{translate('forum.threadList.by', { author })}</span>
+                        <span>•</span>
+                        <span>{new Date(thread.created_at).toLocaleString()}</span>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
+
+          <div className="forum-stats">
+            <h3>{translate('forum.metrics.activeMembers')}</h3>
+            {heroTiles.map((tile) => (
+              <div key={tile.label} className="forum-kpi">
+                <span className="forum-kpi__label">{tile.label}</span>
+                <span className="forum-kpi__value">{tile.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div>
-          <div className="card card-padded" style={{ minHeight: 300 }}>
+        <div className="forum-main">
+          <div className="forum-thread-view">
             {!selected ? (
-              <div className="muted">Select a thread to view posts</div>
+              <div className="forum-empty">{translate('forum.threadDetail.selectPrompt')}</div>
             ) : (
               <div>
-                <h3 className="title" style={{ marginTop: 0 }}>{selected.thread.title}</h3>
-                <div className="muted" style={{ marginBottom: 12 }}>by {selected.thread.author_name || 'anonymous'}</div>
-                <div className="divider" />
+                <div className="forum-thread-view__header">
+                  <h3 className="forum-thread-view__title">{selected.thread.title}</h3>
+                  <div className="forum-thread-view__meta">
+                    <span>{translate('forum.threadDetail.by', { author: selected.thread.author_name || anonymousLabel })}</span>
+                    <span>•</span>
+                    <span>{new Date(selected.thread.created_at).toLocaleString()}</span>
+                  </div>
+                </div>
+
                 {(selected.posts || []).length === 0 ? (
-                  <div className="callout">该主题暂无可见帖子。若你刚刚创建了主题，首帖可能在审核中。</div>
+                  <div className="forum-empty">{translate('forum.threadDetail.noPosts')}</div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {selected.posts.map(p => (
-                      <div key={p.id} className="post">
-                        <div className="thread-meta">
-                          <span>{p.author_name || 'anonymous'}</span>
-                          <span>·</span>
-                          <span>{new Date(p.created_at).toLocaleString()}</span>
-                          <span>·</span>
-                          <span className={`badge ${p.status === 'pending' ? 'pending' : 'published'}`}>{p.status}</span>
-                        </div>
-                        <div className="post-content" dangerouslySetInnerHTML={{ __html: p.safe_html }} />
-                      </div>
-                    ))}
+                  <div className="forum-posts">
+                    {selected.posts.map((post) => {
+                      const statusKey = `forum.common.status.${post.status}`;
+                      const statusLabel = translate(statusKey);
+                      const statusText = statusLabel === statusKey ? post.status : statusLabel;
+                      return (
+                        <article key={post.id} className="forum-post">
+                          <div className="forum-post__meta">
+                            <span>{post.author_name || anonymousLabel}</span>
+                            <span>•</span>
+                            <span>{new Date(post.created_at).toLocaleString()}</span>
+                            <span className="forum-post__badge">{statusText}</span>
+                          </div>
+                          <div className="forum-post__content" dangerouslySetInnerHTML={{ __html: post.safe_html }} />
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             )}
-          </div>
 
-          {selected && (
-            <div className="card card-padded" style={{ marginTop: 16 }}>
-              <h3 className="subtitle">Reply</h3>
-              <textarea
-                className="input"
-                placeholder="回复内容（支持基础 HTML；图片禁用）"
-                rows={4}
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-              />
-              <div style={{ marginTop: 8 }}>
-                <button className="btn btn-primary" onClick={sendReply} disabled={!replyContent.trim()}>Send Reply</button>
+            {selected && (
+              <div className="forum-reply">
+                <h3>{translate('forum.reply.title')}</h3>
+                <textarea
+                  className="forum-textarea"
+                  placeholder={translate('forum.reply.placeholder')}
+                  rows={4}
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                />
+                <div className="forum-compose__footer">
+                  {!me && authChecked && (
+                    <div className="forum-error">{translate('forum.reply.loginRequired')}</div>
+                  )}
+                  <button className="forum-btn forum-btn-primary" onClick={sendReply} disabled={!me || !replyContent.trim()}>
+                    {translate('forum.reply.send')}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

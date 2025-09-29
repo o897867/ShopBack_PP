@@ -37,9 +37,15 @@ from square import Square
 from square.environment import SquareEnvironment  # 正确的导入
 import uuid
 from forum_api import get_forum_router
+from auth_router import get_auth_router
+from auth import get_current_user_dependency, ensure_auth_tables
 
 # 加载环境变量
 load_dotenv()
+
+# Feature toggles for optional prediction services
+AI_PREDICTIONS_ENABLED = False
+ETH_PREDICTIONS_ENABLED = False
 
 # Pydantic模型定义
 
@@ -182,6 +188,7 @@ class CFDBroker(BaseModel):
     id: int
     name: str
     regulators: Optional[str] = None
+    regulator_details: Optional[List[Dict[str, Any]]] = None
     rating: Optional[str] = None
     website: Optional[str] = None
     logo_url: Optional[str] = None
@@ -204,7 +211,7 @@ app = FastAPI(
 
 # CORS中间件配置 - 限制允许的源以提高安全性
 # 在生产环境中，应该设置具体的前端域名
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5174,http://127.0.0.1:5174").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -253,10 +260,14 @@ except Exception:
     pass
 
 # Initialize ETH Kalman model
-eth_model_manager = ETHKalmanModelManager(db_path)
-eth_data_manager = BinanceDataManager(eth_model_manager)
+if ETH_PREDICTIONS_ENABLED:
+    eth_model_manager = ETHKalmanModelManager(db_path)
+    eth_data_manager = BinanceDataManager(eth_model_manager)
+else:
+    eth_model_manager = None
+    eth_data_manager = None
 eth_ws_clients = set()  # WebSocket clients for ETH updates
-model_manager = ModelManager(db_path)
+model_manager = ModelManager(db_path) if AI_PREDICTIONS_ENABLED else None
 
 # 初始化Square客户端
 square_client = Square(
@@ -351,10 +362,12 @@ def get_db_connection():
 
 # Ensure showcase tables now that DB connection helper exists
 ensure_showcase_tables()
- 
-# Include Forum API after DB helper is defined
-# (router will use get_db_connection provided here)
-app.include_router(get_forum_router(get_db_connection))
+# Ensure auth tables on startup
+ensure_auth_tables(get_db_connection)
+
+# Include Auth and Forum routers
+app.include_router(get_auth_router(get_db_connection))
+app.include_router(get_forum_router(get_db_connection, get_current_user_dependency(get_db_connection)))
 
 # Ensure CFD tables exist
 def ensure_cfd_tables():
@@ -670,7 +683,7 @@ async def list_cfd_brokers(request: Request):
     cur = conn.cursor()
     try:
         cur.execute(
-            "SELECT id, name, regulators, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers ORDER BY id DESC"
+            "SELECT id, name, regulators, regulator_details_json, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers ORDER BY id DESC"
         )
         rows = cur.fetchall()
         result: List[CFDBroker] = []
@@ -687,6 +700,13 @@ async def list_cfd_brokers(request: Request):
                 rb = None
             d['rating_breakdown'] = rb
             d.pop('rating_breakdown_json', None)
+            details = None
+            try:
+                details = json.loads(d.get('regulator_details_json') or 'null')
+            except Exception:
+                details = None
+            d['regulator_details'] = details
+            d.pop('regulator_details_json', None)
             result.append(CFDBroker(**d))
         return result
     finally:
@@ -698,7 +718,7 @@ async def get_cfd_broker(broker_id: int, request: Request):
     cur = conn.cursor()
     try:
         cur.execute(
-            "SELECT id, name, regulators, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers WHERE id = ?",
+            "SELECT id, name, regulators, regulator_details_json, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers WHERE id = ?",
             (broker_id,)
         )
         row = cur.fetchone()
@@ -716,6 +736,13 @@ async def get_cfd_broker(broker_id: int, request: Request):
             rb = None
         d['rating_breakdown'] = rb
         d.pop('rating_breakdown_json', None)
+        details = None
+        try:
+            details = json.loads(d.get('regulator_details_json') or 'null')
+        except Exception:
+            details = None
+        d['regulator_details'] = details
+        d.pop('regulator_details_json', None)
         return CFDBroker(**d)
     finally:
         conn.close()
@@ -737,6 +764,232 @@ async def list_cfd_broker_news(broker_id: int):
         return [CFDBrokerNews(**dict(r)) for r in rows]
     finally:
         conn.close()
+
+# ============= CFD Broker Comparison Endpoints =============
+
+@app.post("/api/cfd/brokers/compare", summary="Compare selected CFD brokers")
+async def compare_cfd_brokers(broker_ids: List[int], request: Request):
+    """Compare multiple CFD brokers side by side"""
+    if len(broker_ids) < 2:
+        raise HTTPException(status_code=400, detail="At least 2 brokers are required for comparison")
+    if len(broker_ids) > 5:
+        raise HTTPException(status_code=400, detail="Maximum 5 brokers can be compared at once")
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        # Get broker data for comparison
+        placeholders = ','.join(['?'] * len(broker_ids))
+        cur.execute(f"""
+            SELECT id, name, regulators, regulator_details_json, rating, website, logo_url, rating_breakdown_json, created_at
+            FROM cfd_brokers WHERE id IN ({placeholders})
+        """, broker_ids)
+        rows = cur.fetchall()
+
+        if len(rows) != len(broker_ids):
+            raise HTTPException(status_code=404, detail="One or more brokers not found")
+
+        # Process broker data for comparison
+        brokers = []
+        for r in rows:
+            d = dict(r)
+            logo = d.get('logo_url')
+            if logo and logo.startswith('/static/'):
+                base = _get_base_url(request)
+                d['logo_url'] = f"{base}{logo}"
+
+            # Parse rating breakdown
+            rb = None
+            try:
+                rb = json.loads(d.get('rating_breakdown_json') or 'null')
+            except Exception:
+                rb = None
+            d['rating_breakdown'] = rb
+            d.pop('rating_breakdown_json', None)
+            details = None
+            try:
+                details = json.loads(d.get('regulator_details_json') or 'null')
+            except Exception:
+                details = None
+            d['regulator_details'] = details
+            d.pop('regulator_details_json', None)
+            brokers.append(d)
+
+        # Generate comparison analysis
+        comparison_result = {
+            'brokers': brokers,
+            'comparison_fields': _generate_comparison_fields(brokers),
+            'best_in_category': _analyze_best_performers(brokers),
+            'summary': _generate_comparison_summary(brokers)
+        }
+
+        return comparison_result
+
+    finally:
+        conn.close()
+
+@app.get("/api/cfd/brokers/compare-fields", summary="Get available comparison fields")
+async def get_broker_comparison_fields():
+    """Get the list of fields available for broker comparison"""
+    return {
+        'basic_fields': [
+            {'key': 'name', 'label': 'Broker Name', 'type': 'text'},
+            {'key': 'logo_url', 'label': 'Logo', 'type': 'image'},
+            {'key': 'website', 'label': 'Website', 'type': 'url'},
+            {'key': 'rating', 'label': 'Overall Rating', 'type': 'grade'}
+        ],
+        'regulatory_fields': [
+            {'key': 'regulators', 'label': 'Regulatory Bodies', 'type': 'text'},
+            {'key': 'regulatory_count', 'label': 'Number of Regulators', 'type': 'number'}
+        ],
+        'rating_breakdown_fields': [
+            {'key': '监管强度', 'label': 'Regulatory Strength', 'type': 'score'},
+            {'key': '透明度与合规', 'label': 'Transparency & Compliance', 'type': 'score'},
+            {'key': '交易成本', 'label': 'Trading Costs', 'type': 'score'},
+            {'key': '执行与流动性', 'label': 'Execution & Liquidity', 'type': 'score'},
+            {'key': '平台与产品', 'label': 'Platform & Products', 'type': 'score'},
+            {'key': '服务与教育', 'label': 'Service & Education', 'type': 'score'},
+            {'key': '稳定性与口碑', 'label': 'Stability & Reputation', 'type': 'score'}
+        ]
+    }
+
+def _generate_comparison_fields(brokers):
+    """Generate standardized comparison fields from broker data"""
+    comparison = {}
+
+    for broker in brokers:
+        broker_id = broker['id']
+        regulator_details = broker.get('regulator_details') or []
+        regulator_codes = []
+        for item in regulator_details:
+            code = item.get('code') or item.get('regulator')
+            if not code:
+                continue
+            regulator_codes.append(str(code).strip())
+        if not regulator_codes and broker.get('regulators'):
+            regulator_codes = [r.strip() for r in broker.get('regulators', '').split(',') if r.strip()]
+        comparison[broker_id] = {
+            'basic_info': {
+                'name': broker.get('name', 'N/A'),
+                'logo_url': broker.get('logo_url'),
+                'website': broker.get('website', 'N/A'),
+                'rating': broker.get('rating', 'N/A')
+            },
+            'regulatory_info': {
+                'regulators': ', '.join(regulator_codes) if regulator_codes else broker.get('regulators', 'N/A'),
+                'regulator_details': regulator_details,
+                'regulatory_count': len(regulator_details) if regulator_details else len(regulator_codes)
+            },
+            'rating_breakdown': broker.get('rating_breakdown') or {}
+        }
+
+    return comparison
+
+def _analyze_best_performers(brokers):
+    """Analyze which broker performs best in each category"""
+    best_performers = {}
+
+    # Find best overall rating
+    best_rating_broker = None
+    best_rating_value = None
+    for broker in brokers:
+        rating = broker.get('rating')
+        if rating:
+            # Convert letter grades to numeric for comparison
+            rating_score = _letter_to_score(rating)
+            if rating_score and (best_rating_value is None or rating_score > best_rating_value):
+                best_rating_value = rating_score
+                best_rating_broker = broker['id']
+
+    if best_rating_broker:
+        best_performers['overall_rating'] = best_rating_broker
+
+    # Find best in each rating breakdown category
+    breakdown_categories = ['监管强度', '透明度与合规', '交易成本', '执行与流动性', '平台与产品', '服务与教育', '稳定性与口碑']
+
+    for category in breakdown_categories:
+        best_score = None
+        best_broker = None
+
+        for broker in brokers:
+            breakdown = broker.get('rating_breakdown')
+            if breakdown and category in breakdown:
+                score_data = breakdown[category]
+                score = None
+
+                if isinstance(score_data, dict):
+                    score = score_data.get('score') or score_data.get('value')
+                else:
+                    score = score_data
+
+                if score is not None:
+                    try:
+                        score = float(score)
+                        if best_score is None or score > best_score:
+                            best_score = score
+                            best_broker = broker['id']
+                    except (ValueError, TypeError):
+                        continue
+
+        if best_broker:
+            best_performers[category] = best_broker
+
+    # Find broker with most regulators
+    max_regulators = 0
+    best_regulated_broker = None
+    for broker in brokers:
+        details = broker.get('regulator_details') or []
+        if details:
+            reg_count = len(details)
+        else:
+            regulators = broker.get('regulators', '')
+            reg_count = len(regulators.split(',')) if regulators else 0
+        if reg_count > max_regulators:
+            max_regulators = reg_count
+            best_regulated_broker = broker['id']
+
+    if best_regulated_broker:
+        best_performers['regulatory_count'] = best_regulated_broker
+
+    return best_performers
+
+def _generate_comparison_summary(brokers):
+    """Generate a summary of the comparison"""
+    total_brokers = len(brokers)
+
+    # Count brokers with ratings
+    rated_brokers = len([b for b in brokers if b.get('rating')])
+
+    # Count unique regulators
+    all_regulators = set()
+    for broker in brokers:
+        details = broker.get('regulator_details') or []
+        if details:
+            for item in details:
+                code = item.get('code') or item.get('regulator')
+                if code:
+                    all_regulators.add(str(code).strip())
+        else:
+            regs = broker.get('regulators', '')
+            if regs:
+                all_regulators.update([r.strip() for r in regs.split(',')])
+
+    return {
+        'total_brokers': total_brokers,
+        'rated_brokers': rated_brokers,
+        'unique_regulators': len(all_regulators),
+        'regulator_list': list(all_regulators)
+    }
+
+def _letter_to_score(grade):
+    """Convert letter grade to numeric score for comparison"""
+    grade_map = {
+        'A++': 98, 'A+': 95, 'A': 92, 'A-': 88,
+        'B+': 84, 'B': 80, 'B-': 76,
+        'C+': 72, 'C': 68, 'C-': 64
+    }
+    return grade_map.get(grade)
+
 @app.post("/api/add-store", summary="添加新商家")
 async def add_store(request: AddStoreRequest, background_tasks: BackgroundTasks):
     """添加新的ShopBack或CashRewards商家"""
@@ -1450,6 +1703,8 @@ async def test_email(email: str = Query(..., description="测试邮箱")):
 @app.get("/api/predictions", summary="获取所有预测结果")
 async def get_all_predictions():
     """获取所有商家的预测结果"""
+    if not AI_PREDICTIONS_ENABLED or model_manager is None:
+        raise HTTPException(status_code=503, detail="AI predictions service is temporarily disabled")
     try:
         predictions = model_manager.get_all_predictions()
         return {
@@ -1464,6 +1719,8 @@ async def get_all_predictions():
 @app.get("/api/predictions/global", summary="获取全局预测模型")
 async def get_global_predictions():
     """获取全局预测模型的结果"""
+    if not AI_PREDICTIONS_ENABLED or model_manager is None:
+        raise HTTPException(status_code=503, detail="AI predictions service is temporarily disabled")
     try:
         model = model_manager.load_model()  # None for global model
         if not model:
@@ -1481,6 +1738,14 @@ async def get_global_predictions():
 @app.get("/api/predictions/scheduler-status", summary="获取模型调度器状态")
 async def get_model_scheduler_status():
     """获取后台模型更新调度器的状态"""
+    if not AI_PREDICTIONS_ENABLED:
+        return {
+            "success": False,
+            "scheduler_status": {
+                "running": False,
+                "message": "Scheduler disabled"
+            }
+        }
     try:
         status = get_scheduler_status()
         if status is None:
@@ -1502,6 +1767,8 @@ async def get_model_scheduler_status():
 @app.get("/api/predictions/{store_id}", summary="获取特定商家的预测")
 async def get_store_predictions(store_id: int):
     """获取特定商家的详细预测"""
+    if not AI_PREDICTIONS_ENABLED or model_manager is None:
+        raise HTTPException(status_code=503, detail="AI predictions service is temporarily disabled")
     try:
         model = model_manager.load_model(store_id)
         if not model:
@@ -1519,6 +1786,8 @@ async def get_store_predictions(store_id: int):
 @app.post("/api/predictions/retrain", summary="重新训练预测模型")
 async def retrain_models(background_tasks: BackgroundTasks, store_id: Optional[int] = None):
     """重新训练预测模型"""
+    if not AI_PREDICTIONS_ENABLED or model_manager is None:
+        raise HTTPException(status_code=503, detail="AI predictions service is temporarily disabled")
     try:
         if store_id:
             # 重新训练特定商家模型
@@ -1541,6 +1810,8 @@ async def retrain_models(background_tasks: BackgroundTasks, store_id: Optional[i
 @app.get("/api/predictions/insights", summary="获取AI洞察")
 async def get_ai_insights():
     """获取基于预测模型的AI洞察"""
+    if not AI_PREDICTIONS_ENABLED or model_manager is None:
+        raise HTTPException(status_code=503, detail="AI predictions service is temporarily disabled")
     try:
         predictions = model_manager.get_all_predictions()
         insights = generate_insights(predictions)
@@ -2127,6 +2398,9 @@ threading.Thread(target=run_scheduler, daemon=True).start()
 @app.on_event("startup")
 async def startup_eth_model():
     """Initialize ETH model on startup"""
+    if not ETH_PREDICTIONS_ENABLED or eth_model_manager is None or eth_data_manager is None:
+        logger.info("ETH prediction subsystem disabled; skipping Kalman model startup")
+        return
     try:
         # Load saved state if exists
         if eth_model_manager.load_state():
@@ -2166,6 +2440,8 @@ async def startup_eth_model():
 @app.get("/api/eth/current-price", summary="Get current ETH price and model state")
 async def get_eth_current_price():
     """Get current ETH price with model state"""
+    if not ETH_PREDICTIONS_ENABLED or eth_model_manager is None or eth_data_manager is None:
+        raise HTTPException(status_code=503, detail="ETH prediction service is temporarily disabled")
     try:
         current_price = eth_data_manager.fetcher.get_current_price()
         model_metrics = eth_model_manager.get_model_metrics()
@@ -2181,6 +2457,8 @@ async def get_eth_current_price():
 @app.get("/api/eth/predictions", summary="Get ETH price predictions")
 async def get_eth_predictions():
     """Get ETH price predictions for multiple horizons"""
+    if not ETH_PREDICTIONS_ENABLED or eth_model_manager is None or eth_data_manager is None:
+        raise HTTPException(status_code=503, detail="ETH prediction service is temporarily disabled")
     try:
         # Get latest candle
         candles = eth_data_manager.fetcher.get_recent_candles(2)
@@ -2197,6 +2475,8 @@ async def get_eth_predictions():
 @app.get("/api/eth/candles-3m", summary="Get historical 3-minute candles")
 async def get_eth_candles(limit: int = Query(100, le=500)):
     """Get historical 3-minute ETH candles"""
+    if not ETH_PREDICTIONS_ENABLED or eth_data_manager is None:
+        raise HTTPException(status_code=503, detail="ETH prediction service is temporarily disabled")
     try:
         candles = eth_data_manager.fetcher.get_recent_candles(limit)
         return {
@@ -2209,6 +2489,8 @@ async def get_eth_candles(limit: int = Query(100, le=500)):
 @app.post("/api/eth/model/half-life", summary="Adjust Kalman filter half-life")
 async def set_eth_half_life(half_life_candles: int = Query(..., ge=4, le=6)):
     """Adjust the half-life parameter (4-6 candles, i.e., 12-18 minutes)"""
+    if not ETH_PREDICTIONS_ENABLED or eth_model_manager is None:
+        raise HTTPException(status_code=503, detail="ETH prediction service is temporarily disabled")
     try:
         eth_model_manager.model.set_half_life(half_life_candles)
         eth_model_manager.save_state()
@@ -2224,6 +2506,8 @@ async def set_eth_half_life(half_life_candles: int = Query(..., ge=4, le=6)):
 @app.get("/api/eth/model/metrics", summary="Get model performance metrics")
 async def get_eth_model_metrics():
     """Get detailed model metrics and parameters"""
+    if not ETH_PREDICTIONS_ENABLED or eth_model_manager is None:
+        raise HTTPException(status_code=503, detail="ETH prediction service is temporarily disabled")
     try:
         metrics = eth_model_manager.get_model_metrics()
         state = eth_model_manager.model.get_state()
@@ -2245,6 +2529,14 @@ async def get_eth_model_metrics():
 async def eth_kalman_websocket(websocket: WebSocket):
     """WebSocket for real-time ETH Kalman model updates"""
     await websocket.accept()
+    if not ETH_PREDICTIONS_ENABLED or eth_model_manager is None or eth_data_manager is None:
+        await websocket.send_json({
+            "type": "disabled",
+            "message": "ETH prediction service is temporarily disabled"
+        })
+        await websocket.close()
+        return
+
     eth_ws_clients.add(websocket)
     
     try:
@@ -2297,6 +2589,8 @@ async def eth_kalman_websocket(websocket: WebSocket):
 # Broadcast function for ETH updates
 async def broadcast_eth_update(update_data: dict):
     """Broadcast ETH model updates to all WebSocket clients"""
+    if not ETH_PREDICTIONS_ENABLED:
+        return
     disconnected = set()
     for ws in eth_ws_clients:
         try:
@@ -2312,9 +2606,10 @@ async def broadcast_eth_update(update_data: dict):
 # This prevents the recursion issue that was causing the maximum recursion depth error
 
 if __name__ == "__main__":
-    # Start the model scheduler
-    start_model_scheduler(db_path)
-    logger.info("Started Bayesian model scheduler")
-    
+    # Start the model scheduler when predictions are enabled
+    if AI_PREDICTIONS_ENABLED:
+        start_model_scheduler(db_path)
+        logger.info("Started Bayesian model scheduler")
+
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)

@@ -2,22 +2,25 @@ import React, { useState } from 'react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 
-const Navigation = ({ currentPage, setCurrentPage }) => {
+const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { currentLanguage } = useLanguage();
   const translate = (key) => t(key, currentLanguage);
 
-  const navItems = [
-    { id: 'home', label: translate('showcase.categories') },
-    { id: 'dashboard', label: translate('nav.dashboard') },
-    { id: 'showcase', label: translate('showcase.title') },
-    { id: 'forum', label: 'Forum' },
-    { id: 'forum-mod', label: 'Forum Mod' },
-    { id: 'predictions', label: 'AI Predictions' },
-    { id: 'eth', label: 'ETH Prediction' },
-    { id: 'trading', label: translate('nav.trading') },
-    { id: 'donations', label: translate('nav.donations') }
+  const baseItems = [
+    { id: 'broker-hub', label: translate('nav.brokerHub') },
+    { id: 'forum', label: translate('forum.title') },
+    { id: 'trading', label: translate('nav.trading') }
   ];
+
+  const authItems = currentUser
+    ? [{ id: 'forum-mod', label: 'Forum Mod' }] // 可根据角色再细化
+    : [
+        { id: 'login', label: translate('auth.login.nav') },
+        { id: 'register', label: translate('auth.register.nav') }
+      ];
+
+  const navItems = [...baseItems, ...authItems];
 
   const handleSelect = (id) => {
     setCurrentPage(id);
@@ -54,6 +57,11 @@ const Navigation = ({ currentPage, setCurrentPage }) => {
 
       {/* Slide-out drawer */}
       <div className={`nav-drawer ${isOpen ? 'open' : ''}`} role="menu">
+        {currentUser && (
+          <div className="badge published" style={{ marginBottom: 8 }}>
+            已登录：{currentUser.username || currentUser.display_name}
+          </div>
+        )}
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -64,6 +72,14 @@ const Navigation = ({ currentPage, setCurrentPage }) => {
             {item.label}
           </button>
         ))}
+        {currentUser && (
+          <button
+            className="nav-item"
+            onClick={() => { onLogout && onLogout(); setIsOpen(false); }}
+          >
+            退出登录
+          </button>
+        )}
       </div>
     </>
   );

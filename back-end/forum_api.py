@@ -95,7 +95,7 @@ class ReportCreate(BaseModel):
 RateKey = str
 
 
-def get_forum_router(get_db_connection: Callable[[], Any]) -> APIRouter:
+def get_forum_router(get_db_connection: Callable[[], Any], get_current_user: Optional[Callable[..., Any]] = None) -> APIRouter:
     router = APIRouter(prefix="/api/forum", tags=["forum"])
 
     # Ensure tables
@@ -206,13 +206,15 @@ def get_forum_router(get_db_connection: Callable[[], Any]) -> APIRouter:
 
     # Routes
     @router.post("/threads", response_model=ForumThreadOut, summary="Create thread (first post)")
-    async def create_thread(body: ForumThreadCreate, request: Request):
+    async def create_thread(body: ForumThreadCreate, request: Request, user: Dict[str, Any] = Depends(lambda: None) if get_current_user is None else Depends(get_current_user)):
         # Defensive: ensure tables exist
         try:
             ensure_forum_tables()
         except Exception:
             pass
         rate_limit(request, key_hint="forum_create_thread", times=10, per_seconds=60)
+        if user is None:
+            raise HTTPException(status_code=401, detail="登录后才能发帖")
         # Pydantic已经验证了输入，这里直接使用
         title = body.title
 
@@ -224,9 +226,12 @@ def get_forum_router(get_db_connection: Callable[[], Any]) -> APIRouter:
         conn = get_db_connection()
         cur = conn.cursor()
         try:
+            author_display = None
+            if user:
+                author_display = user.get('display_name') or user.get('username')
             cur.execute(
                 "INSERT INTO forum_threads (title, author_name, tags_json, status, last_post_at) VALUES (?, ?, ?, 'normal', CURRENT_TIMESTAMP)",
-                (title, body.author_name, tags_json)
+                (title, (author_display if author_display else body.author_name), tags_json)
             )
             thread_id = cur.lastrowid
             cur.execute(
@@ -234,7 +239,7 @@ def get_forum_router(get_db_connection: Callable[[], Any]) -> APIRouter:
                 INSERT INTO forum_posts (thread_id, author_name, raw_html, safe_html, status, rules_score, rules_hits_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (thread_id, body.author_name, body.content_html, safe, status, score, json.dumps([h.__dict__ for h in hits]))
+                (thread_id, (author_display if author_display else body.author_name), body.content_html, safe, status, score, json.dumps([h.__dict__ for h in hits]))
             )
             conn.commit()
             cur.execute("SELECT id, title, author_name, tags_json, status, created_at, last_post_at FROM forum_threads WHERE id = ?", (thread_id,))
@@ -327,12 +332,14 @@ def get_forum_router(get_db_connection: Callable[[], Any]) -> APIRouter:
             conn.close()
 
     @router.post("/threads/{thread_id}/posts", response_model=ForumPostOut, summary="Reply to a thread")
-    async def reply_thread(thread_id: int, body: ForumPostCreate, request: Request):
+    async def reply_thread(thread_id: int, body: ForumPostCreate, request: Request, user: Dict[str, Any] = Depends(lambda: None) if get_current_user is None else Depends(get_current_user)):
         try:
             ensure_forum_tables()
         except Exception:
             pass
         rate_limit(request, key_hint="forum_reply", times=10, per_seconds=60)
+        if user is None:
+            raise HTTPException(status_code=401, detail="登录后才能回复")
         conn = get_db_connection()
         cur = conn.cursor()
         try:
@@ -343,12 +350,15 @@ def get_forum_router(get_db_connection: Callable[[], Any]) -> APIRouter:
             safe = sanitize_html(body.content_html)
             score, hits = evaluate_rules(body.content_html)
             status = 'pending' if score >= 5 else 'published'
+            author_display = None
+            if user:
+                author_display = user.get('display_name') or user.get('username')
             cur.execute(
                 """
                 INSERT INTO forum_posts (thread_id, author_name, raw_html, safe_html, status, rules_score, rules_hits_json)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (thread_id, body.author_name, body.content_html, safe, status, score, json.dumps([h.__dict__ for h in hits]))
+                (thread_id, (author_display if author_display else body.author_name), body.content_html, safe, status, score, json.dumps([h.__dict__ for h in hits]))
             )
             post_id = cur.lastrowid
             cur.execute("UPDATE forum_threads SET last_post_at=CURRENT_TIMESTAMP WHERE id = ?", (thread_id,))

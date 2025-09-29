@@ -3,76 +3,45 @@ import './App.css';
 import './index.css';
 import Navigation from './components/Navigation.jsx';
 import TradingViewPage from './pages/trading.jsx';
-import DonationPage from './pages/DonationPage.jsx';
-import BayesianDashboard from './pages/BayesianDashboard.jsx';
-import EthKalmanPrediction from './pages/EthKalmanPrediction.jsx';
-import Showcase from './pages/Showcase.jsx';
+import BrokerHub from './pages/BrokerHub.jsx';
 const Forum = lazy(() => import('./pages/Forum.jsx'));
 const ForumModeration = lazy(() => import('./pages/ForumModeration.jsx'));
+const Login = lazy(() => import('./pages/Login.jsx'));
+const Register = lazy(() => import('./pages/Register.jsx'));
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
 import { getThresholdTypeText } from './utils/thresholdTypes.js';
-import { useDashboard } from './hooks/useDashboard.js';
-import { useStores } from './hooks/useStores.js';
-import { useAlerts } from './hooks/useAlerts.js';
-import { useComparison } from './hooks/useComparison.js';
-
-// Dashboard Components
-import StatsCards from './components/Dashboard/StatsCards.jsx';
-import AverageCashback from './components/Dashboard/AverageCashback.jsx';
-import UpsizedStoresList from './components/Dashboard/UpsizedStoresList.jsx';
-import PerformanceCard from './components/Dashboard/PerformanceCard.jsx';
-
-// Comparison Components
-import CompareModal from './components/Comparison/CompareModal.jsx';
-import ComparableStoresList from './components/Comparison/ComparableStoresList.jsx';
-
-// Store Components
-import StoreList from './components/Stores/StoreList.jsx';
-import StoreDetails from './components/Stores/StoreDetails.jsx';
-
-// Alert Components
-import AlertManagement from './components/Alerts/AlertManagement.jsx';
 
 
 const App = () => {
   const { currentLanguage, isLoading: languageLoading } = useLanguage();
   const translate = (key) => t(key, currentLanguage);
+  const pausedPages = {
+    predictions: {
+      title: 'AI Cashback Predictions',
+      message: 'This feature is currently paused while we upgrade the models.'
+    },
+    eth: {
+      title: 'ETH Price Prediction',
+      message: 'ETH predictions are paused for maintenance and will return soon.'
+    }
+  };
   // Initialize page from URL hash or localStorage; fallback to 'home'
   const getInitialPage = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['home','dashboard','showcase','forum','forum-mod','predictions','eth','trading','donations'];
+      const known = ['broker-hub','forum','forum-mod','predictions','eth','trading','login','register'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
     } catch (e) { /* ignore */ }
-    return 'home';
+    return 'broker-hub';
   };
   const [currentPage, setCurrentPage] = useState(getInitialPage);
   
-  // Custom hooks
-  const { dashboardStats, upsizedStores, statistics, performanceData, loading, error, isRescraping, stores, setStores, fetchData, handleRescrape } = useDashboard();
-  const storeHook = useStores();
-  const alertHook = useAlerts();
-  const comparisonHook = useComparison();
-  // Load dashboard data only when viewing the dashboard
-  useEffect(() => {
-    if (currentPage !== 'dashboard') return;
-    const initializeData = async () => {
-      const result = await fetchData();
-      if (result) {
-        setStores(result.storesData);
-        storeHook.setStores(result.storesData);
-        comparisonHook.setComparableStores(result.comparableData);
-      }
-    };
-    initializeData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
 
   // Persist page selection and reflect in URL hash
   useEffect(() => {
@@ -87,47 +56,11 @@ const App = () => {
 
 
 
-if (currentPage === 'dashboard' && (languageLoading || loading)) {
-  return (
-    <div className="center" style={{ minHeight: '100vh' }}>
-      <div className="card card-padded" style={{ minWidth: 260, textAlign: 'center' }}>
-        <div className="muted" style={{ marginBottom: 8 }}>{translate('messages.loading')}</div>
-        <div className="pill">…</div>
-      </div>
-    </div>
-  );
-}
 
-  if (currentPage === 'dashboard' && error) {
-    return (
-      <div className="center" style={{ minHeight: '100vh' }}>
-        <div className="card card-padded" style={{ maxWidth: 560 }}>
-          <h2 className="title" style={{ color: 'var(--danger)', fontSize: '1.4rem' }}>{translate('messages.connectionError')}</h2>
-          <p className="muted">{error}</p>
-          <div style={{ marginTop: 12 }}>
-            <button className="btn btn-primary" onClick={fetchData}>
-              {translate('messages.retry')}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
-  // Minimal home with two translucent bubbles
-  if (currentPage === 'home') {
-    return (
-      <div className="home-bubbles">
-        <div className="bubble-container">
-          <button className="bubble" onClick={() => setCurrentPage('showcase')}>
-            <span className="bubble-label">{translate('showcase.title')}</span>
-          </button>
-          <button className="bubble" onClick={() => setCurrentPage('trading')}>
-            <span className="bubble-label">{translate('nav.trading')}</span>
-          </button>
-        </div>
-      </div>
-    );
+
+  if (currentPage === 'broker-hub') {
+    return <BrokerHub onNavigate={setCurrentPage} />;
   }
 
   return (
@@ -144,66 +77,19 @@ if (currentPage === 'dashboard' && (languageLoading || loading)) {
         <div className="card card-padded header-card" style={{ marginBottom: 24, textAlign: 'center' }}>
           <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
           <h1 className="title" style={{ fontSize: '2rem' }}>
-            {currentPage === 'dashboard' ? translate('dashboard.title') :
-             currentPage === 'showcase' ? translate('showcase.title') :
-             currentPage === 'forum' ? 'Forum' :
+            {currentPage === 'forum' ? translate('forum.title') :
              currentPage === 'forum-mod' ? 'Forum Moderation' :
-             currentPage === 'predictions' ? 'AI Cashback Predictions' :
-             currentPage === 'eth' ? 'ETH Price Prediction' :
-             currentPage === 'trading' ? translate('nav.trading') :
-             translate('nav.donations')}
+             currentPage === 'login' ? translate('auth.login.title') :
+             currentPage === 'register' ? translate('auth.register.title') :
+             pausedPages[currentPage] ? pausedPages[currentPage].title :
+             currentPage === 'broker-hub' ? translate('brokerHub.pageTitle') :
+             translate('nav.trading')}
           </h1>
 
-          {currentPage === 'dashboard' && (
-            <div style={{ marginTop: 16 }}>
-              <button
-                onClick={handleRescrape}
-                disabled={isRescraping}
-                className={`btn btn-primary`}
-              >
-                {isRescraping ? translate('dashboard.rescraping') : translate('dashboard.rescrape')}
-              </button>
-              <button
-                onClick={() => alertHook.setShowAlerts(!alertHook.showAlerts)}
-                className="btn btn-secondary"
-                style={{ marginLeft: 8 }}
-              >
-                {alertHook.showAlerts ? translate('dashboard.closeAlerts') : translate('dashboard.alerts')}
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Pages */}
-        {currentPage === 'dashboard' ? (
-          <div>
-            <PerformanceCard performanceData={performanceData} translate={translate} />
-            <StatsCards dashboardStats={dashboardStats} translate={translate} />
-            <AverageCashback dashboardStats={dashboardStats} translate={translate} />
-            <UpsizedStoresList upsizedStores={upsizedStores} translate={translate} />
-            <ComparableStoresList
-              comparableStores={comparisonHook.comparableStores}
-              handleCompareStore={comparisonHook.handleCompareStore}
-              translate={translate}
-            />
-            <CompareModal
-              showComparison={comparisonHook.showComparison}
-              selectedComparison={comparisonHook.selectedComparison}
-              setShowComparison={comparisonHook.setShowComparison}
-              translate={translate}
-            />
-            <StoreList
-              stores={stores}
-              storeHook={storeHook}
-              fetchData={fetchData}
-              translate={translate}
-            />
-            <StoreDetails storeHook={storeHook} translate={translate} />
-            <AlertManagement alertHook={alertHook} translate={translate} />
-          </div>
-        ) : currentPage === 'showcase' ? (
-          <Showcase />
-        ) : currentPage === 'forum' ? (
+        {currentPage === 'forum' ? (
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <Forum />
           </Suspense>
@@ -211,15 +97,21 @@ if (currentPage === 'dashboard' && (languageLoading || loading)) {
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <ForumModeration />
           </Suspense>
-        ) : currentPage === 'predictions' ? (
-          <BayesianDashboard />
-        ) : currentPage === 'eth' ? (
-          <EthKalmanPrediction />
+        ) : currentPage === 'login' ? (
+          <Suspense fallback={<div className="muted">Loading…</div>}>
+            <Login onSuccess={() => setCurrentPage('forum')} />
+          </Suspense>
+        ) : currentPage === 'register' ? (
+          <Suspense fallback={<div className="muted">Loading…</div>}>
+            <Register onSuccess={() => setCurrentPage('login')} />
+          </Suspense>
+        ) : pausedPages[currentPage] ? (
+          <div className="card card-padded" style={{ textAlign: 'center' }}>
+            <p className="muted" style={{ maxWidth: 520, margin: '0 auto' }}>{pausedPages[currentPage].message}</p>
+          </div>
         ) : currentPage === 'trading' ? (
           <TradingViewPage />
-        ) : (
-          <DonationPage />
-        )}
+        ) : null}
       </div>
     </div>
   );

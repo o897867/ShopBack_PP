@@ -4,6 +4,7 @@ export const translations = {
     // Navigation & General
     nav: {
       dashboard: 'ShopBack Management',
+      brokerHub: 'Broker Hub',
       trading: 'TradingView',
       donations: 'Donations'
     },
@@ -17,6 +18,201 @@ export const translations = {
       error: 'Error',
       warning: 'Warning',
       info: 'Information'
+    },
+
+    // Broker Hub
+    brokerHub: {
+      brand: 'ShopBack Intelligence Lab',
+      back: '← Back to main',
+      pageTitle: 'Broker Hub',
+      nav: {
+        brokers: 'Brokers',
+        ranking: 'Ranking',
+        community: 'Community'
+      },
+      hero: {
+        eyebrow: 'Daily radar for serious traders',
+        title: 'Build clarity with our broker, ranking & community hub.',
+        description: 'A lightweight control room inspired by WikiFX, reimagined with our tone and visual language.',
+        explore: 'Explore brokers',
+        joinCommunity: 'Join the community',
+        metricsTitle: 'Live oversight'
+      },
+      actions: {
+        retry: 'Try again',
+        refresh: 'Refresh data'
+      },
+      loading: 'Pulling fresh intelligence…',
+      errors: {
+        loadFailed: 'Unable to load broker data right now.'
+      },
+      metrics: {
+        brokers: {
+          label: 'Brokers tracked',
+          helper: '{{count}} listings monitored'
+        },
+        alerts: {
+          label: 'News updates this week',
+          helper: '{{count}} curated items'
+        },
+        sentiment: {
+          label: 'Active community voices',
+          helper: '{{count}} unique contributors'
+        }
+      },
+      sections: {
+        brokers: {
+          title: 'Broker Intelligence',
+          subtitle: 'Curated insights on the most active brokers in our universe.',
+          ratingLabel: 'Risk score',
+          metrics: {
+            regulators: 'Regulators',
+            rating: 'Rating',
+            website: 'Official site',
+            noData: 'Not available'
+          },
+          featureTemplate: '{{label}} · {{score}}',
+          regulatorTooltipLicense: 'License: {{value}}',
+          regulatorTooltipNote: 'Note: {{value}}',
+          actions: {
+            visitSite: 'Visit website',
+            compare: 'Compare soon'
+          },
+          empty: 'No broker profiles available yet.'
+        },
+        ranking: {
+          title: 'Broker Ranking',
+          subtitle: 'Real-time movement based on trust score, liquidity and user momentum.',
+          compositeLabel: 'Composite score',
+          updatesTitle: 'Market Signals',
+          summaryTemplate: 'Highlight: {{feature}} ({{score}}). Grade {{rating}}.',
+          summaryFallback: 'Grade {{rating}}.',
+          updateTemplate: '{{broker}} • {{tag}}',
+          updateFallback: 'Update from {{broker}}',
+          empty: 'No ranking data yet.',
+          emptyUpdates: 'No market signals yet.'
+        },
+        community: {
+          title: 'Community Pulse',
+          subtitle: 'Stay on top of conversations, verified feedback and collaboration opportunities.',
+          trendingTitle: 'Trending Discussions',
+          statsTitle: 'Community Stats',
+          eventsTitle: 'Latest Signals',
+          remindMe: 'Remind me',
+          defaultTag: 'Forum',
+          threadSummary: 'Started by {{author}}',
+          threadSummaryNoAuthor: 'Latest activity {{time}}',
+          participantCount: '{{count}} participants',
+          commentCount: '{{count}} replies',
+          stats: {
+            activeContributors: 'Active contributors',
+            threadsThisWeek: 'Threads this week',
+            totalPosts: 'Posts analysed'
+          },
+          eventsFromNews: 'Update from {{broker}}',
+          emptyFeed: 'No community conversations yet.',
+          emptyEvents: 'No recent signals.'
+        }
+      },
+      ratingBreakdown: {
+        regulation: 'Regulation strength',
+        transparency: 'Transparency & compliance',
+        tradingCost: 'Trading cost',
+        execution: 'Execution & liquidity',
+        platform: 'Platform & products',
+        service: 'Service & education',
+        stability: 'Stability & reputation'
+      }
+    },
+    
+    // Forum
+    forum: {
+      title: 'Forum',
+      subtitle: 'Supports basic formatting (bold, italics, lists, quotes, links). Image uploads are currently disabled and posts may require moderation.',
+      common: {
+        loggedIn: 'Logged in: {{name}}',
+        namePlaceholder: 'Your name (optional)',
+        refresh: 'Refresh',
+        anonymous: 'anonymous',
+        loading: 'Loading…',
+        counter: '{{current}}/{{limit}}',
+        status: {
+          pending: 'pending',
+          published: 'published'
+        }
+      },
+      newThread: {
+        title: 'New Thread',
+        titlePlaceholder: 'Title (max {{limit}} characters)',
+        contentPlaceholder: 'Content (basic HTML supported; images disabled)',
+        hint: 'Tip: Be respectful. Posts containing sensitive words or suspicious links may be held for moderation.',
+        loginRequired: 'Login required to post → go to “Login”',
+        create: 'Create Thread',
+        creating: 'Creating…'
+      },
+      threadList: {
+        title: 'Threads',
+        badge: 'thread',
+        empty: 'No threads yet—be the first to post!',
+        by: 'by {{author}}'
+      },
+      threadDetail: {
+        selectPrompt: 'Select a thread to view posts',
+        by: 'by {{author}}',
+        noPosts: 'No visible posts yet. If you just created the thread, the first post may still be under review.'
+      },
+      reply: {
+        title: 'Reply',
+        placeholder: 'Reply content (basic HTML supported; images disabled)',
+        loginRequired: 'Login required to reply → go to “Login”',
+        send: 'Send Reply'
+      },
+      metrics: {
+        liveThreads: 'Threads live',
+        activeMembers: 'Active members',
+        newActivity: 'Updates today'
+      },
+      errors: {
+        loadThreads: 'Failed to load threads',
+        createThread: 'Failed to create thread',
+        sendReply: 'Failed to reply',
+        openThread: 'Failed to load thread'
+      }
+    },
+
+    // Auth
+    auth: {
+      login: {
+        nav: 'Login',
+        title: 'Login',
+        subtitle: 'Access the forum and broker hub with your credentials.',
+        usernameLabel: 'Username',
+        usernamePlaceholder: '3–20 characters, letters/numbers/underscore',
+        passwordLabel: 'Password',
+        passwordPlaceholder: 'At least 8 characters with letters and numbers',
+        submit: 'Login',
+        submitting: 'Logging in…',
+        error: 'Unable to login right now.'
+      },
+      register: {
+        nav: 'Register',
+        title: 'Create account',
+        subtitle: 'Join the community and manage your broker intelligence.',
+        usernameLabel: 'Username',
+        usernamePlaceholder: '3–20 characters, letters/numbers/underscore',
+        passwordLabel: 'Password',
+        passwordPlaceholder: 'At least 8 characters with letters and numbers',
+        roleLabel: 'Account role',
+        brokerLabel: 'Linked broker',
+        roles: {
+          trader: 'Trader',
+          agent: 'Introducing broker'
+        },
+        submit: 'Register',
+        submitting: 'Submitting…',
+        success: 'Registration successful. You can now login.',
+        error: 'Unable to register right now.'
+      }
     },
     
     // Dashboard
@@ -368,6 +564,7 @@ export const translations = {
     // Navigation & General
     nav: {
       dashboard: 'ShopBack管理',
+      brokerHub: '经纪商控制台',
       trading: '交易图表',
       donations: '项目捐赠'
     },
@@ -381,6 +578,201 @@ export const translations = {
       error: '错误',
       warning: '警告',
       info: '信息'
+    },
+
+    // Broker Hub
+    brokerHub: {
+      brand: 'ShopBack 情报实验室',
+      back: '← 返回主页面',
+      pageTitle: '经纪商控制台',
+      nav: {
+        brokers: '经纪商',
+        ranking: '榜单',
+        community: '社区'
+      },
+      hero: {
+        eyebrow: '严肃交易者的每日雷达',
+        title: '用我们的经纪商、榜单与社区枢纽构建清晰视角。',
+        description: '参考 WikiFX 灵感，以我们的语气与视觉重新演绎的轻量控制室。',
+        explore: '浏览经纪商',
+        joinCommunity: '加入社区',
+        metricsTitle: '实时监控面板'
+      },
+      actions: {
+        retry: '重新尝试',
+        refresh: '刷新数据'
+      },
+      loading: '正在获取最新情报…',
+      errors: {
+        loadFailed: '当前无法加载经纪商数据。'
+      },
+      metrics: {
+        brokers: {
+          label: '监控中的经纪商',
+          helper: '当前追踪 {{count}} 家'
+        },
+        alerts: {
+          label: '本周新闻更新',
+          helper: '共整理 {{count}} 条'
+        },
+        sentiment: {
+          label: '社区活跃声音',
+          helper: '过去 7 天 {{count}} 位贡献者'
+        }
+      },
+      sections: {
+        brokers: {
+          title: '经纪商情报',
+          subtitle: '甄选我们生态中最活跃的经纪商洞察。',
+          ratingLabel: '风险评分',
+          metrics: {
+            regulators: '监管机构',
+            rating: '评级',
+            website: '官方网址',
+            noData: '暂无数据'
+          },
+          featureTemplate: '{{label}} · {{score}}',
+          regulatorTooltipLicense: '许可证号：{{value}}',
+          regulatorTooltipNote: '备注：{{value}}',
+          actions: {
+            visitSite: '访问官网',
+            compare: '对比功能即将上线'
+          },
+          empty: '暂未上线经纪商档案。'
+        },
+        ranking: {
+          title: '经纪商榜单',
+          subtitle: '基于信任度、流动性与用户动量的实时变动。',
+          compositeLabel: '综合评分',
+          updatesTitle: '市场信号',
+          summaryTemplate: '亮点：{{feature}}（{{score}}）。评级 {{rating}}。',
+          summaryFallback: '评级 {{rating}}。',
+          updateTemplate: '{{broker}} • {{tag}}',
+          updateFallback: '{{broker}} 最新动态',
+          empty: '暂无榜单数据。',
+          emptyUpdates: '暂无市场信号。'
+        },
+        community: {
+          title: '社区脉动',
+          subtitle: '掌握讨论热点、验证反馈与协作机会。',
+          trendingTitle: '热议话题',
+          statsTitle: '社区数据',
+          eventsTitle: '最新信号',
+          remindMe: '提醒我',
+          defaultTag: '社区',
+          threadSummary: '发帖人：{{author}}',
+          threadSummaryNoAuthor: '最新活动 {{time}}',
+          participantCount: '{{count}} 位参与者',
+          commentCount: '{{count}} 条回复',
+          stats: {
+            activeContributors: '活跃贡献者',
+            threadsThisWeek: '本周主题',
+            totalPosts: '分析帖子数'
+          },
+          eventsFromNews: '{{broker}} 最新动态',
+          emptyFeed: '暂无社区讨论。',
+          emptyEvents: '暂无最新提醒。'
+        }
+      },
+      ratingBreakdown: {
+        regulation: '监管强度',
+        transparency: '透明度与合规',
+        tradingCost: '交易成本',
+        execution: '执行与流动性',
+        platform: '平台与产品',
+        service: '服务与教育',
+        stability: '稳定性与口碑'
+      }
+    },
+
+    // Forum
+    forum: {
+      title: '社区论坛',
+      subtitle: '支持基础格式（粗体、斜体、列表、引用、链接）。暂不支持图片上传，内容可能进入人工审核。',
+      common: {
+        loggedIn: '已登录：{{name}}',
+        namePlaceholder: '昵称（可选）',
+        refresh: '刷新',
+        anonymous: '匿名',
+        loading: '加载中…',
+        counter: '{{current}}/{{limit}}',
+        status: {
+          pending: '待审核',
+          published: '已发布'
+        }
+      },
+      newThread: {
+        title: '发表主题',
+        titlePlaceholder: '标题（最多 {{limit}} 字）',
+        contentPlaceholder: '内容（支持基础 HTML；不支持图片）',
+        hint: '提示：请文明发言，包含敏感词或异常链接的内容将进入审核。',
+        loginRequired: '登录后才能发帖 → 前往“Login”',
+        create: '发布主题',
+        creating: '发布中…'
+      },
+      threadList: {
+        title: '主题列表',
+        badge: '主题',
+        empty: '暂无主题，快来发布第一条帖子吧！',
+        by: '作者：{{author}}'
+      },
+      threadDetail: {
+        selectPrompt: '选择一个主题查看内容',
+        by: '作者：{{author}}',
+        noPosts: '该主题暂无可见帖子。若你刚刚创建了主题，首帖可能仍在审核中。'
+      },
+      reply: {
+        title: '回复',
+        placeholder: '回复内容（支持基础 HTML；不支持图片）',
+        loginRequired: '登录后才能回复 → 前往“Login”',
+        send: '发送回复'
+      },
+      metrics: {
+        liveThreads: '正在活跃的主题',
+        activeMembers: '活跃成员',
+        newActivity: '今日更新'
+      },
+      errors: {
+        loadThreads: '主题加载失败',
+        createThread: '创建主题失败',
+        sendReply: '回复失败',
+        openThread: '主题内容加载失败'
+      }
+    },
+
+    // Auth
+    auth: {
+      login: {
+        nav: '登录',
+        title: '登录',
+        subtitle: '使用账号访问论坛与经纪商控制台。',
+        usernameLabel: '用户名',
+        usernamePlaceholder: '3-20 位，仅限字母/数字/下划线',
+        passwordLabel: '密码',
+        passwordPlaceholder: '至少 8 位，需包含字母和数字',
+        submit: '登录',
+        submitting: '登录中…',
+        error: '当前无法登录，请稍后再试。'
+      },
+      register: {
+        nav: '注册',
+        title: '创建账号',
+        subtitle: '加入社区并管理你的经纪商情报。',
+        usernameLabel: '用户名',
+        usernamePlaceholder: '3-20 位，仅限字母/数字/下划线',
+        passwordLabel: '密码',
+        passwordPlaceholder: '至少 8 位，需包含字母和数字',
+        roleLabel: '账号角色',
+        brokerLabel: '关联经纪商',
+        roles: {
+          trader: '交易者',
+          agent: '代理'
+        },
+        submit: '注册',
+        submitting: '提交中…',
+        success: '注册成功，现在可以前往登录。',
+        error: '当前无法注册，请稍后再试。'
+      }
     },
     
     // Dashboard

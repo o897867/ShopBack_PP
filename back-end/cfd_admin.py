@@ -27,6 +27,7 @@ def _ensure_tables(conn: sqlite3.Connection) -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             regulators TEXT,
+            regulator_details_json TEXT,
             rating TEXT,
             website TEXT,
             logo_url TEXT,
@@ -55,8 +56,14 @@ def _ensure_tables(conn: sqlite3.Connection) -> None:
     try:
         cur.execute("PRAGMA table_info(cfd_brokers)")
         cols = {r[1] for r in cur.fetchall()}
+        updates = []
         if 'rating_breakdown_json' not in cols:
-            cur.execute("ALTER TABLE cfd_brokers ADD COLUMN rating_breakdown_json TEXT")
+            updates.append("ALTER TABLE cfd_brokers ADD COLUMN rating_breakdown_json TEXT")
+        if 'regulator_details_json' not in cols:
+            updates.append("ALTER TABLE cfd_brokers ADD COLUMN regulator_details_json TEXT")
+        for statement in updates:
+            cur.execute(statement)
+        if updates:
             conn.commit()
     except Exception:
         pass
@@ -67,6 +74,7 @@ class Broker:
     id: int
     name: str
     regulators: Optional[str]
+    regulator_details: Optional[list]
     rating: Optional[str]
     website: Optional[str]
     logo_url: Optional[str]
@@ -102,7 +110,7 @@ class CFDAdmin:
     def list_brokers(self) -> List[Broker]:
         with self._conn() as conn:
             cur = conn.execute(
-                "SELECT id, name, regulators, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers ORDER BY id DESC"
+                "SELECT id, name, regulators, regulator_details_json, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers ORDER BY id DESC"
             )
             rows = []
             for r in cur.fetchall():
@@ -114,13 +122,20 @@ class CFDAdmin:
                     rb = None
                 d['rating_breakdown'] = rb
                 d.pop('rating_breakdown_json', None)
+                details = None
+                try:
+                    details = json.loads(d.get('regulator_details_json') or 'null')
+                except Exception:
+                    details = None
+                d['regulator_details'] = details
+                d.pop('regulator_details_json', None)
                 rows.append(Broker(**d))
             return rows
 
     def get_broker(self, broker_id: int) -> Broker:
         with self._conn() as conn:
             r = conn.execute(
-                "SELECT id, name, regulators, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers WHERE id = ?",
+                "SELECT id, name, regulators, regulator_details_json, rating, website, logo_url, rating_breakdown_json, created_at FROM cfd_brokers WHERE id = ?",
                 (broker_id,),
             ).fetchone()
             if not r:
@@ -133,12 +148,20 @@ class CFDAdmin:
                 rb = None
             d['rating_breakdown'] = rb
             d.pop('rating_breakdown_json', None)
+            details = None
+            try:
+                details = json.loads(d.get('regulator_details_json') or 'null')
+            except Exception:
+                details = None
+            d['regulator_details'] = details
+            d.pop('regulator_details_json', None)
             return Broker(**d)
 
     def create_broker(
         self,
         name: str,
         regulators: Optional[str] = None,
+        regulator_details: Optional[list] = None,
         rating: Optional[str] = None,
         website: Optional[str] = None,
         logo_url: Optional[str] = None,
@@ -146,8 +169,16 @@ class CFDAdmin:
     ) -> Broker:
         with self._conn() as conn:
             cur = conn.execute(
-                "INSERT INTO cfd_brokers (name, regulators, rating, website, logo_url, rating_breakdown_json) VALUES (?, ?, ?, ?, ?, ?)",
-                (name, regulators, rating, website, logo_url, json.dumps(rating_breakdown) if rating_breakdown is not None else None),
+                "INSERT INTO cfd_brokers (name, regulators, regulator_details_json, rating, website, logo_url, rating_breakdown_json) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    name,
+                    regulators,
+                    json.dumps(regulator_details) if regulator_details is not None else None,
+                    rating,
+                    website,
+                    logo_url,
+                    json.dumps(rating_breakdown) if rating_breakdown is not None else None,
+                ),
             )
             new_id = cur.lastrowid
             conn.commit()
@@ -159,6 +190,7 @@ class CFDAdmin:
         *,
         name: Optional[str] = None,
         regulators: Optional[str] = None,
+        regulator_details: Optional[list] = None,
         rating: Optional[str] = None,
         website: Optional[str] = None,
         logo_url: Optional[str] = None,
@@ -166,17 +198,18 @@ class CFDAdmin:
     ) -> Broker:
         with self._conn() as conn:
             row = conn.execute(
-                "SELECT id, name, regulators, rating, website, logo_url, rating_breakdown_json FROM cfd_brokers WHERE id = ?",
+                "SELECT id, name, regulators, regulator_details_json, rating, website, logo_url, rating_breakdown_json FROM cfd_brokers WHERE id = ?",
                 (broker_id,),
             ).fetchone()
             if not row:
                 raise ValueError("Broker not found")
             d = dict(row)
             conn.execute(
-                "UPDATE cfd_brokers SET name = ?, regulators = ?, rating = ?, website = ?, logo_url = ?, rating_breakdown_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                "UPDATE cfd_brokers SET name = ?, regulators = ?, regulator_details_json = ?, rating = ?, website = ?, logo_url = ?, rating_breakdown_json = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                 (
                     name if name is not None else d["name"],
                     regulators if regulators is not None else d.get("regulators"),
+                    json.dumps(regulator_details) if regulator_details is not None else d.get("regulator_details_json"),
                     rating if rating is not None else d.get("rating"),
                     website if website is not None else d.get("website"),
                     logo_url if logo_url is not None else d.get("logo_url"),
