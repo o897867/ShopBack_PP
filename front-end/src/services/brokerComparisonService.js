@@ -8,7 +8,7 @@ const brokerComparisonService = {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(brokerIds),
+      body: JSON.stringify({ broker_ids: brokerIds }),
     });
 
     if (!response.ok) {
@@ -34,7 +34,7 @@ const brokerComparisonService = {
   formatComparisonData: (comparisonData) => {
     if (!comparisonData) return null;
 
-    const { brokers, comparison_fields, best_in_category, summary } = comparisonData;
+    const { brokers, comparison_fields, best_performers, summary } = comparisonData;
     const formatRegulators = (broker) => {
       if (Array.isArray(broker.regulator_details) && broker.regulator_details.length > 0) {
         return broker.regulator_details
@@ -72,7 +72,7 @@ const brokerComparisonService = {
           values: brokers.map(broker => ({
             brokerId: broker.id,
             value: broker.rating || 'N/A',
-            isBest: best_in_category.overall_rating === broker.id,
+            isBest: best_performers.overall_rating === broker.id,
             isGrade: true
           }))
         },
@@ -114,7 +114,7 @@ const brokerComparisonService = {
             return {
               brokerId: broker.id,
               value: count,
-              isBest: best_in_category.regulatory_count === broker.id,
+              isBest: best_performers.regulatory_count === broker.id,
               isNumber: true
             };
           })
@@ -152,7 +152,7 @@ const brokerComparisonService = {
         return {
           brokerId: broker.id,
           value: score,
-          isBest: best_in_category[category.key] === broker.id,
+          isBest: best_performers[category.key] === broker.id,
           isScore: true
         };
       })
@@ -167,7 +167,7 @@ const brokerComparisonService = {
     return {
       brokers,
       tableData,
-      bestInCategory: best_in_category,
+      bestInCategory: best_performers,
       summary,
       metadata: {
         totalComparisons: brokers.length,

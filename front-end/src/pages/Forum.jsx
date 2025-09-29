@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
+import { API_BASE_URL } from '../config/api.js';
 import './Forum.css';
 
 const api = {
@@ -10,12 +11,12 @@ const api = {
     params.set('offset', offset);
     if (tag) params.set('tag', tag);
     if (author) params.set('author', author);
-    const res = await fetch(`/api/forum/threads?${params.toString()}`);
+    const res = await fetch(`${API_BASE_URL}/api/forum/threads?${params.toString()}`);
     if (!res.ok) throw new Error(`Failed to fetch threads: ${res.status}`);
     return res.json();
   },
   createThread: async (payload) => {
-    const res = await fetch('/api/forum/threads', {
+    const res = await fetch(`${API_BASE_URL}/api/forum/threads`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -27,12 +28,12 @@ const api = {
     const params = new URLSearchParams();
     params.set('page', page);
     params.set('page_size', page_size);
-    const res = await fetch(`/api/forum/threads/${id}?${params.toString()}`);
+    const res = await fetch(`${API_BASE_URL}/api/forum/threads/${id}?${params.toString()}`);
     if (!res.ok) throw new Error(`Failed to fetch thread: ${res.status}`);
     return res.json();
   },
   reply: async (threadId, payload) => {
-    const res = await fetch(`/api/forum/threads/${threadId}/posts`, {
+    const res = await fetch(`${API_BASE_URL}/api/forum/threads/${threadId}/posts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -125,7 +126,7 @@ export default function Forum() {
   useEffect(() => {
     const checkMe = async () => {
       try {
-        const res = await fetch('/auth/me');
+        const res = await fetch(`${API_BASE_URL}/api/auth/me`);
         if (res.ok) setMe(await res.json());
       } catch {}
       setAuthChecked(true);

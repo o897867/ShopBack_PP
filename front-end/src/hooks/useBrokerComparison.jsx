@@ -78,7 +78,7 @@ export const useBrokerComparison = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(brokerIds),
+        body: JSON.stringify({ broker_ids: brokerIds }),
       });
 
       if (!response.ok) {

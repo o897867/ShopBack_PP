@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
+import { API_BASE_URL } from '../config/api.js';
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -18,7 +19,7 @@ export default function Register() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/cfd/brokers');
+        const res = await fetch(`${API_BASE_URL}/api/cfd/brokers`);
         if (res.ok) {
           const data = await res.json();
           setBrokers(data);
@@ -33,7 +34,7 @@ export default function Register() {
     if (event) event.preventDefault();
     setLoading(true); setError(''); setSuccess(false);
     try {
-        const res = await fetch('/auth/register', {
+        const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password, role, broker_id: Number(brokerId) })

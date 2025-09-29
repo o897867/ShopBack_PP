@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
+import { API_BASE_URL } from '../config/api.js';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -14,7 +15,7 @@ export default function Login() {
     if (event) event.preventDefault();
     setLoading(true); setError('');
     try {
-      const res = await fetch('/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })

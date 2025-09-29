@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './LeverageCalculator.css';
 import { useLanguage } from '../hooks/useLanguage';
 import { t } from '../translations';
+import { API_BASE_URL } from '../config/api.js';
 
 const LeverageCalculator = () => {
   const { currentLanguage } = useLanguage();
@@ -47,7 +48,7 @@ const LeverageCalculator = () => {
         requestBody.position_size = parseFloat(formData.positionSize);
       }
       
-      const response = await fetch('/api/leverage/calculate', {
+      const response = await fetch(`${API_BASE_URL}/api/leverage/calculate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +71,7 @@ const LeverageCalculator = () => {
   const calculateTargetLoss = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/leverage/target-loss', {
+      const response = await fetch(`${API_BASE_URL}/api/leverage/target-loss`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
