@@ -13,8 +13,14 @@ const CommunitySpotlight = ({ highlights, stats, events }) => {
   return (
     <section className="bh-section">
       <div className="bh-section-heading">
-        <h2>{translate('brokerHub.sections.community.title')}</h2>
-        <p className="muted">{translate('brokerHub.sections.community.subtitle')}</p>
+        <div>
+          <h2>{translate('brokerHub.sections.community.title')}</h2>
+          <p className="muted">{translate('brokerHub.sections.community.subtitle')}</p>
+        </div>
+        <div className="bh-context-indicator">
+          <span className="bh-context-why">{translate('brokerHub.sections.community.whyWatch')}</span>
+          <span className="bh-context-step">{translate('brokerHub.sections.community.currentStep')}</span>
+        </div>
       </div>
 
       <div className="bh-community-grid">

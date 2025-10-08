@@ -5,6 +5,7 @@ import RankingBoard from '../components/RankingBoard.jsx';
 import CommunitySpotlight from '../components/CommunitySpotlight.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import LanguageSelector from '../components/LanguageSelector.jsx';
+import OnboardingStepper from '../components/OnboardingStepper.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 import useBrokerHubData from '../hooks/useBrokerHubData.js';
@@ -232,7 +233,19 @@ const BrokerHub = ({ onNavigate }) => {
   const { currentLanguage } = useLanguage();
   const translate = useCallback((key, params = {}) => t(key, currentLanguage, params), [currentLanguage]);
   const [currentSection, setCurrentSection] = useState('broker');
+  const [onboardingStep, setOnboardingStep] = useState(1);
   const { brokers: rawBrokers, brokerNews, threads, threadHighlights, loading, error, refresh } = useBrokerHubData();
+
+  const handleStepClick = useCallback((step) => {
+    setOnboardingStep(step);
+    if (step === 1) {
+      setCurrentSection('broker');
+    } else if (step === 2) {
+      setCurrentSection('ranking');
+    } else if (step === 3) {
+      setCurrentSection('community');
+    }
+  }, []);
 
   const navItems = useMemo(() => ([
     { id: 'broker', label: translate('brokerHub.nav.brokers') },
@@ -271,41 +284,43 @@ const BrokerHub = ({ onNavigate }) => {
   }, [threads, threadHighlights]);
 
   const formattedBrokers = useMemo(() => {
-    return (rawBrokers || []).map((broker) => {
-      const regulatorDetails = parseRegulators(broker.regulators, broker.regulator_details);
-      const breakdownEntries = parseBreakdownEntries(broker.rating_breakdown, translate);
-      const compositeScore = computeCompositeScore(broker.rating_breakdown) ?? gradeToScore(broker.rating);
-      const featureStrings = breakdownEntries.slice(0, 3).map((entry) => translate('brokerHub.sections.brokers.featureTemplate', { label: entry.label, score: entry.score }));
+    return (rawBrokers || [])
+      .map((broker) => {
+        const regulatorDetails = parseRegulators(broker.regulators, broker.regulator_details);
+        const breakdownEntries = parseBreakdownEntries(broker.rating_breakdown, translate);
+        const compositeScore = computeCompositeScore(broker.rating_breakdown) ?? gradeToScore(broker.rating);
+        const featureStrings = breakdownEntries.slice(0, 3).map((entry) => translate('brokerHub.sections.brokers.featureTemplate', { label: entry.label, score: entry.score }));
 
-      return {
-        id: broker.id,
-        name: broker.name,
-        rating: broker.rating,
-        ratingScore: compositeScore,
-        regulators: broker.regulators,
-        regulatorDetails,
-        website: broker.website,
-        logo_url: broker.logo_url,
-        breakdown: breakdownEntries,
-        metrics: [
-          {
-            label: translate('brokerHub.sections.brokers.metrics.regulators'),
-            value: regulatorDetails.length
-              ? { type: 'regulators', items: regulatorDetails }
-              : translate('brokerHub.sections.brokers.metrics.noData')
-          },
-          {
-            label: translate('brokerHub.sections.brokers.metrics.rating'),
-            value: broker.rating || translate('brokerHub.sections.brokers.metrics.noData')
-          },
-          {
-            label: translate('brokerHub.sections.brokers.metrics.website'),
-            value: broker.website ? formatWebsiteHost(broker.website) : translate('brokerHub.sections.brokers.metrics.noData')
-          }
-        ],
-        features: featureStrings
-      };
-    });
+        return {
+          id: broker.id,
+          name: broker.name,
+          rating: broker.rating,
+          ratingScore: compositeScore,
+          regulators: broker.regulators,
+          regulatorDetails,
+          website: broker.website,
+          logo_url: broker.logo_url,
+          breakdown: breakdownEntries,
+          metrics: [
+            {
+              label: translate('brokerHub.sections.brokers.metrics.regulators'),
+              value: regulatorDetails.length
+                ? { type: 'regulators', items: regulatorDetails }
+                : translate('brokerHub.sections.brokers.metrics.noData')
+            },
+            {
+              label: translate('brokerHub.sections.brokers.metrics.rating'),
+              value: broker.rating || translate('brokerHub.sections.brokers.metrics.noData')
+            },
+            {
+              label: translate('brokerHub.sections.brokers.metrics.website'),
+              value: broker.website ? formatWebsiteHost(broker.website) : translate('brokerHub.sections.brokers.metrics.noData')
+            }
+          ],
+          features: featureStrings
+        };
+      })
+      .sort((a, b) => (b.ratingScore || 0) - (a.ratingScore || 0));
   }, [rawBrokers, translate]);
 
   const rankings = useMemo(() => {
@@ -441,14 +456,6 @@ const BrokerHub = ({ onNavigate }) => {
                 <span className="bh-eyebrow">{translate('brokerHub.hero.eyebrow')}</span>
                 <h1 className="bh-title">{translate('brokerHub.hero.title')}</h1>
                 <p className="bh-subtitle">{translate('brokerHub.hero.description')}</p>
-                <div className="bh-hero__actions">
-                  <button className="btn btn-primary" onClick={() => setCurrentSection('broker')}>
-                    {translate('brokerHub.hero.explore')}
-                  </button>
-                  <button className="btn btn-secondary" onClick={() => setCurrentSection('community')}>
-                    {translate('brokerHub.hero.joinCommunity')}
-                  </button>
-                </div>
               </div>
 
               <div className="bh-hero__metrics">
@@ -461,6 +468,11 @@ const BrokerHub = ({ onNavigate }) => {
                 ))}
               </div>
             </div>
+
+            <OnboardingStepper
+              currentStep={onboardingStep}
+              onStepClick={handleStepClick}
+            />
           </div>
         </div>
       </section>

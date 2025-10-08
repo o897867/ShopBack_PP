@@ -1,0 +1,407 @@
+/* 模态框背景 */
+.broker-detail-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 模态框主体 */
+.broker-detail-modal {
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+  border: 1px solid var(--border);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 模态框头部 */
+.broker-detail-modal__header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.broker-detail-modal__identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+}
+
+.broker-detail-modal__logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--panel-2);
+  padding: 8px;
+}
+
+.broker-detail-modal__name {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.broker-detail-modal__rating {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.broker-detail-modal__rating-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-600));
+  color: white;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.broker-detail-modal__rating-score {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.broker-detail-modal__close {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.broker-detail-modal__close:hover {
+  background: var(--border);
+  transform: translateY(-1px);
+}
+
+/* 模态框内容 */
+.broker-detail-modal__content {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.broker-detail-section {
+  margin-bottom: 32px;
+}
+
+.broker-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.broker-detail-section__title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary);
+  display: inline-block;
+}
+
+/* 详情列表 */
+.broker-detail-list {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.broker-detail-list__item {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.broker-detail-list__item:last-child {
+  border-bottom: none;
+}
+
+.broker-detail-list__item dt {
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.broker-detail-list__item dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.broker-detail-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.broker-detail-badge--rating {
+  background: linear-gradient(135deg, var(--primary), var(--primary-600));
+  color: white;
+}
+
+.broker-detail-link {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.broker-detail-link:hover {
+  color: var(--primary-700);
+  text-decoration: underline;
+}
+
+/* 监管信息卡片 */
+.broker-detail-regulators {
+  display: grid;
+  gap: 12px;
+}
+
+.broker-detail-regulator-card {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.broker-detail-regulator-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.broker-detail-regulator-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.broker-detail-regulator-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-600));
+  color: white;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.broker-detail-regulator-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.broker-detail-regulator-link:hover {
+  color: var(--primary-700);
+}
+
+.broker-detail-regulator-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.broker-detail-regulator-name {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.broker-detail-regulator-license {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.broker-detail-regulator-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* 评分条 */
+.broker-detail-scores {
+  display: grid;
+  gap: 16px;
+}
+
+.broker-detail-score-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.broker-detail-score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.broker-detail-score-label {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.broker-detail-score-value {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.broker-detail-score-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--panel-2);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.broker-detail-score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--primary-600));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* 特色功能列表 */
+.broker-detail-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.broker-detail-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--panel-2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.broker-detail-feature-item svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.broker-detail-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* 模态框底部 */
+.broker-detail-modal__footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .broker-detail-modal {
+    max-height: 95vh;
+  }
+
+  .broker-detail-modal__header {
+    padding: 16px;
+  }
+
+  .broker-detail-modal__content {
+    padding: 16px;
+  }
+
+  .broker-detail-modal__footer {
+    padding: 16px;
+    flex-direction: column;
+  }
+
+  .broker-detail-modal__footer .btn {
+    width: 100%;
+  }
+
+  .broker-detail-list__item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .broker-detail-modal__identity {
+    flex-direction: column;
+  }
+
+  .broker-detail-modal__logo {
+    width: 48px;
+    height: 48px;
+  }
+}

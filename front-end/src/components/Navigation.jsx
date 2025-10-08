@@ -7,20 +7,32 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
   const { currentLanguage } = useLanguage();
   const translate = (key) => t(key, currentLanguage);
 
-  const baseItems = [
-    { id: 'broker-hub', label: translate('nav.brokerHub') },
-    { id: 'forum', label: translate('forum.title') },
-    { id: 'trading', label: translate('nav.trading') }
+  const navGroups = [
+    {
+      title: translate('nav.groups.explore'),
+      items: [
+        { id: 'broker-hub', label: translate('nav.brokerHub'), badge: 'recommended' },
+        { id: 'analytics', label: translate('nav.analytics') }
+      ]
+    },
+    {
+      title: translate('nav.groups.community'),
+      items: [
+        { id: 'forum', label: translate('forum.title') },
+        { id: 'trading', label: translate('nav.trading') },
+        { id: 'eth', label: translate('nav.ethPrediction') }
+      ]
+    },
+    {
+      title: translate('nav.groups.account'),
+      items: currentUser
+        ? [{ id: 'forum-mod', label: 'Forum Mod' }]
+        : [
+            { id: 'login', label: translate('auth.login.nav') },
+            { id: 'register', label: translate('auth.register.nav') }
+          ]
+    }
   ];
-
-  const authItems = currentUser
-    ? [{ id: 'forum-mod', label: 'Forum Mod' }] // 可根据角色再细化
-    : [
-        { id: 'login', label: translate('auth.login.nav') },
-        { id: 'register', label: translate('auth.register.nav') }
-      ];
-
-  const navItems = [...baseItems, ...authItems];
 
   const handleSelect = (id) => {
     setCurrentPage(id);
@@ -59,25 +71,33 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
       <div className={`nav-drawer ${isOpen ? 'open' : ''}`} role="menu">
         {currentUser && (
           <div className="badge published" style={{ marginBottom: 8 }}>
-            已登录：{currentUser.username || currentUser.display_name}
+            {translate('forum.common.loggedIn').replace('{{name}}', currentUser.username || currentUser.display_name)}
           </div>
         )}
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            role="menuitem"
-            onClick={() => handleSelect(item.id)}
-            className={`nav-item ${currentPage === item.id ? 'active' : ''}`}
-          >
-            {item.label}
-          </button>
+        {navGroups.map((group, groupIndex) => (
+          <div key={groupIndex} className="nav-group">
+            <div className="nav-group-title">{group.title}</div>
+            {group.items.map((item) => (
+              <button
+                key={item.id}
+                role="menuitem"
+                onClick={() => handleSelect(item.id)}
+                className={`nav-item ${currentPage === item.id ? 'active' : ''}`}
+              >
+                {item.label}
+                {item.badge === 'recommended' && (
+                  <span className="nav-badge">{translate('nav.badges.recommended')}</span>
+                )}
+              </button>
+            ))}
+          </div>
         ))}
         {currentUser && (
           <button
-            className="nav-item"
+            className="nav-item nav-item-logout"
             onClick={() => { onLogout && onLogout(); setIsOpen(false); }}
           >
-            退出登录
+            {translate('nav.logout')}
           </button>
         )}
       </div>

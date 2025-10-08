@@ -12,8 +12,14 @@ const RankingBoard = ({ rankings, updates }) => {
   return (
     <section className="bh-section">
       <div className="bh-section-heading">
-        <h2>{translate('brokerHub.sections.ranking.title')}</h2>
-        <p className="muted">{translate('brokerHub.sections.ranking.subtitle')}</p>
+        <div>
+          <h2>{translate('brokerHub.sections.ranking.title')}</h2>
+          <p className="muted">{translate('brokerHub.sections.ranking.subtitle')}</p>
+        </div>
+        <div className="bh-context-indicator">
+          <span className="bh-context-why">{translate('brokerHub.sections.ranking.whyWatch')}</span>
+          <span className="bh-context-step">{translate('brokerHub.sections.ranking.currentStep')}</span>
+        </div>
       </div>
 
       <div className="bh-ranking-layout">

@@ -43,14 +43,14 @@ const BrokerCompareModal = () => {
       <div className="bh-comparison-table">
         {/* 表头 - Broker信息 */}
         <div className="bh-comparison-header">
-          <div className="bh-comparison-label-col">对比项目</div>
+          <div className="bh-comparison-label-col">{translate('brokerComparison.comparisonItems')}</div>
           {brokers.map(broker => (
             <div key={broker.id} className="bh-comparison-broker-col">
               <div className="bh-broker-header">
                 <button
                   className="bh-remove-broker"
                   onClick={() => handleRemoveBroker(broker.id)}
-                  title="移除此经纪商"
+                  title={translate('brokerComparison.removeBroker')}
                 >
                   ×
                 </button>
@@ -149,7 +149,7 @@ const BrokerCompareModal = () => {
 
     return (
       <div className="bh-comparison-summary">
-        <h4>对比总结</h4>
+        <h4>{translate('brokerComparison.summary')}</h4>
         <p>{summary}</p>
       </div>
     );
@@ -161,15 +161,15 @@ const BrokerCompareModal = () => {
         {/* 弹窗头部 */}
         <div className="bh-modal-header">
           <div className="bh-modal-title">
-            <h2>经纪商对比分析</h2>
+            <h2>{translate('brokerComparison.title')}</h2>
             <span className="bh-modal-subtitle">
-              对比 {selectedBrokers.length} 家经纪商
+              {translate('brokerComparison.subtitle', { count: selectedBrokers.length })}
             </span>
           </div>
           <button
             className="bh-modal-close"
             onClick={closeComparison}
-            aria-label="关闭对比"
+            aria-label={translate('brokerComparison.closeComparison')}
           >
             ×
           </button>
@@ -180,7 +180,7 @@ const BrokerCompareModal = () => {
           {isLoading ? (
             <div className="bh-loading-container">
               <div className="bh-loading-spinner"></div>
-              <p>正在加载对比数据...</p>
+              <p>{translate('brokerComparison.loading')}</p>
             </div>
           ) : comparisonData ? (
             <>
@@ -189,7 +189,7 @@ const BrokerCompareModal = () => {
             </>
           ) : (
             <div className="bh-empty-state">
-              <p>暂无对比数据</p>
+              <p>{translate('brokerComparison.noData')}</p>
             </div>
           )}
         </div>
@@ -214,7 +214,7 @@ const BrokerCompareModal = () => {
             </button>
           </div>
           <div className="bh-modal-tips">
-            <span className="bh-tip">💡 点击 × 可移除单个经纪商进行重新对比</span>
+            <span className="bh-tip">{translate('brokerComparison.tip')}</span>
           </div>
         </div>
       </div>

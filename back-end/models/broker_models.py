@@ -72,3 +72,48 @@ class BrokerSearchResponse(BaseModel):
     brokers: List[CFDBroker]
     total_count: int
     filters_applied: Dict[str, Any]
+
+# ============= 象限分析相关模型 =============
+
+class QuadrantAnalysisRequest(BaseModel):
+    """象限分析请求模型"""
+    x_axis: Optional[str] = "监管强度"  # X轴维度
+    y_axis: Optional[str] = "透明度与合规"  # Y轴维度
+    bubble_metric: Optional[str] = "综合影响力"  # 气泡大小指标
+    regulators: Optional[List[str]] = None  # 监管机构筛选
+    rating_min: Optional[str] = None  # 最低评级
+    rating_max: Optional[str] = None  # 最高评级
+    limit: Optional[int] = 100  # 最大返回数量
+
+class BrokerDataPoint(BaseModel):
+    """单个经纪商的图表数据点"""
+    id: int
+    name: str
+    x_score: float  # X轴标准化分数 (0-100)
+    y_score: float  # Y轴标准化分数 (0-100)
+    bubble_size: float  # 气泡大小标准化分数 (0-100)
+    overall_rating: Optional[str] = None
+    logo_url: Optional[str] = None
+    regulator_count: int
+    metadata: Dict[str, Any]  # 额外信息，用于悬停提示
+
+class AxisInfo(BaseModel):
+    """坐标轴信息"""
+    name: str
+    description: str
+    data_range: Dict[str, float]  # min, max, avg
+
+class QuadrantStatistics(BaseModel):
+    """象限统计信息"""
+    total_brokers: int
+    quadrants: Dict[str, int]  # 各象限的经纪商数量
+    averages: Dict[str, float]  # 各维度的平均分
+
+class QuadrantAnalysisResponse(BaseModel):
+    """象限分析响应模型"""
+    data_points: List[BrokerDataPoint]
+    x_axis_info: AxisInfo
+    y_axis_info: AxisInfo
+    bubble_info: AxisInfo
+    statistics: QuadrantStatistics
+    available_dimensions: List[str]  # 可选的维度列表

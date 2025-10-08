@@ -110,14 +110,14 @@ const BrokerStackCard = ({ brokerGroup }) => {
         {!isExpanded && additionalCount > 0 && (
           <div className="bh-stack-indicator">
             <span className="bh-stack-count">+{additionalCount}</span>
-            <span className="bh-stack-label">个实体</span>
+            <span className="bh-stack-label">{translate('brokerDetail.entities')}</span>
           </div>
         )}
 
         {/* 选择统计 */}
         {hasSelected && (
           <div className="bh-selection-badge">
-            已选 {selectedCount}
+            {translate('brokerHub.sections.brokers.selected', { count: selectedCount })}
           </div>
         )}
 
@@ -136,7 +136,7 @@ const BrokerStackCard = ({ brokerGroup }) => {
                 <div>
                   <h3 className="bh-broker-name">{brokerGroup.groupName}</h3>
                   <div className="bh-broker-entities">
-                    {isExpanded ? `${brokerGroup.brokers.length} 个实体` : `${brokerGroup.brokers.length} 个实体`}
+                    {translate('brokerHub.sections.brokers.entityCount', { count: brokerGroup.brokers.length })}
                   </div>
                   {renderRegulatorBadges(brokerGroup.allRegulators)}
                 </div>

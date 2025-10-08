@@ -270,6 +270,53 @@ code {
   border-color: transparent;
 }
 
+/* 导航分组 */
+.nav-group {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.nav-group-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  padding: 0 1rem;
+}
+
+.nav-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--primary), var(--primary-600));
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nav-item-logout {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  color: var(--danger);
+}
+
+.nav-item-logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
 /* Utility */
 .grid {
   display: grid;
@@ -286,6 +333,7 @@ code {
   color: var(--text);
   box-shadow: var(--shadow-sm);
   transition: box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
+  box-sizing: border-box;
 }
 .input:focus {
   outline: none;

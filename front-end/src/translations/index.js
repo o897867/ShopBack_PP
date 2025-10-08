@@ -5,8 +5,19 @@ export const translations = {
     nav: {
       dashboard: 'ShopBack Management',
       brokerHub: 'Broker Hub',
+      analytics: 'Broker Analytics',
       trading: 'TradingView',
-      donations: 'Donations'
+      ethPrediction: 'ETH Price Prediction',
+      donations: 'Donations',
+      groups: {
+        explore: 'Explore',
+        community: 'Community',
+        account: 'Account'
+      },
+      badges: {
+        recommended: 'Recommended'
+      },
+      logout: 'Logout'
     },
     common: {
       close: 'Close',
@@ -22,7 +33,7 @@ export const translations = {
 
     // Broker Hub
     brokerHub: {
-      brand: 'ShopBack Intelligence Lab',
+      brand: 'Forex Intelligence Lab',
       back: '← Back to main',
       pageTitle: 'Broker Hub',
       nav: {
@@ -37,6 +48,51 @@ export const translations = {
         explore: 'Explore brokers',
         joinCommunity: 'Join the community',
         metricsTitle: 'Live oversight'
+      },
+      onboarding: {
+        stepperTitle: 'Get started in 3 steps',
+        steps: {
+          step1: {
+            title: 'Set your goal',
+            description: 'Define what matters: low spreads, strong regulation, or beginner-friendly'
+          },
+          step2: {
+            title: 'Compare brokers',
+            description: 'Use quick filters and side-by-side comparison tools'
+          },
+          step3: {
+            title: 'Join discussion',
+            description: 'Get insights from the community and share your experience'
+          }
+        },
+        ctaGo: 'Start here',
+        firstVisit: {
+          tooltip1: 'Select a broker card to start comparing',
+          tooltip2: 'Check the ranking to see real-time movement',
+          tooltip3: 'Great! You completed your first comparison',
+          dismiss: 'Got it',
+          skipAll: 'Skip tour'
+        }
+      },
+      quickFilters: {
+        title: 'Quick start scenarios',
+        subtitle: 'Click a filter to highlight matching brokers',
+        presets: {
+          beginner: {
+            title: 'Beginner friendly',
+            description: 'High cashback + ASIC/FCA regulation'
+          },
+          lowCost: {
+            title: 'Ultra-low spreads',
+            description: 'Trading cost score ≥ 80'
+          },
+          topRegulation: {
+            title: 'Strongest oversight',
+            description: '3+ tier-1 regulators'
+          }
+        },
+        clearFilter: 'Clear filter',
+        showComparison: 'Compare selected'
       },
       actions: {
         retry: 'Try again',
@@ -74,6 +130,8 @@ export const translations = {
           featureTemplate: '{{label}} · {{score}}',
           regulatorTooltipLicense: 'License: {{value}}',
           regulatorTooltipNote: 'Note: {{value}}',
+          entityCount: '{{count}} entities',
+          selected: 'Selected {{count}}',
           actions: {
             visitSite: 'Visit website',
             compare: 'Compare soon'
@@ -90,7 +148,9 @@ export const translations = {
           updateTemplate: '{{broker}} • {{tag}}',
           updateFallback: 'Update from {{broker}}',
           empty: 'No ranking data yet.',
-          emptyUpdates: 'No market signals yet.'
+          emptyUpdates: 'No market signals yet.',
+          whyWatch: 'Track how brokers perform relative to each other over time',
+          currentStep: 'Step 2 of 3'
         },
         community: {
           title: 'Community Pulse',
@@ -111,7 +171,9 @@ export const translations = {
           },
           eventsFromNews: 'Update from {{broker}}',
           emptyFeed: 'No community conversations yet.',
-          emptyEvents: 'No recent signals.'
+          emptyEvents: 'No recent signals.',
+          whyWatch: 'See what real traders are saying about their broker experiences',
+          currentStep: 'Step 3 of 3'
         }
       },
       ratingBreakdown: {
@@ -549,6 +611,148 @@ export const translations = {
       }
     },
     
+    // Analytics - Broker Quadrant Analysis
+    analytics: {
+      title: 'Broker Quadrant Analysis',
+      subtitle: 'Data-driven analysis based on multi-dimensional scoring to help you quickly identify broker advantages and positioning',
+
+      // Configuration section
+      configuration: {
+        title: 'Analysis Configuration',
+        xAxis: 'X-Axis Dimension:',
+        yAxis: 'Y-Axis Dimension:',
+        bubbleMetric: 'Bubble Size Metric:',
+        regulatorFilter: 'Regulator Filter:',
+        regulatorPlaceholder: 'e.g: ASIC,FCA,CySEC',
+        ratingRange: 'Rating Range:',
+        minRating: 'Min Rating',
+        maxRating: 'Max Rating',
+        to: 'to'
+      },
+
+      // Chart section
+      chart: {
+        title: 'Broker Quadrant Analysis Chart',
+        controls: {
+          size: 'Size:',
+          sizeOptions: {
+            small: 'Small (60%)',
+            medium: 'Medium (75%)',
+            large: 'Large (90%)'
+          },
+          fullscreen: 'Fullscreen View',
+          exitFullscreen: 'Exit Fullscreen (ESC)',
+          resetZoom: 'Reset Zoom (ESC)'
+        },
+        description: {
+          xAxis: 'X-Axis:',
+          yAxis: 'Y-Axis:',
+          bubbleSize: 'Bubble Size:'
+        },
+        interaction: {
+          hint: '💡 Drag to select area for zoom, ESC to reset zoom, click data points for details'
+        }
+      },
+
+      // Tooltip
+      tooltip: {
+        overallRating: 'Overall Rating:',
+        compositeScore: 'Composite Score:',
+        regulatorCount: 'Number of Regulators:'
+      },
+
+      // Quadrant legends
+      quadrants: {
+        q1: {
+          title: 'Top Right (Advantage Zone)',
+          description: 'High {{xAxis}} + High {{yAxis}}'
+        },
+        q2: {
+          title: 'Top Left (Potential Zone)',
+          description: 'Low {{xAxis}} + High {{yAxis}}'
+        },
+        q3: {
+          title: 'Bottom Left (Focus Zone)',
+          description: 'Low {{xAxis}} + Low {{yAxis}}'
+        },
+        q4: {
+          title: 'Bottom Right (Improvement Zone)',
+          description: 'High {{xAxis}} + Low {{yAxis}}'
+        }
+      },
+
+      // Statistics
+      statistics: {
+        title: 'Analysis Statistics',
+        totalBrokers: 'Total Brokers:',
+        advantageZone: 'Advantage Zone:',
+        potentialZone: 'Potential Zone:',
+        focusZone: 'Focus Zone:',
+        improvementZone: 'Improvement Zone:',
+        brokers: 'brokers'
+      },
+
+      // Loading and error states
+      loading: 'Loading data...',
+      error: 'Failed to load data',
+      retry: 'Retry',
+
+      // Dimensions (commonly used)
+      dimensions: {
+        regulation: 'Regulatory Strength',
+        transparency: 'Transparency & Compliance',
+        tradingCost: 'Trading Cost',
+        execution: 'Execution & Liquidity',
+        platform: 'Platform & Products',
+        service: 'Service & Education',
+        stability: 'Stability & Reputation',
+        compositeScore: 'Composite Score'
+      },
+
+      // Dimension mapping (for backend Chinese keys)
+      dimensionNames: {
+        '监管强度': 'Regulatory Strength',
+        '透明度与合规': 'Transparency & Compliance',
+        '交易成本': 'Trading Cost',
+        '执行与流动性': 'Execution & Liquidity',
+        '平台与产品': 'Platform & Products',
+        '服务与教育': 'Service & Education',
+        '稳定性与口碑': 'Stability & Reputation',
+        '综合影响力': 'Composite Score'
+      },
+
+      // Broker Detail Modal
+      brokerDetail: {
+        compositeScore: 'Composite Score',
+        basicInfo: 'Basic Information',
+        brokerName: 'Broker Name',
+        overallRating: 'Overall Rating',
+        website: 'Official Website',
+        unrated: 'Not rated',
+        regulatoryInfo: 'Regulatory Information',
+        regulators: 'Regulators',
+        entities: 'entities',
+        ratingBreakdown: 'Rating Breakdown',
+        category: 'Category',
+        score: 'Score',
+        weight: 'Weight',
+        close: 'Close'
+      },
+
+      // Broker Comparison Modal
+      brokerComparison: {
+        title: 'Broker Comparison Analysis',
+        subtitle: 'Comparing {{count}} brokers',
+        comparisonItems: 'Comparison Items',
+        summary: 'Comparison Summary',
+        loading: 'Loading comparison data...',
+        noData: 'No comparison data available',
+        removeBroker: 'Remove this broker',
+        closeComparison: 'Close comparison',
+        tip: '💡 Click × to remove individual brokers and re-compare'
+      }
+    },
+
     // Validation Messages
     validation: {
       required: 'This field is required',
@@ -565,8 +769,19 @@ export const translations = {
     nav: {
       dashboard: 'ShopBack管理',
       brokerHub: '经纪商控制台',
+      analytics: '券商象限分析',
       trading: '交易图表',
-      donations: '项目捐赠'
+      ethPrediction: 'ETH价格预测',
+      donations: '项目捐赠',
+      groups: {
+        explore: '探索',
+        community: '社区',
+        account: '账户'
+      },
+      badges: {
+        recommended: '推荐起点'
+      },
+      logout: '退出登录'
     },
     common: {
       close: '关闭',
@@ -582,7 +797,7 @@ export const translations = {
 
     // Broker Hub
     brokerHub: {
-      brand: 'ShopBack 情报实验室',
+      brand: '外汇情报实验室',
       back: '← 返回主页面',
       pageTitle: '经纪商控制台',
       nav: {
@@ -597,6 +812,51 @@ export const translations = {
         explore: '浏览经纪商',
         joinCommunity: '加入社区',
         metricsTitle: '实时监控面板'
+      },
+      onboarding: {
+        stepperTitle: '3 步快速上手',
+        steps: {
+          step1: {
+            title: '设定目标',
+            description: '明确重点：低点差、强监管还是新手友好'
+          },
+          step2: {
+            title: '筛选对比',
+            description: '使用快速筛选与并排对比工具'
+          },
+          step3: {
+            title: '参与讨论',
+            description: '从社区获取洞察并分享你的经验'
+          }
+        },
+        ctaGo: '开始',
+        firstVisit: {
+          tooltip1: '选择一张经纪商卡片开始对比',
+          tooltip2: '点击榜单查看实时变动',
+          tooltip3: '太棒了！你完成了首次对比',
+          dismiss: '知道了',
+          skipAll: '跳过引导'
+        }
+      },
+      quickFilters: {
+        title: '快速入门场景',
+        subtitle: '点击筛选器高亮匹配的经纪商',
+        presets: {
+          beginner: {
+            title: '新手推荐',
+            description: '高返现 + ASIC/FCA 监管'
+          },
+          lowCost: {
+            title: '超低点差',
+            description: '交易成本评分 ≥ 80'
+          },
+          topRegulation: {
+            title: '监管最强',
+            description: '3+ 一线监管机构'
+          }
+        },
+        clearFilter: '清除筛选',
+        showComparison: '对比所选'
       },
       actions: {
         retry: '重新尝试',
@@ -634,6 +894,8 @@ export const translations = {
           featureTemplate: '{{label}} · {{score}}',
           regulatorTooltipLicense: '许可证号：{{value}}',
           regulatorTooltipNote: '备注：{{value}}',
+          entityCount: '{{count}} 个实体',
+          selected: '已选 {{count}}',
           actions: {
             visitSite: '访问官网',
             compare: '对比功能即将上线'
@@ -650,7 +912,9 @@ export const translations = {
           updateTemplate: '{{broker}} • {{tag}}',
           updateFallback: '{{broker}} 最新动态',
           empty: '暂无榜单数据。',
-          emptyUpdates: '暂无市场信号。'
+          emptyUpdates: '暂无市场信号。',
+          whyWatch: '追踪经纪商相对表现的长期变化趋势',
+          currentStep: '第 2 步 / 共 3 步'
         },
         community: {
           title: '社区脉动',
@@ -671,7 +935,9 @@ export const translations = {
           },
           eventsFromNews: '{{broker}} 最新动态',
           emptyFeed: '暂无社区讨论。',
-          emptyEvents: '暂无最新提醒。'
+          emptyEvents: '暂无最新提醒。',
+          whyWatch: '了解真实交易者对各经纪商的实际体验',
+          currentStep: '第 3 步 / 共 3 步'
         }
       },
       ratingBreakdown: {
@@ -1109,6 +1375,148 @@ export const translations = {
       }
     },
     
+    // Analytics - 券商象限分析
+    analytics: {
+      title: '券商象限分析',
+      subtitle: '基于多维度评分的数据驱动分析，帮助您快速识别券商的相对优势和定位',
+
+      // 配置部分
+      configuration: {
+        title: '分析配置',
+        xAxis: 'X轴维度：',
+        yAxis: 'Y轴维度：',
+        bubbleMetric: '气泡大小指标：',
+        regulatorFilter: '监管机构筛选：',
+        regulatorPlaceholder: '如：ASIC,FCA,CySEC',
+        ratingRange: '评级范围：',
+        minRating: '最低评级',
+        maxRating: '最高评级',
+        to: '到'
+      },
+
+      // 图表部分
+      chart: {
+        title: '券商象限分析图',
+        controls: {
+          size: '尺寸：',
+          sizeOptions: {
+            small: '小 (60%)',
+            medium: '中 (75%)',
+            large: '大 (90%)'
+          },
+          fullscreen: '全屏显示',
+          exitFullscreen: '退出全屏 (ESC)',
+          resetZoom: '重置缩放 (ESC)'
+        },
+        description: {
+          xAxis: 'X轴：',
+          yAxis: 'Y轴：',
+          bubbleSize: '气泡大小：'
+        },
+        interaction: {
+          hint: '💡 拖拽选择区域进行缩放，ESC重置缩放，点击数据点查看详情'
+        }
+      },
+
+      // 提示框
+      tooltip: {
+        overallRating: '总体评级：',
+        compositeScore: '综合影响力：',
+        regulatorCount: '监管机构数量：'
+      },
+
+      // 象限说明
+      quadrants: {
+        q1: {
+          title: '右上角 (优势区)',
+          description: '高{{xAxis}} + 高{{yAxis}}'
+        },
+        q2: {
+          title: '左上角 (潜力区)',
+          description: '低{{xAxis}} + 高{{yAxis}}'
+        },
+        q3: {
+          title: '左下角 (关注区)',
+          description: '低{{xAxis}} + 低{{yAxis}}'
+        },
+        q4: {
+          title: '右下角 (改进区)',
+          description: '高{{xAxis}} + 低{{yAxis}}'
+        }
+      },
+
+      // 统计信息
+      statistics: {
+        title: '分析统计',
+        totalBrokers: '总经纪商数：',
+        advantageZone: '优势区：',
+        potentialZone: '潜力区：',
+        focusZone: '关注区：',
+        improvementZone: '改进区：',
+        brokers: '家'
+      },
+
+      // 加载和错误状态
+      loading: '正在加载数据...',
+      error: '获取数据失败',
+      retry: '重试',
+
+      // 维度（常用）
+      dimensions: {
+        regulation: '监管强度',
+        transparency: '透明度与合规',
+        tradingCost: '交易成本',
+        execution: '执行与流动性',
+        platform: '平台与产品',
+        service: '服务与教育',
+        stability: '稳定性与口碑',
+        compositeScore: '综合影响力'
+      },
+
+      // 维度映射（后端中文键）
+      dimensionNames: {
+        '监管强度': '监管强度',
+        '透明度与合规': '透明度与合规',
+        '交易成本': '交易成本',
+        '执行与流动性': '执行与流动性',
+        '平台与产品': '平台与产品',
+        '服务与教育': '服务与教育',
+        '稳定性与口碑': '稳定性与口碑',
+        '综合影响力': '综合影响力'
+      },
+
+      // 经纪商详情弹窗
+      brokerDetail: {
+        compositeScore: '综合得分',
+        basicInfo: '基本信息',
+        brokerName: '经纪商名称',
+        overallRating: '总体评级',
+        website: '官方网站',
+        unrated: '未评级',
+        regulatoryInfo: '监管信息',
+        regulators: '监管机构',
+        entities: '个实体',
+        ratingBreakdown: '评分细节',
+        category: '类别',
+        score: '得分',
+        weight: '权重',
+        close: '关闭'
+      },
+
+      // 经纪商对比弹窗
+      brokerComparison: {
+        title: '经纪商对比分析',
+        subtitle: '对比 {{count}} 家经纪商',
+        comparisonItems: '对比项目',
+        summary: '对比总结',
+        loading: '正在加载对比数据...',
+        noData: '暂无对比数据',
+        removeBroker: '移除此经纪商',
+        closeComparison: '关闭对比',
+        tip: '💡 点击 × 可移除单个经纪商进行重新对比'
+      }
+    },
+
     // Validation Messages
     validation: {
       required: '此字段为必填项',

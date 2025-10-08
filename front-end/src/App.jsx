@@ -6,6 +6,8 @@ import TradingViewPage from './pages/trading.jsx';
 import BrokerHub from './pages/BrokerHub.jsx';
 const Forum = lazy(() => import('./pages/Forum.jsx'));
 const ForumModeration = lazy(() => import('./pages/ForumModeration.jsx'));
+const BrokerAnalytics = lazy(() => import('./pages/BrokerAnalytics.jsx'));
+const EthKalmanPrediction = lazy(() => import('./pages/EthKalmanPrediction.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
@@ -22,10 +24,6 @@ const App = () => {
     predictions: {
       title: 'AI Cashback Predictions',
       message: 'This feature is currently paused while we upgrade the models.'
-    },
-    eth: {
-      title: 'ETH Price Prediction',
-      message: 'ETH predictions are paused for maintenance and will return soon.'
     }
   };
   // Initialize page from URL hash or localStorage; fallback to 'home'
@@ -33,7 +31,7 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['broker-hub','forum','forum-mod','predictions','eth','trading','login','register'];
+      const known = ['broker-hub','analytics','forum','forum-mod','predictions','eth','trading','login','register'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
@@ -59,34 +57,35 @@ const App = () => {
 
 
 
-  if (currentPage === 'broker-hub') {
-    return <BrokerHub onNavigate={setCurrentPage} />;
-  }
-
   return (
     <div className="app">
-      <div className="container">
-        <div className="page-header">
-          <div className="controls" style={{ marginLeft: 'auto' }}>
-            <ThemeToggle />
-            <LanguageSelector />
+      {/* 全局导航 - 始终显示 */}
+      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+
+      {currentPage === 'broker-hub' ? (
+        <BrokerHub onNavigate={setCurrentPage} />
+      ) : (
+        <div className="container">
+          <div className="page-header">
+            <div className="controls" style={{ marginLeft: 'auto' }}>
+              <ThemeToggle />
+              <LanguageSelector />
+            </div>
           </div>
-        </div>
 
-        {/* Header and Navigation */}
-        <div className="card card-padded header-card" style={{ marginBottom: 24, textAlign: 'center' }}>
-          <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-          <h1 className="title" style={{ fontSize: '2rem' }}>
-            {currentPage === 'forum' ? translate('forum.title') :
-             currentPage === 'forum-mod' ? 'Forum Moderation' :
-             currentPage === 'login' ? translate('auth.login.title') :
-             currentPage === 'register' ? translate('auth.register.title') :
-             pausedPages[currentPage] ? pausedPages[currentPage].title :
-             currentPage === 'broker-hub' ? translate('brokerHub.pageTitle') :
-             translate('nav.trading')}
-          </h1>
-
-        </div>
+          {/* Header */}
+          <div style={{ marginBottom: 24, textAlign: 'center', padding: '2rem 0' }}>
+            <h1 className="title" style={{ fontSize: '2rem', margin: 0 }}>
+              {currentPage === 'forum' ? translate('forum.title') :
+               currentPage === 'forum-mod' ? 'Forum Moderation' :
+               currentPage === 'analytics' ? translate('nav.analytics') :
+               currentPage === 'eth' ? translate('nav.ethPrediction') :
+               currentPage === 'login' ? translate('auth.login.title') :
+               currentPage === 'register' ? translate('auth.register.title') :
+               pausedPages[currentPage] ? pausedPages[currentPage].title :
+               translate('nav.trading')}
+            </h1>
+          </div>
 
         {/* Pages */}
         {currentPage === 'forum' ? (
@@ -97,6 +96,10 @@ const App = () => {
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <ForumModeration />
           </Suspense>
+        ) : currentPage === 'analytics' ? (
+          <Suspense fallback={<div className="muted">Loading…</div>}>
+            <BrokerAnalytics />
+          </Suspense>
         ) : currentPage === 'login' ? (
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <Login onSuccess={() => setCurrentPage('forum')} />
@@ -105,6 +108,10 @@ const App = () => {
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <Register onSuccess={() => setCurrentPage('login')} />
           </Suspense>
+        ) : currentPage === 'eth' ? (
+          <Suspense fallback={<div className="muted">Loading…</div>}>
+            <EthKalmanPrediction />
+          </Suspense>
         ) : pausedPages[currentPage] ? (
           <div className="card card-padded" style={{ textAlign: 'center' }}>
             <p className="muted" style={{ maxWidth: 520, margin: '0 auto' }}>{pausedPages[currentPage].message}</p>
@@ -112,7 +119,8 @@ const App = () => {
         ) : currentPage === 'trading' ? (
           <TradingViewPage />
         ) : null}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,12 +1,16 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 import { useBrokerComparisonContext } from '../hooks/useBrokerComparison.jsx';
 import BrokerStackCard from './BrokerStackCard.jsx';
+import QuickFilterCards from './QuickFilterCards.jsx';
+import BrokerDetailModal from './BrokerDetailModal.jsx';
 
 const BrokerGroupGrid = ({ brokers }) => {
   const { currentLanguage } = useLanguage();
   const translate = useCallback((key, params = {}) => t(key, currentLanguage, params), [currentLanguage]);
+  const [activeFilter, setActiveFilter] = useState(null);
+  const [selectedBrokerForDetail, setSelectedBrokerForDetail] = useState(null);
 
   const {
     selectedBrokers,
@@ -19,6 +23,51 @@ const BrokerGroupGrid = ({ brokers }) => {
 
   const groupedBrokers = useMemo(() => {
     if (!brokers || brokers.length === 0) return [];
+
+    // 将 extractGroupName 移到 useMemo 内部
+    const extractGroupName = (brokerName) => {
+      if (!brokerName) return null;
+
+      const patterns = [
+        /^(Plus500)[A-Z]{2,3}.*$/i,
+        /^(IC Markets).*$/i,
+        /^(XM).*$/i,
+        /^(Exness).*$/i,
+        /^(TMGM).*$/i,
+        /^(HFM|HotForex).*$/i,
+        /^(FXTM).*$/i,
+        /^(FxPro).*$/i,
+        /^(OANDA).*$/i,
+        /^(IG).*$/i,
+        /^(Saxo).*$/i,
+        /^(AvaTrade).*$/i,
+        /^(Tickmill).*$/i,
+        /^(Vantage).*$/i,
+        /^(BlackBull).*$/i,
+        /^(CMC Markets).*$/i,
+        /^(Doo Prime).*$/i,
+        /^(Pepperstone).*$/i,
+        /^(Eightcap).*$/i,
+        /^(FP Markets).*$/i,
+        /^(Axi).*$/i,
+        /^(RoboForex).*$/i,
+        /^(FOREX\.com).*$/i,
+        /^(EBC).*$/i,
+        /^(Blueberry).*$/i,
+        /^(STARTRADER).*$/i,
+        /^(DBG Markets).*$/i,
+        /^(ZFX).*$/i
+      ];
+
+      for (const pattern of patterns) {
+        const match = brokerName.match(pattern);
+        if (match) {
+          return match[1];
+        }
+      }
+
+      return null;
+    };
 
     const groups = new Map();
     const ungrouped = [];
@@ -63,49 +112,44 @@ const BrokerGroupGrid = ({ brokers }) => {
     return [...groupedBrokers, ...singleBrokerGroups];
   }, [brokers]);
 
-  function extractGroupName(brokerName) {
-    if (!brokerName) return null;
+  const filterBroker = useCallback((broker, filterId) => {
+    if (!filterId) return true;
 
-    const patterns = [
-      /^(Plus500)[A-Z]{2,3}.*$/i,
-      /^(IC Markets).*$/i,
-      /^(XM).*$/i,
-      /^(Exness).*$/i,
-      /^(TMGM).*$/i,
-      /^(HFM|HotForex).*$/i,
-      /^(FXTM).*$/i,
-      /^(FxPro).*$/i,
-      /^(OANDA).*$/i,
-      /^(IG).*$/i,
-      /^(Saxo).*$/i,
-      /^(AvaTrade).*$/i,
-      /^(Tickmill).*$/i,
-      /^(Vantage).*$/i,
-      /^(BlackBull).*$/i,
-      /^(CMC Markets).*$/i,
-      /^(Doo Prime).*$/i,
-      /^(Pepperstone).*$/i,
-      /^(Eightcap).*$/i,
-      /^(FP Markets).*$/i,
-      /^(Axi).*$/i,
-      /^(RoboForex).*$/i,
-      /^(FOREX\.com).*$/i,
-      /^(EBC).*$/i,
-      /^(Blueberry).*$/i,
-      /^(STARTRADER).*$/i,
-      /^(DBG Markets).*$/i,
-      /^(ZFX).*$/i
-    ];
-
-    for (const pattern of patterns) {
-      const match = brokerName.match(pattern);
-      if (match) {
-        return match[1];
-      }
+    if (filterId === 'beginner') {
+      const hasTopRegulator = broker.regulatorDetails?.some(
+        reg => ['ASIC', 'FCA'].includes(reg.code)
+      );
+      return hasTopRegulator;
     }
 
-    return null;
-  }
+    if (filterId === 'lowCost') {
+      const costBreakdown = broker.breakdown?.find(item =>
+        item.key === '交易成本' || item.label.toLowerCase().includes('cost')
+      );
+      return costBreakdown && costBreakdown.score >= 80;
+    }
+
+    if (filterId === 'topRegulation') {
+      const tier1Regulators = ['ASIC', 'FCA', 'CYSEC', 'MAS'];
+      const count = broker.regulatorDetails?.filter(
+        reg => tier1Regulators.includes(reg.code)
+      ).length || 0;
+      return count >= 3;
+    }
+
+    return true;
+  }, []);
+
+  const filteredGroupedBrokers = useMemo(() => {
+    if (!activeFilter) return groupedBrokers;
+
+    return groupedBrokers
+      .map(group => ({
+        ...group,
+        brokers: group.brokers.filter(broker => filterBroker(broker, activeFilter))
+      }))
+      .filter(group => group.brokers.length > 0);
+  }, [groupedBrokers, activeFilter, filterBroker]);
 
   const renderRegulatorBadges = (items) => {
     if (!items || items.length === 0) {
@@ -188,8 +232,14 @@ const BrokerGroupGrid = ({ brokers }) => {
         )}
       </div>
 
+      <QuickFilterCards
+        activeFilter={activeFilter}
+        onFilterSelect={setActiveFilter}
+        onClearFilter={() => setActiveFilter(null)}
+      />
+
       <div className="bh-grid">
-        {groupedBrokers.map((brokerGroup, index) => {
+        {filteredGroupedBrokers.map((brokerGroup, index) => {
           if (brokerGroup.brokers.length === 1) {
             const broker = brokerGroup.brokers[0];
             const isSelected = selectedBrokers.some(selected => selected.id === broker.id);
@@ -265,20 +315,12 @@ const BrokerGroupGrid = ({ brokers }) => {
                 )}
 
                 <div className="bh-card-footer">
-                  {broker.website ? (
-                    <a
-                      className="btn btn-ghost"
-                      href={broker.website}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {translate('brokerHub.sections.brokers.actions.visitSite')}
-                    </a>
-                  ) : (
-                    <button className="btn btn-ghost" disabled>
-                      {translate('brokerHub.sections.brokers.actions.visitSite')}
-                    </button>
-                  )}
+                  <button
+                    className="btn btn-ghost"
+                    onClick={() => setSelectedBrokerForDetail(broker)}
+                  >
+                    查看详情
+                  </button>
                   <button
                     className={`btn ${isSelected ? 'btn-secondary' : 'btn-primary'}`}
                     onClick={() => toggleBroker(broker)}
@@ -336,6 +378,13 @@ const BrokerGroupGrid = ({ brokers }) => {
         <div className="bh-error-toast">
           <span className="bh-error-message">{error}</span>
         </div>
+      )}
+
+      {selectedBrokerForDetail && (
+        <BrokerDetailModal
+          broker={selectedBrokerForDetail}
+          onClose={() => setSelectedBrokerForDetail(null)}
+        />
       )}
     </section>
   );
