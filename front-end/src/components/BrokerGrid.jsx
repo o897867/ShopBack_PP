@@ -193,7 +193,7 @@ const BrokerGrid = ({ brokers }) => {
                   onClick={() => toggleBroker(broker)}
                   disabled={isMaxReached}
                 >
-                  {isSelected ? '移除对比' : '添加对比'}
+                  {isSelected ? translate('brokerDetail.removeFromCompare') : translate('brokerDetail.addToCompare')}
                 </button>
               </div>
             </article>
@@ -207,10 +207,12 @@ const BrokerGrid = ({ brokers }) => {
           <div className="bh-floating-compare__content">
             <div className="bh-floating-compare__info">
               <span className="bh-floating-compare__title">
-                已选择 {selectionStats.count} 个经纪商
+                {translate('common.selected', { count: selectionStats.count })}
               </span>
               <span className="bh-floating-compare__subtitle">
-                {selectionStats.count === 5 ? '已达最大对比数量' : `还可选择 ${5 - selectionStats.count} 个`}
+                {selectionStats.count === 5
+                  ? translate('brokerDetail.maxReached')
+                  : translate('brokerDetail.canSelectMore', { count: 5 - selectionStats.count })}
               </span>
             </div>
             <div className="bh-floating-compare__actions">
@@ -220,14 +222,16 @@ const BrokerGrid = ({ brokers }) => {
                   selectedBrokers.forEach(broker => toggleBroker(broker));
                 }}
               >
-                清空
+                {translate('common.clear')}
               </button>
               <button
                 className="btn btn-primary"
                 onClick={startComparison}
                 disabled={isLoading}
               >
-                {isLoading ? '加载中...' : `开始对比 (${selectionStats.count})`}
+                {isLoading
+                  ? translate('brokerDetail.loading')
+                  : translate('brokerDetail.startComparison', { count: selectionStats.count })}
               </button>
             </div>
           </div>

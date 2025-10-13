@@ -4,6 +4,7 @@ import './index.css';
 import Navigation from './components/Navigation.jsx';
 import TradingViewPage from './pages/trading.jsx';
 import BrokerHub from './pages/BrokerHub.jsx';
+import Home from './pages/Home.jsx';
 const Forum = lazy(() => import('./pages/Forum.jsx'));
 const ForumModeration = lazy(() => import('./pages/ForumModeration.jsx'));
 const BrokerAnalytics = lazy(() => import('./pages/BrokerAnalytics.jsx'));
@@ -31,12 +32,12 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['broker-hub','analytics','forum','forum-mod','predictions','eth','trading','login','register'];
+      const known = ['home','broker-hub','analytics','forum','forum-mod','predictions','eth','trading','login','register'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
     } catch (e) { /* ignore */ }
-    return 'broker-hub';
+    return 'home';
   };
   const [currentPage, setCurrentPage] = useState(getInitialPage);
   
@@ -62,7 +63,9 @@ const App = () => {
       {/* 全局导航 - 始终显示 */}
       <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
-      {currentPage === 'broker-hub' ? (
+      {currentPage === 'home' ? (
+        <Home onNavigate={setCurrentPage} />
+      ) : currentPage === 'broker-hub' ? (
         <BrokerHub onNavigate={setCurrentPage} />
       ) : (
         <div className="container">

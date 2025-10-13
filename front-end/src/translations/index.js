@@ -4,6 +4,7 @@ export const translations = {
     // Navigation & General
     nav: {
       dashboard: 'ShopBack Management',
+      home: 'Workspace Home',
       brokerHub: 'Broker Hub',
       analytics: 'Broker Analytics',
       trading: 'TradingView',
@@ -28,7 +29,113 @@ export const translations = {
       success: 'Success',
       error: 'Error',
       warning: 'Warning',
-      info: 'Information'
+      info: 'Information',
+      clear: 'Clear',
+      selected: 'Selected {{count}} brokers'
+    },
+    home: {
+      hero: {
+        badge: 'Your broker operating system',
+        title: 'Turn broker intelligence into a living workspace.',
+        subtitle: 'Track regulators, scorecards and community sentiment in one collaborative surface inspired by Monday.com.',
+        primary: 'Open Broker Hub',
+        secondary: 'View analytics'
+      },
+      preview: {
+        title: 'Top performers',
+        badge: 'Live board',
+        loading: 'Loading board…',
+        empty: 'No brokers available yet.'
+      },
+      metrics: {
+        brokers: 'Brokers tracked',
+        brokersHelper: '{{count}} listings synced',
+        alerts: 'News signals',
+        alertsHelper: '{{count}} curated updates',
+        community: 'Active voices',
+        communityHelper: '{{count}} contributors this week'
+      },
+      states: {
+        loading: 'Pulling workspace data…',
+        error: 'We could not load the workspace right now.',
+        retry: 'Try again'
+      },
+      workspace: {
+        title: 'Broker workspace',
+        subtitle: 'Plan, prioritise and brief the next brokerage moves in a Monday.com-style board.',
+        cta: 'Open detailed board'
+      },
+      board: {
+        title: 'Acquisition pipeline',
+        helper: 'Auto-ranked by composite risk score',
+        column: {
+          broker: 'Broker',
+          status: 'Status',
+          score: 'Score',
+          regulators: 'Regulators',
+          actions: 'Action'
+        },
+        status: {
+          unknown: 'No status',
+          live: 'Ready to activate',
+          review: 'In review',
+          watch: 'On watchlist',
+          hold: 'Backlog'
+        },
+        focusFallback: 'No highlight captured yet',
+        regulatorCount: '{{count}} regulators',
+        viewProfile: 'Open profile'
+      },
+      highlight: {
+        title: 'Spotlight',
+        headline: '{{broker}} is leading this week',
+        description: 'Composite {{score}} · Standout: {{focus}}',
+        empty: 'Select a broker to populate the highlight.',
+        cta: 'Deep-dive analytics'
+      },
+      quickActions: {
+        title: 'Quick automations',
+        launch: 'Launch',
+        compare: {
+          title: 'Spin up a comparison',
+          description: 'Open the broker hub with filters pre-applied.'
+        },
+        analytics: {
+          title: 'Check broker analytics',
+          description: 'Review quadrants, trends and risk clusters.'
+        },
+        community: {
+          title: 'Listen to the community',
+          description: 'Jump into the forum to validate sentiment.'
+        }
+      },
+      timeline: {
+        title: 'Live signal feed',
+        subtitle: 'Curated alerts from regulators and community',
+        empty: 'No signals in the last 48 hours.',
+        newsFallback: '{{broker}} update',
+        unknownBroker: 'Unknown broker',
+        tagged: '{{broker}} • {{tag}}',
+        generic: '{{broker}} shared a new signal',
+        threadFallback: 'Community thread',
+        threadBy: 'Thread by {{author}}',
+        threadAnonymous: 'Thread from the community'
+      },
+      community: {
+        title: 'Community heatmap',
+        subtitle: 'Track sentiment before you commit capital.',
+        cta: 'Open forum',
+        stats: {
+          voices: 'Active voices',
+          threads: 'Threads this week',
+          posts: 'Posts analysed'
+        },
+        feedTitle: 'Trending conversations',
+        feedSubtitle: 'Signals from analysts and power users',
+        feedFallback: 'Untitled conversation',
+        anonymous: 'Anonymous',
+        feedEmpty: 'No highlights yet — start a thread to warm things up.'
+      }
     },
 
     // Broker Hub
@@ -721,36 +828,48 @@ export const translations = {
         '综合影响力': 'Composite Score'
       },
 
-      // Broker Detail Modal
-      brokerDetail: {
-        compositeScore: 'Composite Score',
-        basicInfo: 'Basic Information',
-        brokerName: 'Broker Name',
-        overallRating: 'Overall Rating',
-        website: 'Official Website',
-        unrated: 'Not rated',
-        regulatoryInfo: 'Regulatory Information',
-        regulators: 'Regulators',
-        entities: 'entities',
-        ratingBreakdown: 'Rating Breakdown',
-        category: 'Category',
-        score: 'Score',
-        weight: 'Weight',
-        close: 'Close'
-      },
+    },
 
-      // Broker Comparison Modal
-      brokerComparison: {
-        title: 'Broker Comparison Analysis',
-        subtitle: 'Comparing {{count}} brokers',
-        comparisonItems: 'Comparison Items',
-        summary: 'Comparison Summary',
-        loading: 'Loading comparison data...',
-        noData: 'No comparison data available',
-        removeBroker: 'Remove this broker',
-        closeComparison: 'Close comparison',
-        tip: '💡 Click × to remove individual brokers and re-compare'
-      }
+    // Broker Detail Modal
+    brokerDetail: {
+      compositeScore: 'Composite Score',
+      basicInfo: 'Basic Information',
+      brokerName: 'Broker Name',
+      overallRating: 'Overall Rating',
+      website: 'Official Website',
+      unrated: 'Not rated',
+      regulatoryInfo: 'Regulatory Information',
+      regulators: 'Regulators',
+      entities: 'entities',
+      ratingBreakdown: 'Rating Breakdown',
+      category: 'Category',
+      score: 'Score',
+      weight: 'Weight',
+      close: 'Close',
+      viewDetails: 'View Details',
+      addToCompare: 'Add to Compare',
+      removeFromCompare: 'Remove',
+      visit: 'Visit',
+      compare: 'Compare',
+      remove: 'Remove',
+      expandView: 'Expand ({{count}})',
+      maxReached: 'Max comparison limit reached',
+      canSelectMore: '{{count}} more can be selected',
+      startComparison: 'Start Comparison ({{count}})',
+      loading: 'Loading...'
+    },
+
+    // Broker Comparison Modal
+    brokerComparison: {
+      title: 'Broker Comparison Analysis',
+      subtitle: 'Comparing {{count}} brokers',
+      comparisonItems: 'Comparison Items',
+      summary: 'Comparison Summary',
+      loading: 'Loading comparison data...',
+      noData: 'No comparison data available',
+      removeBroker: 'Remove this broker',
+      closeComparison: 'Close comparison',
+      tip: '💡 Click × to remove individual brokers and re-compare'
     },
 
     // Validation Messages
@@ -768,6 +887,7 @@ export const translations = {
     // Navigation & General
     nav: {
       dashboard: 'ShopBack管理',
+      home: '工作台首页',
       brokerHub: '经纪商控制台',
       analytics: '券商象限分析',
       trading: '交易图表',
@@ -792,7 +912,113 @@ export const translations = {
       success: '成功',
       error: '错误',
       warning: '警告',
-      info: '信息'
+      info: '信息',
+      clear: '清空',
+      selected: '已选择 {{count}} 个经纪商'
+    },
+    home: {
+      hero: {
+        badge: '你的经纪商操作系统',
+        title: '把经纪商情报变成真正可执行的工作台。',
+        subtitle: '像 Monday.com 一样，把监管动向、评分卡与社区情绪整合在同一个协作界面。',
+        primary: '进入经纪商控制台',
+        secondary: '查看象限分析'
+      },
+      preview: {
+        title: '本周表现榜',
+        badge: '实时看板',
+        loading: '正在加载看板…',
+        empty: '暂时没有经纪商数据。'
+      },
+      metrics: {
+        brokers: '监控中的经纪商',
+        brokersHelper: '已同步 {{count}} 家',
+        alerts: '新闻信号',
+        alertsHelper: '精选 {{count}} 条更新',
+        community: '活跃声音',
+        communityHelper: '过去 7 天 {{count}} 位贡献者'
+      },
+      states: {
+        loading: '正在加载工作台数据…',
+        error: '当前暂时无法加载工作台。',
+        retry: '重试'
+      },
+      workspace: {
+        title: '经纪商工作台',
+        subtitle: '用 Monday.com 风格的看板规划、优先排序并输出你的下一步动作。',
+        cta: '打开完整看板'
+      },
+      board: {
+        title: '经纪商承做看板',
+        helper: '按复合风险评分自动排序',
+        column: {
+          broker: '经纪商',
+          status: '状态',
+          score: '评分',
+          regulators: '监管',
+          actions: '操作'
+        },
+        status: {
+          unknown: '未设置状态',
+          live: '可以立即推进',
+          review: '评估中',
+          watch: '观察列表',
+          hold: '待定'
+        },
+        focusFallback: '暂无亮点信息',
+        regulatorCount: '{{count}} 个监管',
+        viewProfile: '查看档案'
+      },
+      highlight: {
+        title: '焦点',
+        headline: '{{broker}} 引领本周节奏',
+        description: '综合评分 {{score}} · 亮点：{{focus}}',
+        empty: '选择一位经纪商即可生成焦点。',
+        cta: '深入查看分析'
+      },
+      quickActions: {
+        title: '快速自动化',
+        launch: '立即前往',
+        compare: {
+          title: '一键发起对比',
+          description: '打开经纪商中心并自动带上筛选。'
+        },
+        analytics: {
+          title: '查看经纪商分析',
+          description: '审阅象限、趋势与风险聚类。'
+        },
+        community: {
+          title: '倾听社区声音',
+          description: '进入论坛验证真实口碑。'
+        }
+      },
+      timeline: {
+        title: '实时信号流',
+        subtitle: '监管消息与社区动态集中呈现',
+        empty: '过去 48 小时暂无新信号。',
+        newsFallback: '{{broker}} 最新动态',
+        unknownBroker: '未知经纪商',
+        tagged: '{{broker}} • {{tag}}',
+        generic: '{{broker}} 发布了新信号',
+        threadFallback: '社区话题',
+        threadBy: '来自 {{author}} 的话题',
+        threadAnonymous: '社区匿名话题'
+      },
+      community: {
+        title: '社区热力图',
+        subtitle: '在投入资金前先掌握真实情绪。',
+        cta: '打开论坛',
+        stats: {
+          voices: '活跃声音',
+          threads: '本周话题',
+          posts: '分析帖子数'
+        },
+        feedTitle: '热议讨论',
+        feedSubtitle: '分析师与资深用户的关键信号',
+        feedFallback: '未命名话题',
+        anonymous: '匿名',
+        feedEmpty: '暂无精选内容，发个帖子点燃社区吧。'
+      }
     },
 
     // Broker Hub
@@ -1485,36 +1711,48 @@ export const translations = {
         '综合影响力': '综合影响力'
       },
 
-      // 经纪商详情弹窗
-      brokerDetail: {
-        compositeScore: '综合得分',
-        basicInfo: '基本信息',
-        brokerName: '经纪商名称',
-        overallRating: '总体评级',
-        website: '官方网站',
-        unrated: '未评级',
-        regulatoryInfo: '监管信息',
-        regulators: '监管机构',
-        entities: '个实体',
-        ratingBreakdown: '评分细节',
-        category: '类别',
-        score: '得分',
-        weight: '权重',
-        close: '关闭'
-      },
+    },
 
-      // 经纪商对比弹窗
-      brokerComparison: {
-        title: '经纪商对比分析',
-        subtitle: '对比 {{count}} 家经纪商',
-        comparisonItems: '对比项目',
-        summary: '对比总结',
-        loading: '正在加载对比数据...',
-        noData: '暂无对比数据',
-        removeBroker: '移除此经纪商',
-        closeComparison: '关闭对比',
-        tip: '💡 点击 × 可移除单个经纪商进行重新对比'
-      }
+    // 经纪商详情弹窗
+    brokerDetail: {
+      compositeScore: '综合得分',
+      basicInfo: '基本信息',
+      brokerName: '经纪商名称',
+      overallRating: '总体评级',
+      website: '官方网站',
+      unrated: '未评级',
+      regulatoryInfo: '监管信息',
+      regulators: '监管机构',
+      entities: '实体',
+      ratingBreakdown: '评分细节',
+      category: '类别',
+      score: '得分',
+      weight: '权重',
+      close: '关闭',
+      viewDetails: '查看详情',
+      addToCompare: '添加对比',
+      removeFromCompare: '移除对比',
+      visit: '访问',
+      compare: '对比',
+      remove: '移除',
+      expandView: '展开查看 ({{count}})',
+      maxReached: '已达最大对比数量',
+      canSelectMore: '还可选择 {{count}} 个',
+      startComparison: '开始对比 ({{count}})',
+      loading: '加载中...'
+    },
+
+    // 经纪商对比弹窗
+    brokerComparison: {
+      title: '经纪商对比分析',
+      subtitle: '对比 {{count}} 家经纪商',
+      comparisonItems: '对比项目',
+      summary: '对比总结',
+      loading: '正在加载对比数据...',
+      noData: '暂无对比数据',
+      removeBroker: '移除此经纪商',
+      closeComparison: '关闭对比',
+      tip: '💡 点击 × 可移除单个经纪商进行重新对比'
     },
 
     // Validation Messages

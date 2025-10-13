@@ -205,11 +205,11 @@ const BrokerStackCard = ({ brokerGroup }) => {
                           rel="noreferrer"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          访问
+                          {translate('brokerDetail.visit')}
                         </a>
                       ) : (
                         <button className="btn btn-ghost btn-small" disabled>
-                          访问
+                          {translate('brokerDetail.visit')}
                         </button>
                       )}
                       <button
@@ -217,7 +217,7 @@ const BrokerStackCard = ({ brokerGroup }) => {
                         onClick={(e) => handleBrokerSelect(broker, e)}
                         disabled={isMaxReached}
                       >
-                        {isSelected ? '移除' : '对比'}
+                        {isSelected ? translate('brokerDetail.remove') : translate('brokerDetail.compare')}
                       </button>
                     </div>
                   </div>
@@ -274,7 +274,7 @@ const BrokerStackCard = ({ brokerGroup }) => {
                   className="btn btn-primary"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  展开查看 ({additionalCount + 1})
+                  {translate('brokerDetail.expandView', { count: additionalCount + 1 })}
                 </button>
               </div>
             </>

@@ -11,7 +11,8 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
     {
       title: translate('nav.groups.explore'),
       items: [
-        { id: 'broker-hub', label: translate('nav.brokerHub'), badge: 'recommended' },
+        { id: 'home', label: translate('nav.home'), badge: 'recommended' },
+        { id: 'broker-hub', label: translate('nav.brokerHub') },
         { id: 'analytics', label: translate('nav.analytics') }
       ]
     },
