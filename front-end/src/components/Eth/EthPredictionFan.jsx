@@ -1,211 +1,259 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  Area,
-  ComposedChart
-} from 'recharts';
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Filler,
+  Tooltip as ChartTooltip,
+  Legend
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, ChartTooltip, Legend);
+
+const formatPrice = (value) => `$${Number(value ?? 0).toFixed(2)}`;
 
 const EthPredictionFan = ({ currentPrice, predictions }) => {
-  if (!currentPrice || !predictions?.horizons) {
-    return (
-      <div style={{ 
-        height: 400, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        color: '#999'
-      }}>
-        No prediction data available
-      </div>
-    );
-  }
+  const fanData = useMemo(() => {
+    if (!currentPrice || !predictions?.horizons) return [];
 
-  // Prepare data for the fan chart
-  const fanData = [
-    {
+    const base = [{
       minutes: 0,
       price: currentPrice,
       pi68_lower: currentPrice,
       pi68_upper: currentPrice,
       pi95_lower: currentPrice,
       pi95_upper: currentPrice
-    }
-  ];
+    }];
 
-  // Add prediction points
-  const horizons = [3, 6, 9, 15, 30, 60];
-  horizons.forEach(horizon => {
-    const key = `${horizon}m`;
-    if (predictions.horizons[key]) {
-      const pred = predictions.horizons[key];
-      fanData.push({
-        minutes: horizon,
-        price: pred.y_hat,
-        pi68_lower: pred.pi68[0],
-        pi68_upper: pred.pi68[1],
-        pi95_lower: pred.pi95[0],
-        pi95_upper: pred.pi95[1]
-      });
-    }
-  });
+    const horizons = [3, 6, 9, 15, 30, 60];
+    horizons.forEach((horizon) => {
+      const key = `${horizon}m`;
+      const prediction = predictions.horizons[key];
+      if (prediction) {
+        base.push({
+          minutes: horizon,
+          price: prediction.y_hat,
+          pi68_lower: prediction.pi68?.[0],
+          pi68_upper: prediction.pi68?.[1],
+          pi95_lower: prediction.pi95?.[0],
+          pi95_upper: prediction.pi95?.[1]
+        });
+      }
+    });
 
-  const formatPrice = (value) => `$${value.toFixed(2)}`;
+    return base;
+  }, [currentPrice, predictions]);
 
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (!active || !payload || !payload.length) return null;
-
-    const data = payload[0].payload;
-    const priceChange = ((data.price - currentPrice) / currentPrice) * 100;
-    
+  if (!currentPrice || !predictions?.horizons || fanData.length <= 1) {
     return (
-      <div style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        padding: '12px',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        fontSize: '12px'
-      }}>
-        <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>
-          {label === 0 ? 'Current' : `+${label} minutes`}
-        </p>
-        <p style={{ margin: '4px 0', color: '#2196f3' }}>
-          Price: {formatPrice(data.price)}
-        </p>
-        {label !== 0 && (
-          <p style={{ 
-            margin: '4px 0', 
-            color: priceChange >= 0 ? '#4caf50' : '#f44336' 
-          }}>
-            Change: {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
-          </p>
-        )}
-        <p style={{ margin: '4px 0', color: '#ff9800' }}>
-          68% CI: {formatPrice(data.pi68_lower)} - {formatPrice(data.pi68_upper)}
-        </p>
-        <p style={{ margin: '4px 0', color: '#999' }}>
-          95% CI: {formatPrice(data.pi95_lower)} - {formatPrice(data.pi95_upper)}
-        </p>
+      <div
+        style={{
+          height: 400,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#999'
+        }}
+      >
+        No prediction data available
       </div>
     );
-  };
+  }
 
-  // Calculate Y-axis domain to show full confidence intervals
-  const allValues = fanData.flatMap(d => [
-    d.pi95_lower,
-    d.pi95_upper,
-    d.price
-  ]);
-  const minValue = Math.min(...allValues) * 0.998;
-  const maxValue = Math.max(...allValues) * 1.002;
+  const labels = fanData.map((point) => point.minutes);
+
+  const chartData = useMemo(() => ({
+    labels,
+    datasets: [
+      {
+        label: '95% Upper',
+        data: fanData.map((point) => point.pi95_upper ?? null),
+        borderColor: 'rgba(33, 150, 243, 0.3)',
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+        skipLegend: true,
+        tension: 0.25,
+        tooltip: { enabled: false }
+      },
+      {
+        label: '95% Lower',
+        data: fanData.map((point) => point.pi95_lower ?? null),
+        borderColor: 'rgba(33, 150, 243, 0.3)',
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: '-1',
+        backgroundColor: 'rgba(227, 242, 253, 0.5)',
+        skipLegend: true,
+        tension: 0.25,
+        tooltip: { enabled: false }
+      },
+      {
+        label: '68% Upper',
+        data: fanData.map((point) => point.pi68_upper ?? null),
+        borderColor: 'rgba(59, 130, 246, 0.4)',
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: false,
+        skipLegend: true,
+        tension: 0.25,
+        tooltip: { enabled: false }
+      },
+      {
+        label: '68% Lower',
+        data: fanData.map((point) => point.pi68_lower ?? null),
+        borderColor: 'rgba(59, 130, 246, 0.4)',
+        borderWidth: 1,
+        pointRadius: 0,
+        fill: '-1',
+        backgroundColor: 'rgba(187, 222, 251, 0.55)',
+        skipLegend: true,
+        tension: 0.25,
+        tooltip: { enabled: false }
+      },
+      {
+        label: 'Kalman Prediction',
+        data: fanData.map((point) => point.price ?? null),
+        borderColor: '#2196f3',
+        backgroundColor: 'rgba(33, 150, 243, 0.12)',
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: '#2196f3',
+        pointHoverRadius: 5,
+        fill: false,
+        tension: 0.3
+      },
+      {
+        label: 'Current Price',
+        data: fanData.map(() => currentPrice),
+        borderColor: '#6b7280',
+        borderDash: [10, 6],
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: false,
+        tension: 0,
+        skipLegend: true,
+        tooltip: { enabled: false }
+      }
+    ]
+  }), [fanData, currentPrice, labels]);
+
+  const yNumeric = fanData
+    .flatMap((point) => [point.pi95_lower, point.pi95_upper, point.price])
+    .filter((value) => Number.isFinite(value));
+
+  let yMin = currentPrice * 0.9;
+  let yMax = currentPrice * 1.1;
+
+  if (yNumeric.length) {
+    const min = Math.min(...yNumeric);
+    const max = Math.max(...yNumeric);
+    if (min === max) {
+      const spread = Math.abs(min) * 0.05 || 5;
+      yMin = min - spread;
+      yMax = max + spread;
+    } else {
+      const padding = (max - min) * 0.08;
+      yMin = min - padding;
+      yMax = max + padding;
+    }
+  }
+
+  const tooltipCallbacks = useMemo(() => ({
+    title: (contexts) => {
+      const label = contexts[0]?.label;
+      if (label === 0) return 'Now';
+      return `+${label} minutes`;
+    },
+    label: (context) => {
+      const entry = fanData[context.dataIndex];
+      if (!entry) return '';
+      const priceLine = `Price: ${formatPrice(entry.price)}`;
+      const change = ((entry.price - currentPrice) / currentPrice) * 100;
+      const changeLine = context.label === 0
+        ? null
+        : `Change: ${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+      const lines = [priceLine];
+      if (changeLine) lines.push(changeLine);
+      lines.push(`68% CI: ${formatPrice(entry.pi68_lower)} - ${formatPrice(entry.pi68_upper)}`);
+      lines.push(`95% CI: ${formatPrice(entry.pi95_lower)} - ${formatPrice(entry.pi95_upper)}`);
+      return lines;
+    }
+  }), [fanData, currentPrice]);
+
+  const chartOptions = useMemo(() => ({
+    maintainAspectRatio: false,
+    responsive: true,
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          filter: (item, chart) => {
+            const dataset = chart.data.datasets[item.datasetIndex];
+            return !dataset?.skipLegend;
+          }
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(17, 24, 39, 0.92)',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        titleColor: '#fff',
+        bodyColor: '#e5e7eb',
+        displayColors: false,
+        callbacks: tooltipCallbacks
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(148, 163, 184, 0.2)' },
+        ticks: {
+          color: 'var(--text)',
+          font: { size: 12 },
+          callback: (_, index, ticks, axis) => {
+            const value = labels[index];
+            return value === 0 ? 'Now' : `+${value}m`;
+          }
+        },
+        title: {
+          display: true,
+          text: 'Minutes Ahead',
+          color: 'var(--text)',
+          font: { size: 13, weight: 600 }
+        },
+        border: { color: 'var(--border)' }
+      },
+      y: {
+        min: yMin,
+        max: yMax,
+        grid: { color: 'rgba(148, 163, 184, 0.2)' },
+        ticks: {
+          color: 'var(--text)',
+          font: { size: 12 },
+          callback: (value) => formatPrice(value)
+        },
+        title: {
+          display: true,
+          text: 'ETH Price (USD)',
+          color: 'var(--text)',
+          font: { size: 13, weight: 600 }
+        },
+        border: { color: 'var(--border)' }
+      }
+    }
+  }), [labels, tooltipCallbacks, yMin, yMax]);
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <ComposedChart 
-        data={fanData} 
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-      >
-        <defs>
-          <linearGradient id="confidence95" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#e3f2fd" stopOpacity={0.8}/>
-            <stop offset="95%" stopColor="#e3f2fd" stopOpacity={0.2}/>
-          </linearGradient>
-          <linearGradient id="confidence68" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#bbdefb" stopOpacity={0.8}/>
-            <stop offset="95%" stopColor="#bbdefb" stopOpacity={0.3}/>
-          </linearGradient>
-        </defs>
-        
-        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-        
-        <XAxis 
-          dataKey="minutes"
-          label={{ value: 'Minutes Ahead', position: 'insideBottom', offset: -5 }}
-          tick={{ fontSize: 11 }}
-          ticks={[0, 3, 6, 9, 15, 30, 60]}
-        />
-        
-        <YAxis 
-          domain={[minValue, maxValue]}
-          tickFormatter={formatPrice}
-          tick={{ fontSize: 11 }}
-          label={{ 
-            value: 'ETH Price (USD)', 
-            angle: -90, 
-            position: 'insideLeft',
-            style: { textAnchor: 'middle' }
-          }}
-        />
-        
-        <Tooltip content={<CustomTooltip />} />
-        
-        <Legend 
-          wrapperStyle={{ fontSize: '12px' }}
-          iconType="line"
-        />
-
-        {/* 95% Confidence Interval */}
-        <Area
-          type="monotone"
-          dataKey="pi95_upper"
-          stackId="1"
-          stroke="none"
-          fill="url(#confidence95)"
-          name="95% CI"
-        />
-        <Area
-          type="monotone"
-          dataKey="pi95_lower"
-          stackId="2"
-          stroke="none"
-          fill="#fff"
-        />
-
-        {/* 68% Confidence Interval */}
-        <Area
-          type="monotone"
-          dataKey="pi68_upper"
-          stackId="3"
-          stroke="none"
-          fill="url(#confidence68)"
-          name="68% CI"
-        />
-        <Area
-          type="monotone"
-          dataKey="pi68_lower"
-          stackId="4"
-          stroke="none"
-          fill="#fff"
-        />
-
-        {/* Predicted price line */}
-        <Line
-          type="monotone"
-          dataKey="price"
-          stroke="#2196f3"
-          strokeWidth={3}
-          dot={{ r: 5, fill: '#2196f3' }}
-          name="Kalman Prediction"
-        />
-
-        {/* Current price reference line */}
-        <Line
-          type="monotone"
-          dataKey={() => currentPrice}
-          stroke="#666"
-          strokeWidth={1}
-          strokeDasharray="10 5"
-          dot={false}
-          name="Current Price"
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+    <div style={{ width: '100%', height: 400 }}>
+      <Line data={chartData} options={chartOptions} />
+    </div>
   );
 };
 

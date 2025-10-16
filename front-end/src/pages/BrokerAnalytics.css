@@ -347,6 +347,34 @@
   font-weight: 600;
 }
 
+.chart-viewport {
+  width: 100%;
+  position: relative;
+}
+
+.chart-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.chart-canvas-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-canvas-wrapper.is-selecting {
+  cursor: crosshair;
+}
+
+.chart-selection-rect {
+  position: absolute;
+  border: 2px solid rgba(37, 99, 235, 0.55);
+  background: rgba(37, 99, 235, 0.12);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
 /* 图表响应式容器 */
 .chart-responsive-container {
   background: rgba(255, 255, 255, 0.6);

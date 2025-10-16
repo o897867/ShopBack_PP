@@ -6,9 +6,9 @@
 
 /* 导航栏 */
 .navbar {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--panel);
+  box-shadow: none;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .nav-content {
@@ -22,9 +22,11 @@
 }
 
 .nav-title {
+  font-family: var(--font-display);
   font-size: 1.5rem;
-  font-weight: bold;
-  color: #333;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
   margin: 0;
 }
 
@@ -51,7 +53,7 @@
 }
 
 .tabs {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   display: flex;
   gap: 32px;
 }
@@ -61,8 +63,11 @@
   border: none;
   padding: 12px 4px;
   cursor: pointer;
-  font-size: 14px;
-  color: #666;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--text-muted);
   border-bottom: 2px solid transparent;
   display: flex;
   align-items: center;
@@ -71,14 +76,14 @@
 }
 
 .tab-button:hover {
-  color: #333;
-  border-bottom-color: #ccc;
+  color: var(--text);
+  border-bottom-color: var(--border);
 }
 
 .tab-button.active {
-  color: #007bff;
-  border-bottom-color: #007bff;
-  font-weight: 500;
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
 }
 
 .tab-icon {

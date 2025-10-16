@@ -880,6 +880,162 @@ export const translations = {
       mustBePositive: 'Value must be positive',
       tooLong: 'Text is too long',
       tooShort: 'Text is too short'
+    },
+
+    // Broker Score Panel
+    scorePanel: {
+      title: 'Broker Score Panel',
+      subtitle: 'Comprehensive rating breakdown with quick filters',
+      filters: {
+        all: 'All Brokers',
+        hot: 'Hot',
+        highRebate: 'High Rebate',
+        strongRegulation: 'Strong Regulation'
+      },
+      noResults: 'No brokers match your filter criteria',
+      regulators: '{{count}} regulators',
+      licenseNumber: 'License No.',
+      showMore: 'Show all scores',
+      showLess: 'Show less',
+      viewDetails: 'View Details',
+      quickSignup: 'Quick Signup',
+      comingSoon: 'Coming Soon',
+      mainDescription: '{{broker}} achieves a composite score of {{score}}, demonstrating strong performance across key metrics.',
+      highlightText: 'Top-rated broker with excellent execution and competitive trading conditions.',
+      tradingConditions: 'Trading Conditions',
+      rebate: 'Rebate',
+      limitedDisplay: 'Showing {{count}} of {{total}} brokers',
+      brokerDescriptions: {
+        'TMGM': 'Competitive costs, broad product coverage, stable execution. Ideal for EA and high-frequency trading with fastest account manager response and optimized US stocks.',
+        'IC Markets': 'Deep liquidity, low spreads, fast execution. Scalping and quant-friendly.',
+        'Exness': 'Fast deposits/withdrawals, flexible leverage, excellent stability. Perfect for frequent trading.',
+        'ECMarket': 'Relatively niche brand. Recommend thorough comparison of regulation and costs before choosing.',
+        'FXTM': 'Rich educational content, excellent localization. Beginner-friendly for progression.',
+        'AvaTrade': 'Extensive compliance coverage, diverse platforms (copy trading/options). Multi-strategy suitable.',
+        'EBC': 'Good execution and service feedback, competitive costs. Brand in rapid development.',
+        'Pepperstone': 'Premium execution, institutional-grade infrastructure. Professional trader\'s choice.'
+      },
+      hoverMetrics: {
+        liquidity: 'Liquidity',
+        spread: 'Spread',
+        accountTypes: 'Account Types',
+        high: 'High',
+        standard: 'Standard'
+      }
+    },
+
+    // Regulation Ticker
+    regulationTicker: {
+      title: 'Regulatory Updates',
+      subtitle: 'Real-time tracking of regulatory status and compliance alerts',
+      viewAll: 'View All Updates',
+      noUpdates: 'No regulatory updates at this time',
+      unknownBroker: 'Unknown Broker',
+      defaultTag: 'Update',
+      regarding: 'Regarding {{broker}}',
+      recentUpdates: 'Recent Updates',
+      showing: 'Showing {{count}} updates'
+    },
+
+    // Rebate Comparison
+    rebateComparison: {
+      title: 'Rebate Comparison',
+      subtitle: 'Compare highest rebates and lowest spreads across brokers',
+      tradeVolume: 'Trade Volume: {{volume}} lots',
+      bestOffer: 'Best Offer',
+      estimatedRebate: 'Estimated Total',
+      maxRebate: 'Highest Rebate',
+      minSpread: 'Lowest Spread',
+      total: 'Total Rebate',
+      yAxisLabel: 'Rebate (USD)',
+      realData: 'Verified Data',
+      table: {
+        broker: 'Broker',
+        maxRebate: 'Max Rebate',
+        minSpread: 'Min Spread',
+        estimated: 'Est. Total ($)'
+      }
+    },
+
+    // Quick Signup
+    quickSignup: {
+      title: 'Quick Account Setup',
+      subtitle: 'Get started in 3 simple steps',
+      steps: {
+        contact: {
+          title: 'Contact Information',
+          description: 'Provide your email and phone number'
+        },
+        preferences: {
+          title: 'Trading Preferences',
+          description: 'Select your account type and experience level'
+        },
+        verify: {
+          title: 'Review & Submit',
+          description: 'Verify your information and complete setup'
+        }
+      },
+      fields: {
+        email: 'Email Address',
+        phone: 'Phone Number',
+        accountType: 'Account Type',
+        experience: 'Trading Experience'
+      },
+      placeholders: {
+        email: 'your@email.com',
+        phone: '+1 234 567 8900'
+      },
+      accountTypes: {
+        standard: 'Standard Account',
+        ecn: 'ECN Account',
+        vip: 'VIP Account'
+      },
+      experience: {
+        beginner: 'Beginner (< 1 year)',
+        intermediate: 'Intermediate (1-3 years)',
+        advanced: 'Advanced (3-5 years)',
+        professional: 'Professional (5+ years)'
+      },
+      errors: {
+        emailRequired: 'Email is required',
+        emailInvalid: 'Please enter a valid email address',
+        phoneRequired: 'Phone number is required',
+        phoneInvalid: 'Please enter a valid phone number',
+        accountTypeRequired: 'Please select an account type',
+        experienceRequired: 'Please select your experience level'
+      },
+      summary: {
+        title: 'Confirm Your Information'
+      },
+      kycNotice: 'Your information will be securely processed. KYC verification may be required to complete account activation.',
+      buttons: {
+        back: 'Back',
+        next: 'Next Step',
+        submit: 'Complete Setup',
+        submitting: 'Processing...'
+      }
+    },
+
+    // Trust Section
+    trustSection: {
+      title: 'Trusted by Traders Worldwide',
+      subtitle: 'Join thousands of satisfied traders who trust our platform',
+      testimonials: {
+        title: 'What Our Users Say'
+      },
+      partners: {
+        title: 'Our Partners',
+        subtitle: 'Regulated brokers we work with'
+      },
+      media: {
+        title: 'Featured In',
+        subtitle: 'Recognized by leading financial publications'
+      },
+      stats: {
+        users: 'Active Users',
+        trades: 'Trades Processed',
+        satisfaction: 'Satisfaction Rate'
+      }
     }
   },
   
@@ -918,9 +1074,9 @@ export const translations = {
     },
     home: {
       hero: {
-        badge: '你的经纪商操作系统',
-        title: '把经纪商情报变成真正可执行的工作台。',
-        subtitle: '像 Monday.com 一样，把监管动向、评分卡与社区情绪整合在同一个协作界面。',
+        badge: '外汇情报实验室',
+        title: '交易者的每日雷达',
+        subtitle: '选择合适的平台，开始你的交易之旅。',
         primary: '进入经纪商控制台',
         secondary: '查看象限分析'
       },
@@ -1763,6 +1919,162 @@ export const translations = {
       mustBePositive: '数值必须为正数',
       tooLong: '文本过长',
       tooShort: '文本过短'
+    },
+
+    // Broker Score Panel
+    scorePanel: {
+      title: '经纪商评分面板',
+      subtitle: '全面的评分细分与快速筛选',
+      filters: {
+        all: '全部经纪商',
+        hot: '热门',
+        highRebate: '返佣高',
+        strongRegulation: '监管强'
+      },
+      noResults: '没有符合筛选条件的经纪商',
+      regulators: '{{count}} 个监管',
+      licenseNumber: '监管号',
+      showMore: '显示全部评分',
+      showLess: '收起',
+      viewDetails: '查看详情',
+      quickSignup: '快速开户',
+      comingSoon: '敬请期待',
+      mainDescription: '{{broker}} 综合评分 {{score}}，在各项关键指标上表现强劲。',
+      highlightText: '顶级经纪商，执行优秀，交易条件具有竞争力。',
+      tradingConditions: '交易条件',
+      rebate: '返佣',
+      limitedDisplay: '显示 {{count}}/{{total}} 个经纪商',
+      brokerDescriptions: {
+        'TMGM': '成本具竞争力、产品覆盖广、执行稳定，适合EA与高频，客户经理反馈最快，美股深度优化。',
+        'IC Markets': '流动性深、点差低、执行迅速，剥头皮与量化友好。',
+        'Exness': '出入金快捷、杠杆灵活、稳定性好，适合频繁交易。',
+        'ECMarket': '品牌相对小众，建议重点比较监管与成本后再选择。',
+        'FXTM': '教育内容丰富、本地化服务佳，上手友好适合新手进阶。',
+        'AvaTrade': '合规布局较广、工具平台多样（含复制/期权），适合多策略。',
+        'EBC': '执行与服务反馈良好、成本具竞争力，品牌仍在加速发展。',
+        'Pepperstone': '优质执行、机构级基础设施，专业交易者首选。'
+      },
+      hoverMetrics: {
+        liquidity: '流动性',
+        spread: '点差',
+        accountTypes: '账户类型',
+        high: '高',
+        standard: '标准'
+      }
+    },
+
+    // Regulation Ticker
+    regulationTicker: {
+      title: '监管动态',
+      subtitle: '实时追踪监管状态与合规警示',
+      viewAll: '查看全部更新',
+      noUpdates: '暂无监管更新',
+      unknownBroker: '未知经纪商',
+      defaultTag: '更新',
+      regarding: '关于 {{broker}}',
+      recentUpdates: '近期更新',
+      showing: '显示 {{count}} 条更新'
+    },
+
+    // Rebate Comparison
+    rebateComparison: {
+      title: '返佣对比',
+      subtitle: '对比各经纪商的最高返佣和最低点差',
+      tradeVolume: '交易量：{{volume}} 手',
+      bestOffer: '最佳方案',
+      estimatedRebate: '预估总额',
+      maxRebate: '最高返佣',
+      minSpread: '最低点差',
+      total: '总返佣',
+      yAxisLabel: '返佣 (美元)',
+      realData: '真实数据',
+      table: {
+        broker: '经纪商',
+        maxRebate: '最高返佣',
+        minSpread: '最低点差',
+        estimated: '预估总额 ($)'
+      }
+    },
+
+    // Quick Signup
+    quickSignup: {
+      title: '快捷开户',
+      subtitle: '3步完成账户设置',
+      steps: {
+        contact: {
+          title: '联系方式',
+          description: '提供您的邮箱和电话号码'
+        },
+        preferences: {
+          title: '交易偏好',
+          description: '选择账户类型和交易经验'
+        },
+        verify: {
+          title: '确认提交',
+          description: '验证信息并完成设置'
+        }
+      },
+      fields: {
+        email: '邮箱地址',
+        phone: '电话号码',
+        accountType: '账户类型',
+        experience: '交易经验'
+      },
+      placeholders: {
+        email: 'your@email.com',
+        phone: '+86 138 0000 0000'
+      },
+      accountTypes: {
+        standard: '标准账户',
+        ecn: 'ECN账户',
+        vip: 'VIP账户'
+      },
+      experience: {
+        beginner: '新手（< 1年）',
+        intermediate: '中级（1-3年）',
+        advanced: '高级（3-5年）',
+        professional: '专业（5年以上）'
+      },
+      errors: {
+        emailRequired: '邮箱为必填项',
+        emailInvalid: '请输入有效的邮箱地址',
+        phoneRequired: '电话号码为必填项',
+        phoneInvalid: '请输入有效的电话号码',
+        accountTypeRequired: '请选择账户类型',
+        experienceRequired: '请选择交易经验'
+      },
+      summary: {
+        title: '确认您的信息'
+      },
+      kycNotice: '您的信息将被安全处理。可能需要 KYC 验证才能完成账户激活。',
+      buttons: {
+        back: '返回',
+        next: '下一步',
+        submit: '完成设置',
+        submitting: '处理中...'
+      }
+    },
+
+    // Trust Section
+    trustSection: {
+      title: '全球交易者信赖之选',
+      subtitle: '加入数千位信任我们平台的满意交易者',
+      testimonials: {
+        title: '用户评价'
+      },
+      partners: {
+        title: '合作伙伴',
+        subtitle: '我们合作的受监管经纪商'
+      },
+      media: {
+        title: '媒体报道',
+        subtitle: '获得金融领域权威媒体认可'
+      },
+      stats: {
+        users: '活跃用户',
+        trades: '处理交易',
+        satisfaction: '满意度'
+      }
     }
   }
 };

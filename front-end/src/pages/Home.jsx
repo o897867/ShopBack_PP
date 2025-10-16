@@ -1,7 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import './Home.css';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import LanguageSelector from '../components/LanguageSelector.jsx';
+import BrokerScorePanel from '../components/BrokerScorePanel.jsx';
+import RebateComparison from '../components/RebateComparison.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 import useBrokerHubData from '../hooks/useBrokerHubData.js';
@@ -54,6 +56,8 @@ const Home = ({ onNavigate }) => {
   const translate = useCallback((key, params = {}) => t(key, currentLanguage, params), [currentLanguage]);
   const locale = currentLanguage === 'zh-CN' ? 'zh-CN' : 'en-US';
   const formatNumber = useCallback((value) => new Intl.NumberFormat(locale).format(value ?? 0), [locale]);
+  const [visibleSections, setVisibleSections] = useState(() => ({ hero: true }));
+
   const {
     brokers: rawBrokers,
     brokerNews,
@@ -63,6 +67,60 @@ const Home = ({ onNavigate }) => {
     error,
     refresh
   } = useBrokerHubData();
+
+  // Intersection Observer for scroll animations
+  React.useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
+    const sectionNodes = Array.from(document.querySelectorAll('[data-section]'));
+    if (sectionNodes.length === 0) {
+      return undefined;
+    }
+
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      // Fallback for environments without IntersectionObserver support
+      setVisibleSections((prev) => {
+        const nextState = { ...prev };
+        sectionNodes.forEach((node) => {
+          const id = node.dataset.section;
+          if (id) nextState[id] = true;
+        });
+        return nextState;
+      });
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const sectionId = entry.target.dataset.section;
+          if (!sectionId) return;
+
+          if (entry.isIntersecting) {
+            setVisibleSections((prev) => {
+              if (prev[sectionId]) return prev;
+              return { ...prev, [sectionId]: true };
+            });
+          } else if (sectionId !== 'hero') {
+            setVisibleSections((prev) => {
+              if (!prev[sectionId]) return prev;
+              return { ...prev, [sectionId]: false };
+            });
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '120px 0px 120px 0px' }
+    );
+
+    sectionNodes.forEach((node) => observer.observe(node));
+
+    return () => {
+      sectionNodes.forEach((node) => observer.unobserve(node));
+      observer.disconnect();
+    };
+  }, [loading, error]);
 
   const communityAnalytics = useMemo(() => {
     const uniqueAuthors = new Set();
@@ -112,6 +170,36 @@ const Home = ({ onNavigate }) => {
       })
       .filter((broker) => broker.name)
       .sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+  }, [rawBrokers, translate]);
+
+  const formattedBrokers = useMemo(() => {
+    const allBrokers = (rawBrokers || [])
+      .map((broker) => {
+        const regulatorDetails = parseRegulators(broker.regulators, broker.regulator_details);
+        const breakdownEntries = parseBreakdownEntries(broker.rating_breakdown, translate);
+        const compositeScore = computeCompositeScore(broker.rating_breakdown) ?? gradeToScore(broker.rating);
+
+        return {
+          id: broker.id,
+          name: broker.name,
+          rating: broker.rating,
+          ratingScore: compositeScore,
+          score: compositeScore,
+          regulators: broker.regulators,
+          regulatorDetails,
+          website: broker.website,
+          logo_url: broker.logo_url,
+          breakdown: breakdownEntries
+        };
+      })
+      .filter((broker) => broker.name)
+      .sort((a, b) => (b.ratingScore || 0) - (a.ratingScore || 0));
+
+    // Filter to show 8 premium brokers: TMGM, Exness, IC Markets, Pepperstone, AvaTrade, FXTM, EBC, ECMarket
+    const targetBrokers = ['tmgm', 'exness', 'ic markets', 'ic market', 'pepperstone', 'avatrade', 'fxtm', 'ebc', 'ecmarket'];
+    return allBrokers.filter((broker) =>
+      targetBrokers.some(target => broker.name.toLowerCase().includes(target))
+    );
   }, [rawBrokers, translate]);
 
   const boardRows = useMemo(() => {
@@ -207,7 +295,8 @@ const Home = ({ onNavigate }) => {
 
   return (
     <div className="home">
-      <section className="home-hero">
+      {/* Hero Section - Always visible */}
+      <section className="home-hero" data-section="hero">
         <div className="home-hero__inner">
           <div className="home-hero__content">
             <div className="home-hero__topline">
@@ -266,7 +355,7 @@ const Home = ({ onNavigate }) => {
         </div>
       </section>
 
-      <main className="home-main container">
+      <main className="home-main">
         {loading ? (
           <div className="home-card home-card--state">
             <div className="muted">{translate('home.states.loading')}</div>
@@ -279,169 +368,69 @@ const Home = ({ onNavigate }) => {
           </div>
         ) : (
           <>
-            <section className="home-section">
+            {/* Segment 1: Broker Score Panel */}
+            <section
+              className={`home-segment home-segment--alt ${visibleSections.scores ? 'home-segment--visible' : ''}`}
+              data-section="scores"
+            >
+              <BrokerScorePanel
+                brokers={formattedBrokers}
+                onBrokerClick={(broker) => handleNavigate('broker-hub')}
+              />
+            </section>
+
+            {/* Segment 2: Rebate Comparison */}
+            <section
+              className={`home-segment home-segment--alt ${visibleSections.rebate ? 'home-segment--visible' : ''}`}
+              data-section="rebate"
+            >
+              <RebateComparison brokers={formattedBrokers} />
+            </section>
+
+            {/* Segment 3: Trust & Social Proof */}
+            <section
+              className={`home-segment ${visibleSections.trust ? 'home-segment--visible' : ''}`}
+              data-section="trust"
+            >
               <header className="home-section__header">
                 <div>
-                  <h2 className="home-section__title">{translate('home.workspace.title')}</h2>
-                  <p className="home-section__subtitle">{translate('home.workspace.subtitle')}</p>
+                  <h2 className="home-section__title">{translate('trustSection.title')}</h2>
+                  <p className="home-section__subtitle">{translate('trustSection.subtitle')}</p>
                 </div>
-                <button className="btn btn-secondary" onClick={() => handleNavigate('broker-hub')}>
-                  {translate('home.workspace.cta')}
-                </button>
               </header>
-
-              <div className="home-workspace">
-                <div className="home-board">
-                  <div className="home-board__head">
-                    <span>{translate('home.board.title')}</span>
-                    <span className="home-board__helper">{translate('home.board.helper')}</span>
+              <div className="trust-grid">
+                <div className="trust-stats">
+                  <div className="trust-stat-card">
+                    <span className="trust-stat-value">50,000+</span>
+                    <span className="trust-stat-label">{translate('trustSection.stats.users')}</span>
                   </div>
-                  <div className="home-board__table">
-                    <div className="home-board__row home-board__row--header">
-                      <span>{translate('home.board.column.broker')}</span>
-                      <span>{translate('home.board.column.status')}</span>
-                      <span>{translate('home.board.column.score')}</span>
-                      <span>{translate('home.board.column.regulators')}</span>
-                      <span>{translate('home.board.column.actions')}</span>
-                    </div>
-                    {boardRows.map((broker) => (
-                      <div key={broker.id} className="home-board__row">
-                        <div className="home-board__cell home-board__cell--primary">
-                          <span className="home-board__position">#{broker.position}</span>
-                          <div>
-                            <div className="home-board__name">{broker.name}</div>
-                            <div className="home-board__note">{broker.focus}</div>
-                          </div>
-                        </div>
-                        <div className="home-board__cell">
-                          <span className={`home-pill home-pill--${broker.status.tone}`}>{broker.status.label}</span>
-                        </div>
-                        <div className="home-board__cell">
-                          <span className="home-badge home-badge--score">{broker.score ?? '—'}</span>
-                        </div>
-                        <div className="home-board__cell">
-                          <span className="home-badge home-badge--neutral">
-                            {translate('home.board.regulatorCount', { count: broker.regulatorCount })}
-                          </span>
-                        </div>
-                        <div className="home-board__cell">
-                          <button className="home-link" onClick={() => handleNavigate('broker-hub')}>
-                            {translate('home.board.viewProfile')}
-                          </button>
-                        </div>
+                  <div className="trust-stat-card">
+                    <span className="trust-stat-value">2.5M+</span>
+                    <span className="trust-stat-label">{translate('trustSection.stats.trades')}</span>
+                  </div>
+                  <div className="trust-stat-card">
+                    <span className="trust-stat-value">98%</span>
+                    <span className="trust-stat-label">{translate('trustSection.stats.satisfaction')}</span>
+                  </div>
+                </div>
+                <div className="trust-partners">
+                  <h3 className="trust-subsection-title">{translate('trustSection.partners.title')}</h3>
+                  <p className="trust-subsection-subtitle">{translate('trustSection.partners.subtitle')}</p>
+                  <div className="trust-partner-logos">
+                    {processedBrokers.slice(0, 6).map((broker, index) => (
+                      <div key={broker.id} className="trust-partner-logo" style={{ animationDelay: `${index * 100}ms` }}>
+                        {broker.logo_url ? (
+                          <img src={broker.logo_url} alt={broker.name} />
+                        ) : (
+                          <span>{broker.name}</span>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
-
-                <aside className="home-aside">
-                  <div className="home-card home-card--highlight">
-                    <div className="home-card__eyebrow">{translate('home.highlight.title')}</div>
-                    {highlight ? (
-                      <>
-                        <h3 className="home-card__headline">{translate('home.highlight.headline', { broker: highlight.name })}</h3>
-                        <p className="home-card__body">
-                          {translate('home.highlight.description', {
-                            score: highlight.score ?? '—',
-                            focus: highlight.focus
-                          })}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="home-card__body">{translate('home.highlight.empty')}</p>
-                    )}
-                    <button className="btn btn-primary" onClick={() => handleNavigate('analytics')}>
-                      {translate('home.highlight.cta')}
-                    </button>
-                  </div>
-
-                  <div className="home-card home-card--actions">
-                    <h3 className="home-card__title">{translate('home.quickActions.title')}</h3>
-                    <ul className="home-action-list">
-                      {quickActions.map((action) => (
-                        <li key={action.id} className="home-action-list__item">
-                          <div>
-                            <div className="home-action-list__title">{action.title}</div>
-                            <div className="home-action-list__description">{action.description}</div>
-                          </div>
-                          <button className="home-link" onClick={() => handleNavigate(action.target)}>
-                            {translate('home.quickActions.launch')}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="home-card home-card--timeline">
-                    <h3 className="home-card__title">{translate('home.timeline.title')}</h3>
-                    <p className="home-card__body">{translate('home.timeline.subtitle')}</p>
-                    {activityFeed.length === 0 ? (
-                      <div className="home-card__empty">{translate('home.timeline.empty')}</div>
-                    ) : (
-                      <ul className="home-timeline">
-                        {activityFeed.map((item) => (
-                          <li key={item.id} className={`home-timeline__item home-timeline__item--${item.tone}`}>
-                            <div className="home-timeline__meta">
-                              <span className="home-timeline__title">{item.title}</span>
-                              <span className="home-timeline__relative">{item.relative}</span>
-                            </div>
-                            <div className="home-timeline__context">{item.context}</div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                </aside>
               </div>
             </section>
 
-            <section className="home-section home-section--community">
-              <header className="home-section__header">
-                <div>
-                  <h2 className="home-section__title">{translate('home.community.title')}</h2>
-                  <p className="home-section__subtitle">{translate('home.community.subtitle')}</p>
-                </div>
-                <button className="btn btn-ghost" onClick={() => handleNavigate('forum')}>
-                  {translate('home.community.cta')}
-                </button>
-              </header>
-              <div className="home-community">
-                <div className="home-community__stats">
-                  <div className="home-community__stat">
-                    <span className="home-community__value">{formatNumber(communityAnalytics.uniqueAuthors)}</span>
-                    <span className="home-community__label">{translate('home.community.stats.voices')}</span>
-                  </div>
-                  <div className="home-community__stat">
-                    <span className="home-community__value">{formatNumber(communityAnalytics.threadsThisWeek)}</span>
-                    <span className="home-community__label">{translate('home.community.stats.threads')}</span>
-                  </div>
-                  <div className="home-community__stat">
-                    <span className="home-community__value">{formatNumber(communityAnalytics.totalPosts)}</span>
-                    <span className="home-community__label">{translate('home.community.stats.posts')}</span>
-                  </div>
-                </div>
-
-                <div className="home-card home-card--feed">
-                  <h3 className="home-card__title">{translate('home.community.feedTitle')}</h3>
-                  <p className="home-card__body">{translate('home.community.feedSubtitle')}</p>
-                  <ul className="home-feed">
-                    {(threadHighlights || []).slice(0, 4).map((thread) => (
-                      <li key={thread.id || thread.title} className="home-feed__item">
-                        <div className="home-feed__topic">{thread.title || translate('home.community.feedFallback')}</div>
-                        <div className="home-feed__meta">
-                          <span>{thread.author_name || translate('home.community.anonymous')}</span>
-                          <span>·</span>
-                          <span>{formatRelativeTime(thread.lastActivity || thread.created_at, currentLanguage)}</span>
-                        </div>
-                      </li>
-                    ))}
-                    {(threadHighlights || []).length === 0 && (
-                      <li className="home-feed__empty">{translate('home.community.feedEmpty')}</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            </section>
           </>
         )}
       </main>
