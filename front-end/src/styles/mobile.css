@@ -1,0 +1,278 @@
+/* ==============================================
+   移动端通用优化样式
+   适配各种屏幕尺寸和触摸交互
+============================================== */
+
+/* 触摸友好的按钮和交互元素 */
+@media (max-width: 768px) {
+  /* 增加可点击区域 */
+  button,
+  .btn,
+  a.btn,
+  .nav-btn,
+  .nav-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* 优化触摸反馈 */
+  button:active,
+  .btn:active,
+  a.btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  /* 防止文本选择 */
+  button,
+  .btn,
+  .nav-btn,
+  .nav-item {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* 优化输入框 */
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* 防止iOS自动缩放 */
+    min-height: 44px;
+  }
+
+  /* 优化模态框 */
+  .modal,
+  .bh-modal-content,
+  .rebate-detail-card {
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    margin: 8px;
+  }
+
+  /* 优化滚动 */
+  .modal-body,
+  .bh-modal-body,
+  .chart-container {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 优化表格 */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 优化图片 */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* 优化横向滚动 */
+  .horizontal-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+}
+
+/* 小屏手机特殊优化 */
+@media (max-width: 480px) {
+  /* 减少整体内边距 */
+  body {
+    padding: 0;
+  }
+
+  /* 优化弹性布局 */
+  .flex-row-mobile {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* 全宽按钮 */
+  .btn-full-mobile {
+    width: 100% !important;
+  }
+
+  /* 隐藏桌面版元素 */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* 显示移动版元素 */
+  .show-mobile {
+    display: block !important;
+  }
+
+  /* 优化栅格系统 */
+  .grid-mobile-1 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 减少卡片间距 */
+  .card-mobile-compact {
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* 优化字体大小 */
+  .text-mobile-sm {
+    font-size: 0.875rem !important;
+  }
+
+  .text-mobile-xs {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* 横屏手机优化 */
+@media (max-width: 896px) and (orientation: landscape) {
+  /* 减少垂直间距 */
+  .home-hero,
+  .bh-hero,
+  .analytics-header {
+    padding-top: 24px !important;
+    padding-bottom: 24px !important;
+  }
+
+  /* 优化导航 */
+  .nav-drawer {
+    max-height: calc(100vh - 60px) !important;
+  }
+
+  /* 优化模态框 */
+  .modal,
+  .bh-modal-content {
+    max-height: 90vh !important;
+  }
+}
+
+/* 平板优化 (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* 中等屏幕的栅格优化 */
+  .home-board__row {
+    grid-template-columns: minmax(180px, 2fr) minmax(100px, 1fr) 80px 110px 100px !important;
+  }
+
+  .rebate-table-row {
+    grid-template-columns: 1.8fr 1fr 0.9fr 1fr !important;
+  }
+
+  /* 优化容器宽度 */
+  .container,
+  .analytics-container,
+  .bh-main {
+    max-width: 100%;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  /* 优化卡片布局 */
+  .bh-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .home-hero__metrics {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* 触摸设备通用优化 */
+@media (hover: none) and (pointer: coarse) {
+  /* 增加可触摸区域 */
+  button,
+  a,
+  .btn {
+    padding: 12px 16px;
+  }
+
+  /* 移除悬停效果,使用激活状态 */
+  .btn:hover {
+    transform: none;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  /* 优化下拉菜单 */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+  }
+}
+
+/* 安全区域适配 (iPhone X及以上) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+
+  .nav-toggle {
+    left: max(16px, calc(env(safe-area-inset-left) + 16px));
+  }
+
+  .bh-floating-compare {
+    bottom: max(1rem, calc(env(safe-area-inset-bottom) + 1rem));
+    left: max(1rem, calc(env(safe-area-inset-left) + 1rem));
+    right: max(1rem, calc(env(safe-area-inset-right) + 1rem));
+  }
+}
+
+/* 可访问性优化 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .btn,
+  .nav-btn,
+  .card {
+    border-width: 2px !important;
+  }
+
+  .btn-primary {
+    background: #0051d5 !important;
+  }
+
+  .text-muted {
+    color: var(--text) !important;
+    opacity: 0.8;
+  }
+}
+
+/* PWA支持 - 独立模式优化 */
+@media (display-mode: standalone) {
+  /* 为PWA添加顶部安全间距 */
+  .home-hero,
+  .bh-hero,
+  .analytics-header {
+    padding-top: max(3rem, calc(env(safe-area-inset-top) + 3rem));
+  }
+}

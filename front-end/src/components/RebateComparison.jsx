@@ -12,6 +12,7 @@ const RebateComparison = ({ brokers = [] }) => {
   const translate = useCallback((key, params = {}) => t(key, currentLanguage, params), [currentLanguage]);
 
   const [tradeVolume, setTradeVolume] = useState(10); // in lots
+  const [selectedBroker, setSelectedBroker] = useState(null); // clicked broker details
 
   // Real rebate data for Gold (XAUUSD) - per lot
   const realRebateData = useMemo(() => ({
@@ -132,6 +133,13 @@ const RebateComparison = ({ brokers = [] }) => {
   const chartOptions = useMemo(() => ({
     maintainAspectRatio: false,
     responsive: true,
+    onClick: (event, elements) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const clickedData = chartData[index];
+        setSelectedBroker(clickedData);
+      }
+    },
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -175,7 +183,8 @@ const RebateComparison = ({ brokers = [] }) => {
             }
 
             return lines.join('\n');
-          }
+          },
+          footer: () => '💡 Click to see details'
         }
       }
     },
@@ -209,7 +218,7 @@ const RebateComparison = ({ brokers = [] }) => {
         border: { color: 'var(--border)' }
       }
     }
-  }), [translate]);
+  }), [translate, chartData]);
 
   return (
     <div className="rebate-comparison">
@@ -279,6 +288,97 @@ const RebateComparison = ({ brokers = [] }) => {
           <Bar data={chartJsData} options={chartOptions} />
         </div>
       </div>
+
+      {selectedBroker && (
+        <div className="broker-detail-modal-overlay" onClick={() => setSelectedBroker(null)}>
+          <div className="broker-detail-card rebate-detail-card" onClick={(e) => e.stopPropagation()}>
+            <button className="broker-detail-close" onClick={() => setSelectedBroker(null)}>×</button>
+
+            <div className="rebate-detail-header">
+              <h3 className="rebate-detail-broker-name">{selectedBroker.name}</h3>
+              {selectedBroker.hasRealData && (
+                <span className="rebate-detail-badge">✓ {translate('rebateComparison.realData')}</span>
+              )}
+            </div>
+
+            <div className="rebate-detail-content">
+              <div className="rebate-detail-section">
+                <h4 className="rebate-detail-section-title">{translate('rebateComparison.title')}</h4>
+                <div className="rebate-detail-grid">
+                  <div className="rebate-detail-item">
+                    <span className="rebate-detail-label">{translate('rebateComparison.maxRebate')}</span>
+                    <span className="rebate-detail-value rebate-value-highlight">
+                      ${selectedBroker.maxRebate.toFixed(2)}<span className="rebate-unit">/lot</span>
+                    </span>
+                  </div>
+                  <div className="rebate-detail-item">
+                    <span className="rebate-detail-label">{translate('rebateComparison.estimatedRebate')}</span>
+                    <span className="rebate-detail-value rebate-value-success">
+                      ${selectedBroker.totalRebate.toFixed(2)}
+                    </span>
+                  </div>
+                  {selectedBroker.minSpread !== null && (
+                    <div className="rebate-detail-item">
+                      <span className="rebate-detail-label">{translate('rebateComparison.minSpread')}</span>
+                      <span className="rebate-detail-value">
+                        {selectedBroker.minSpread} <span className="rebate-unit">pips</span>
+                      </span>
+                    </div>
+                  )}
+                  <div className="rebate-detail-item">
+                    <span className="rebate-detail-label">{translate('rebateComparison.tradeVolume', { volume: '' })}</span>
+                    <span className="rebate-detail-value">
+                      {tradeVolume} <span className="rebate-unit">lots</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {selectedBroker.broker && (
+                <div className="rebate-detail-section">
+                  <h4 className="rebate-detail-section-title">{translate('brokerDetail.basicInfo')}</h4>
+                  <div className="rebate-detail-info">
+                    {selectedBroker.broker.rating && (
+                      <div className="rebate-info-row">
+                        <span className="rebate-info-label">{translate('brokerDetail.overallRating')}:</span>
+                        <span className="rebate-info-value">{selectedBroker.broker.rating}</span>
+                      </div>
+                    )}
+                    {selectedBroker.broker.regulators && selectedBroker.broker.regulators.length > 0 && (
+                      <div className="rebate-info-row">
+                        <span className="rebate-info-label">{translate('brokerDetail.regulators')}:</span>
+                        <span className="rebate-info-value">
+                          {selectedBroker.broker.regulators.slice(0, 3).map(reg => reg.name || reg).join(', ')}
+                          {selectedBroker.broker.regulators.length > 3 && ` +${selectedBroker.broker.regulators.length - 3}`}
+                        </span>
+                      </div>
+                    )}
+                    {selectedBroker.broker.website && (
+                      <div className="rebate-info-row">
+                        <span className="rebate-info-label">{translate('brokerDetail.website')}:</span>
+                        <a
+                          href={selectedBroker.broker.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rebate-info-link"
+                        >
+                          {translate('brokerDetail.visit')} →
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="rebate-detail-note">
+                💡 {currentLanguage === 'zh-CN'
+                  ? '返佣数据基于标准账户、ECN账户和VIP账户的最高返佣率。实际返佣可能因账户类型和交易条件而异。'
+                  : 'Rebate data is based on the highest rate across Standard, ECN, and VIP accounts. Actual rebates may vary by account type and trading conditions.'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

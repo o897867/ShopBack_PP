@@ -14,7 +14,7 @@ const BrokerScorePanel = ({ brokers = [], onBrokerClick }) => {
     'TMGM': 'https://portal.tmgmroadmaps.com/register?node=MjE4MzQw&language=zh-Hans',
     'Exness': '',
     'IC Markets': '',
-    'FXTM': '',
+    'FXCM': '',
     'AvaTrade': '',
     'EBC': '',
     'ECMarket': '',
@@ -69,8 +69,22 @@ const BrokerScorePanel = ({ brokers = [], onBrokerClick }) => {
             key={broker.id}
             className={`broker-tab ${activeBroker === index ? 'broker-tab--active' : ''}`}
             onClick={() => setActiveBroker(index)}
+            title={broker.name}
           >
-            <div>{broker.name}</div>
+            {/* Show logo on mobile, text on desktop */}
+            {broker.logo_url ? (
+              <>
+                <img
+                  src={broker.logo_url}
+                  alt={broker.name}
+                  className="broker-tab-logo broker-tab-logo--mobile"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <span className="broker-tab-text">{broker.name}</span>
+              </>
+            ) : (
+              <div>{broker.name}</div>
+            )}
           </button>
         ))}
       </div>

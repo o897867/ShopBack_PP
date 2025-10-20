@@ -70,7 +70,7 @@
 .home-hero__inner {
   position: relative;
   z-index: 1;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 24px;
   display: grid;
@@ -427,7 +427,6 @@
   margin: 0;
   position: relative;
   background: transparent;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
   transition: opacity 420ms cubic-bezier(0.16, 1, 0.3, 1),
               transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0;
@@ -436,6 +435,19 @@
 
 .home-segment:first-of-type {
   border-top: none;
+}
+
+/* Alternating background colors */
+.home-segment--alt:nth-of-type(odd) {
+  background: var(--bg);
+}
+
+.home-segment--alt:nth-of-type(even) {
+  background: var(--home-surface-muted, rgba(59, 130, 246, 0.02));
+}
+
+.home-segment:not(.home-segment--alt) {
+  background: var(--bg);
 }
 
 .home-segment--visible {
@@ -1133,6 +1145,104 @@
     border-top: 1px solid var(--border);
     padding-top: 10px;
     margin-top: 10px;
+  }
+}
+
+/* 增强的移动端适配 */
+@media (max-width: 480px) {
+  .home-hero {
+    padding: 40px 0 60px;
+  }
+
+  .home-hero__inner {
+    padding: 0 16px;
+    gap: 32px;
+  }
+
+  .home-hero__topline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .home-hero__toggles {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .home-hero__title {
+    font-size: 2rem;
+  }
+
+  .home-hero__subtitle {
+    font-size: 1rem;
+  }
+
+  .home-hero__actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .home-hero__actions .btn {
+    width: 100%;
+  }
+
+  .home-hero__metrics {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .home-hero__metric {
+    padding: 16px;
+  }
+
+  .home-preview-card {
+    padding: 20px;
+  }
+
+  .home-section__header {
+    padding: 0 16px;
+  }
+
+  .home-workspace {
+    padding: 0 16px;
+    gap: 24px;
+  }
+
+  .home-board {
+    padding: 20px;
+  }
+
+  .home-board__row {
+    padding: 12px 16px;
+  }
+
+  .home-aside {
+    gap: 16px;
+  }
+
+  .home-card {
+    padding: 20px;
+  }
+
+  .home-timeline__item {
+    padding: 12px 16px;
+  }
+
+  .home-community__stat {
+    padding: 20px;
+  }
+
+  .home-feed__item {
+    padding: 14px;
+  }
+
+  .trust-stat-card {
+    padding: 20px;
+  }
+
+  .trust-stat-value {
+    font-size: 2rem;
   }
 }
 

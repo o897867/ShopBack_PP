@@ -50,7 +50,7 @@ export const translations = {
       metrics: {
         brokers: 'Brokers tracked',
         brokersHelper: '{{count}} listings synced',
-        alerts: 'News signals',
+        alerts: 'Event Archive',
         alertsHelper: '{{count}} curated updates',
         community: 'Active voices',
         communityHelper: '{{count}} contributors this week'
@@ -910,7 +910,7 @@ export const translations = {
         'IC Markets': 'Deep liquidity, low spreads, fast execution. Scalping and quant-friendly.',
         'Exness': 'Fast deposits/withdrawals, flexible leverage, excellent stability. Perfect for frequent trading.',
         'ECMarket': 'Relatively niche brand. Recommend thorough comparison of regulation and costs before choosing.',
-        'FXTM': 'Rich educational content, excellent localization. Beginner-friendly for progression.',
+        'FXCM': 'Rich educational content, excellent localization. Beginner-friendly for progression.',
         'AvaTrade': 'Extensive compliance coverage, diverse platforms (copy trading/options). Multi-strategy suitable.',
         'EBC': 'Good execution and service feedback, competitive costs. Brand in rapid development.',
         'Pepperstone': 'Premium execution, institutional-grade infrastructure. Professional trader\'s choice.'
@@ -946,6 +946,7 @@ export const translations = {
       estimatedRebate: 'Estimated Total',
       maxRebate: 'Highest Rebate',
       minSpread: 'Lowest Spread',
+      spread: 'Spread',
       total: 'Total Rebate',
       yAxisLabel: 'Rebate (USD)',
       realData: 'Verified Data',
@@ -1036,6 +1037,17 @@ export const translations = {
         trades: 'Trades Processed',
         satisfaction: 'Satisfaction Rate'
       }
+    },
+
+    slippageRecords: {
+      title: 'Trading Halt Records',
+      subtitle: 'Track unexpected quote interruptions across major trading platforms',
+      columns: {
+        broker: 'Broker',
+        date: 'Halt Date',
+        platform: 'Platform'
+      },
+      noData: 'No halt records available'
     }
   },
   
@@ -1089,7 +1101,7 @@ export const translations = {
       metrics: {
         brokers: '监控中的经纪商',
         brokersHelper: '已同步 {{count}} 家',
-        alerts: '新闻信号',
+        alerts: '事件收录',
         alertsHelper: '精选 {{count}} 条更新',
         community: '活跃声音',
         communityHelper: '过去 7 天 {{count}} 位贡献者'
@@ -1949,7 +1961,7 @@ export const translations = {
         'IC Markets': '流动性深、点差低、执行迅速，剥头皮与量化友好。',
         'Exness': '出入金快捷、杠杆灵活、稳定性好，适合频繁交易。',
         'ECMarket': '品牌相对小众，建议重点比较监管与成本后再选择。',
-        'FXTM': '教育内容丰富、本地化服务佳，上手友好适合新手进阶。',
+        'FXCM': '教育内容丰富、本地化服务佳，上手友好适合新手进阶。',
         'AvaTrade': '合规布局较广、工具平台多样（含复制/期权），适合多策略。',
         'EBC': '执行与服务反馈良好、成本具竞争力，品牌仍在加速发展。',
         'Pepperstone': '优质执行、机构级基础设施，专业交易者首选。'
@@ -1985,6 +1997,7 @@ export const translations = {
       estimatedRebate: '预估总额',
       maxRebate: '最高返佣',
       minSpread: '最低点差',
+      spread: '点差',
       total: '总返佣',
       yAxisLabel: '返佣 (美元)',
       realData: '真实数据',
@@ -2075,6 +2088,17 @@ export const translations = {
         trades: '处理交易',
         satisfaction: '满意度'
       }
+    },
+
+    slippageRecords: {
+      title: '卡盘记录',
+      subtitle: '过去14天内发生卡盘的平台',
+      columns: {
+        broker: '平台',
+        date: '卡盘时间',
+        platform: 'MT4/MT5'
+      },
+      noData: '暂无卡盘记录'
     }
   }
 };

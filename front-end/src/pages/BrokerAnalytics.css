@@ -767,27 +767,161 @@
 }
 
 @media (max-width: 480px) {
+  .broker-analytics {
+    padding: 0.5rem 0;
+  }
+
+  .analytics-container {
+    padding: 0 0.75rem;
+  }
+
   .analytics-header {
     padding: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .analytics-header h1 {
     font-size: 1.875rem;
+    margin-bottom: 0.75rem;
   }
 
   .analytics-header p {
     font-size: 1rem;
   }
 
-  .chart-container,
+  .analytics-filters h3,
+  .chart-container h3,
+  .analytics-stats h3 {
+    font-size: 1.25rem;
+  }
+
   .analytics-filters,
   .analytics-stats {
     padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-grid {
+    gap: 1rem;
+  }
+
+  .filter-group label {
+    font-size: 0.875rem;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  .chart-container {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-container.fullscreen {
+    padding: 0.75rem;
+  }
+
+  .chart-header {
+    margin-bottom: 1rem;
+  }
+
+  .chart-container h3 {
+    font-size: 1.25rem;
+  }
+
+  .chart-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .chart-description {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .chart-description p {
+    font-size: 0.875rem;
+  }
+
+  .chart-responsive-container {
+    padding: 0.75rem;
   }
 
   .quadrant-tooltip {
-    min-width: 250px;
+    min-width: 240px;
     padding: 1rem;
+  }
+
+  .quadrant-tooltip h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .tooltip-row {
+    gap: 0.5rem;
+  }
+
+  .tooltip-label,
+  .tooltip-value {
+    font-size: 0.85rem;
+  }
+
+  .quadrant-legends {
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .legend-item {
+    padding: 1.25rem;
+  }
+
+  .legend-item strong {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .legend-item p {
+    font-size: 0.85rem;
+  }
+
+  .stats-grid {
+    gap: 1rem;
+  }
+
+  .stat-item {
+    padding: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+  }
+
+  .stat-value {
+    font-size: 1.125rem;
+  }
+
+  .loading-container,
+  .error-container {
+    padding: 3rem 1.5rem;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1.25rem;
+  }
+
+  .loading-container p,
+  .error-message {
+    font-size: 1rem;
+  }
+
+  .retry-button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.95rem;
   }
 }
 

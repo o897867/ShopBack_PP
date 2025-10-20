@@ -1,9 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import './Home.css';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import LanguageSelector from '../components/LanguageSelector.jsx';
 import BrokerScorePanel from '../components/BrokerScorePanel.jsx';
 import RebateComparison from '../components/RebateComparison.jsx';
+import HaltRecords from '../components/HaltRecords.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 import useBrokerHubData from '../hooks/useBrokerHubData.js';
@@ -67,6 +68,26 @@ const Home = ({ onNavigate }) => {
     error,
     refresh
   } = useBrokerHubData();
+
+  // Fetch halt records
+  const [haltRecords, setHaltRecords] = useState([]);
+  const [haltLoading, setHaltLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHaltRecords = async () => {
+      try {
+        const response = await fetch('/api/halt/records?limit=50');
+        const result = await response.json();
+        setHaltRecords(result.data || []);
+      } catch (err) {
+        console.error('Failed to fetch halt records:', err);
+      } finally {
+        setHaltLoading(false);
+      }
+    };
+
+    fetchHaltRecords();
+  }, []);
 
   // Intersection Observer for scroll animations
   React.useEffect(() => {
@@ -195,8 +216,8 @@ const Home = ({ onNavigate }) => {
       .filter((broker) => broker.name)
       .sort((a, b) => (b.ratingScore || 0) - (a.ratingScore || 0));
 
-    // Filter to show 8 premium brokers: TMGM, Exness, IC Markets, Pepperstone, AvaTrade, FXTM, EBC, ECMarket
-    const targetBrokers = ['tmgm', 'exness', 'ic markets', 'ic market', 'pepperstone', 'avatrade', 'fxtm', 'ebc', 'ecmarket'];
+    // Filter to show 8 premium brokers: TMGM, Exness, IC Markets, Pepperstone, AvaTrade, FXCM, EBC, ECMarket
+    const targetBrokers = ['tmgm', 'exness', 'ic markets', 'ic market', 'pepperstone', 'avatrade', 'fxcm', 'ebc', 'ecmarket'];
     return allBrokers.filter((broker) =>
       targetBrokers.some(target => broker.name.toLowerCase().includes(target))
     );
@@ -387,7 +408,17 @@ const Home = ({ onNavigate }) => {
               <RebateComparison brokers={formattedBrokers} />
             </section>
 
-            {/* Segment 3: Trust & Social Proof */}
+            {/* Segment 3: Halt Records */}
+            {!haltLoading && haltRecords.length > 0 && (
+              <section
+                className={`home-segment home-segment--alt ${visibleSections.halt ? 'home-segment--visible' : ''}`}
+                data-section="halt"
+              >
+                <HaltRecords records={haltRecords} />
+              </section>
+            )}
+
+            {/* Segment 4: Trust & Social Proof */}
             <section
               className={`home-segment ${visibleSections.trust ? 'home-segment--visible' : ''}`}
               data-section="trust"

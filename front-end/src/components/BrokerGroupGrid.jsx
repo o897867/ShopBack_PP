@@ -35,7 +35,7 @@ const BrokerGroupGrid = ({ brokers }) => {
         /^(Exness).*$/i,
         /^(TMGM).*$/i,
         /^(HFM|HotForex).*$/i,
-        /^(FXTM).*$/i,
+        /^(FXCM).*$/i,
         /^(FxPro).*$/i,
         /^(OANDA).*$/i,
         /^(IG).*$/i,
