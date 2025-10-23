@@ -245,9 +245,9 @@ const Home = ({ onNavigate }) => {
     },
     {
       id: 'alerts',
-      value: formatNumber(brokerNews?.length || 0),
+      value: formatNumber(haltRecords?.length || 0),
       label: translate('home.metrics.alerts'),
-      helper: translate('home.metrics.alertsHelper', { count: brokerNews?.length || 0 })
+      helper: translate('home.metrics.alertsHelper', { count: haltRecords?.length || 0 })
     },
     {
       id: 'community',
@@ -255,7 +255,7 @@ const Home = ({ onNavigate }) => {
       label: translate('home.metrics.community'),
       helper: translate('home.metrics.communityHelper', { count: communityAnalytics.uniqueAuthors || 0 })
     }
-  ]), [rawBrokers, brokerNews, communityAnalytics, translate, formatNumber]);
+  ]), [rawBrokers, haltRecords, communityAnalytics, translate, formatNumber]);
 
   const quickActions = useMemo(() => ([
     {
@@ -340,37 +340,10 @@ const Home = ({ onNavigate }) => {
             <div className="home-hero__metrics">
               {heroMetrics.map((metric) => (
                 <div key={metric.id} className="home-hero__metric">
-                  <span className="home-hero__metric-value">{metric.value}</span>
-                  <span className="home-hero__metric-label">{metric.label}</span>
-                  <span className="home-hero__metric-helper">{metric.helper}</span>
+                  <div className="home-hero__metric-value">{metric.value}</div>
+                  <div className="home-hero__metric-label">{metric.helper}</div>
                 </div>
               ))}
-            </div>
-          </div>
-          <div className="home-hero__preview">
-            <div className="home-preview-card">
-              <div className="home-preview-card__header">
-                <span>{translate('home.preview.title')}</span>
-                <span className="home-preview-card__badge">{translate('home.preview.badge')}</span>
-              </div>
-              {loading ? (
-                <div className="home-preview-card__empty">{translate('home.preview.loading')}</div>
-              ) : boardRows.length === 0 ? (
-                <div className="home-preview-card__empty">{translate('home.preview.empty')}</div>
-              ) : (
-                <ul className="home-preview-card__list">
-                  {boardRows.slice(0, 3).map((broker) => (
-                    <li key={broker.id} className="home-preview-card__item">
-                      <span className="home-preview-card__rank">#{broker.position}</span>
-                      <div className="home-preview-card__meta">
-                        <span className="home-preview-card__name">{broker.name}</span>
-                        <span className="home-preview-card__feature">{broker.focus}</span>
-                      </div>
-                      <span className={`home-pill home-pill--${broker.status.tone}`}>{broker.status.label}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           </div>
         </div>

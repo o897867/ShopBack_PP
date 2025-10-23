@@ -90,6 +90,25 @@
 }
 
 /* Front face content */
+.halt-card__logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--home-surface-alt, #f8fafc);
+  padding: 8px;
+}
+
+.halt-card__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 .halt-card__broker {
   font-size: 1.5rem;
   font-weight: 500;

@@ -9,13 +9,13 @@ const Forum = lazy(() => import('./pages/Forum.jsx'));
 const ForumModeration = lazy(() => import('./pages/ForumModeration.jsx'));
 const BrokerAnalytics = lazy(() => import('./pages/BrokerAnalytics.jsx'));
 const EthKalmanPrediction = lazy(() => import('./pages/EthKalmanPrediction.jsx'));
+const IndicatorTesting = lazy(() => import('./pages/IndicatorTesting.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
-import { getThresholdTypeText } from './utils/thresholdTypes.js';
 
 
 const App = () => {
@@ -32,7 +32,7 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['home','broker-hub','analytics','forum','forum-mod','predictions','eth','trading','login','register'];
+      const known = ['home','broker-hub','analytics','forum','forum-mod','predictions','eth','indicators','trading','login','register'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
@@ -67,6 +67,10 @@ const App = () => {
         <Home onNavigate={setCurrentPage} />
       ) : currentPage === 'broker-hub' ? (
         <BrokerHub onNavigate={setCurrentPage} />
+      ) : currentPage === 'indicators' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <IndicatorTesting />
+        </Suspense>
       ) : (
         <div className="container">
           <div className="page-header">

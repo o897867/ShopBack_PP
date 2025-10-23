@@ -36,10 +36,10 @@ export const translations = {
     home: {
       hero: {
         badge: 'Your broker operating system',
-        title: 'Turn broker intelligence into a living workspace.',
-        subtitle: 'Track regulators, scorecards and community sentiment in one collaborative surface inspired by Monday.com.',
-        primary: 'Open Broker Hub',
-        secondary: 'View analytics'
+        title: 'One platform for broker intelligence',
+        subtitle: 'Track brokers, analyze performance, and monitor market events in real-time.',
+        primary: 'Get Started',
+        secondary: 'View Analytics'
       },
       preview: {
         title: 'Top performers',
@@ -48,12 +48,12 @@ export const translations = {
         empty: 'No brokers available yet.'
       },
       metrics: {
-        brokers: 'Brokers tracked',
-        brokersHelper: '{{count}} listings synced',
-        alerts: 'Event Archive',
-        alertsHelper: '{{count}} curated updates',
-        community: 'Active voices',
-        communityHelper: '{{count}} contributors this week'
+        brokers: 'Brokers',
+        brokersHelper: 'tracked platforms',
+        alerts: 'Events',
+        alertsHelper: 'halt records',
+        community: 'Users',
+        communityHelper: 'active voices'
       },
       states: {
         loading: 'Pulling workspace data…',
@@ -1087,10 +1087,10 @@ export const translations = {
     home: {
       hero: {
         badge: '外汇情报实验室',
-        title: '交易者的每日雷达',
-        subtitle: '选择合适的平台，开始你的交易之旅。',
-        primary: '进入经纪商控制台',
-        secondary: '查看象限分析'
+        title: '一站式经纪商情报平台',
+        subtitle: '实时追踪经纪商、分析表现、监控市场事件',
+        primary: '立即开始',
+        secondary: '查看分析'
       },
       preview: {
         title: '本周表现榜',
@@ -1099,12 +1099,12 @@ export const translations = {
         empty: '暂时没有经纪商数据。'
       },
       metrics: {
-        brokers: '监控中的经纪商',
-        brokersHelper: '已同步 {{count}} 家',
-        alerts: '事件收录',
-        alertsHelper: '精选 {{count}} 条更新',
-        community: '活跃声音',
-        communityHelper: '过去 7 天 {{count}} 位贡献者'
+        brokers: '经纪商',
+        brokersHelper: '追踪平台',
+        alerts: '事件',
+        alertsHelper: '卡盘记录',
+        community: '用户',
+        communityHelper: '活跃声音'
       },
       states: {
         loading: '正在加载工作台数据…',

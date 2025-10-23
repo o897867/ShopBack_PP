@@ -18,7 +18,7 @@ DEBUG = os.getenv("DEBUG", "true").lower() == "true"
 DATABASE_PATH = os.getenv("DATABASE_PATH", "/root/shopback/ShopBack_PP/back-end/shopback_data.db")
 
 # CORS配置
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5174,http://127.0.0.1:5174").split(",")
+ALLOWED_ORIGINS = ["*"]  # Allow all origins for development/testing
 
 # 功能开关
 ENABLE_LEGACY_FEATURES = os.getenv("ENABLE_LEGACY_FEATURES", "false").lower() == "true"

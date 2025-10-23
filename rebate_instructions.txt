@@ -1,0 +1,68 @@
+
+==========================================
+Broker Rebate Data Template - Instructions
+==========================================
+
+FIELD DESCRIPTIONS:
+-------------------
+
+1. Broker ID
+   - Auto-filled from database
+   - Do NOT modify this field
+
+2. Broker Name
+   - Auto-filled from database
+   - Do NOT modify this field
+
+3. Account Type
+   - Pre-filled: Standard / ECN / VIP
+   - Each broker has 3 rows for 3 account types
+
+4. Rebate Per Lot (USD)
+   - Amount in USD per standard lot
+   - Example: 5.00, 8.50, 12.00
+   - Use decimal format (e.g., 6.50, not 6.5 or $6.50)
+
+5. Min Deposit (USD)
+   - Minimum deposit required for this account type
+   - Example: 100, 500, 10000
+   - Whole numbers only
+
+6. Trading Instruments
+   - Comma-separated list
+   - Example: Forex,CFD,Metals,Indices,Crypto
+   - Common values: Forex, CFD, Metals, Indices, Crypto, Commodities
+
+7. Max Rebate Period (Days)
+   - How many days the rebate is valid for
+   - Example: 30, 60, 90, 365
+   - Use 0 for unlimited/ongoing rebates
+
+8. Payment Frequency
+   - How often rebate is paid
+   - Values: Daily, Weekly, Monthly, Quarterly
+
+9. Special Conditions
+   - Any special requirements or conditions
+   - Example: "Min 10 lots per month", "New clients only"
+   - Leave blank if no speci
+   
+   
+   
+   al conditions
+
+10. Notes
+    - Additional notes or comments
+    - Example: "Promotion valid until Dec 2025"
+    - Leave blank if no notes
+
+EXAMPLE ROW:
+-----------
+1,TMGM,Standard,6.50,100,Forex;CFD;Metals,30,Monthly,Min 10 lots per month,Promotion until Dec 2025
+
+TIPS:
+-----
+- Fill in all empty fields with accurate data
+- Use consistent formatting (e.g., always use "Forex" not "forex" or "FX")
+- For rebates that don't apply to an account type, you can delete that row
+- Save as CSV when done

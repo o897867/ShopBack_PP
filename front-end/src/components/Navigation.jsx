@@ -21,7 +21,8 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
       items: [
         { id: 'forum', label: translate('forum.title') },
         { id: 'trading', label: translate('nav.trading') },
-        { id: 'eth', label: translate('nav.ethPrediction') }
+        { id: 'eth', label: translate('nav.ethPrediction') },
+        { id: 'indicators', label: 'Indicator Testing' }
       ]
     },
     {

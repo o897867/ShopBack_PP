@@ -466,6 +466,279 @@ async def broadcast_eth_update(update_data: dict):
     for ws in disconnected:
         eth_ws_clients.remove(ws)
 
+# ============= Technical Indicators API =============
+
+from indicators import (
+    calculate_all_indicators,
+    evaluate_indicator_effectiveness,
+    compare_indicators
+)
+from indicator_signals_v2 import analyze_signals_simple
+from indicator_validity import analyze_validity, filter_validity_by_period
+
+@app.get("/api/indicators/calculate", summary="Calculate technical indicators")
+async def calculate_indicators(
+    symbol: str = Query("ETHUSDT", description="Trading symbol"),
+    interval: str = Query("3m", description="Candle interval"),
+    limit: int = Query(500, le=1000, description="Number of candles")
+):
+    """Calculate MACD, VWAP, SMA14, EMA20 for given symbol"""
+    try:
+        # Get candles data
+        if symbol == "ETHUSDT" and interval == "3m":
+            # Use existing ETH data
+            if eth_data_manager:
+                candles = eth_data_manager.fetcher.get_recent_candles(limit)
+            else:
+                raise HTTPException(status_code=503, detail="ETH data service not available")
+        else:
+            # For other symbols, we would need to fetch from Binance API
+            # For now, return error
+            raise HTTPException(status_code=400, detail="Currently only ETHUSDT with 3m interval is supported")
+
+        # Calculate indicators
+        indicators = calculate_all_indicators(candles)
+
+        # Helper function to convert NaN to None for JSON serialization
+        import numpy as np
+        def clean_nan(arr):
+            if isinstance(arr, np.ndarray):
+                # Replace NaN with None
+                return [None if np.isnan(x) else x for x in arr]
+            return arr
+
+        # Format response
+        return {
+            "symbol": symbol,
+            "interval": interval,
+            "candle_count": len(candles),
+            "indicators": {
+                "sma14": clean_nan(indicators.get('sma14', [])),
+                "ema20": clean_nan(indicators.get('ema20', [])),
+                "macd": {
+                    "macd": clean_nan(indicators.get('macd', {}).get('macd', [])),
+                    "signal": clean_nan(indicators.get('macd', {}).get('signal', [])),
+                    "histogram": clean_nan(indicators.get('macd', {}).get('histogram', []))
+                },
+                "vwap": clean_nan(indicators.get('vwap', [])),
+                "rsi": clean_nan(indicators.get('rsi', []))
+            },
+            "candles": candles
+        }
+    except Exception as e:
+        logger.error(f"Error calculating indicators: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/indicators/backtest", summary="Backtest indicator effectiveness")
+async def backtest_indicator(
+    indicator: str = Query(..., description="Indicator type: MACD, VWAP, SMA14, EMA20"),
+    symbol: str = Query("ETHUSDT", description="Trading symbol"),
+    interval: str = Query("3m", description="Candle interval"),
+    limit: int = Query(1000, le=2000, description="Number of candles for backtest")
+):
+    """Backtest a specific indicator and get effectiveness metrics"""
+    try:
+        # Validate indicator
+        valid_indicators = ['MACD', 'VWAP', 'SMA14', 'EMA20']
+        if indicator not in valid_indicators:
+            raise HTTPException(status_code=400, detail=f"Invalid indicator. Choose from: {valid_indicators}")
+
+        # Get candles data
+        if symbol == "ETHUSDT" and interval == "3m":
+            if eth_data_manager:
+                candles = eth_data_manager.fetcher.get_recent_candles(limit)
+            else:
+                raise HTTPException(status_code=503, detail="ETH data service not available")
+        else:
+            raise HTTPException(status_code=400, detail="Currently only ETHUSDT with 3m interval is supported")
+
+        # Evaluate effectiveness
+        result = evaluate_indicator_effectiveness(candles, indicator)
+
+        return {
+            "symbol": symbol,
+            "interval": interval,
+            "candle_count": len(candles),
+            "backtest_result": result
+        }
+    except Exception as e:
+        logger.error(f"Error in backtest: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/indicators/effectiveness", summary="Compare all indicators effectiveness")
+async def compare_all_indicators(
+    symbol: str = Query("ETHUSDT", description="Trading symbol"),
+    interval: str = Query("3m", description="Candle interval"),
+    limit: int = Query(1000, le=2000, description="Number of candles for comparison")
+):
+    """Compare effectiveness of all indicators and rank them"""
+    try:
+        # Get candles data
+        if symbol == "ETHUSDT" and interval == "3m":
+            if eth_data_manager:
+                candles = eth_data_manager.fetcher.get_recent_candles(limit)
+            else:
+                raise HTTPException(status_code=503, detail="ETH data service not available")
+        else:
+            raise HTTPException(status_code=400, detail="Currently only ETHUSDT with 3m interval is supported")
+
+        # Compare all indicators
+        comparison = compare_indicators(candles)
+
+        return {
+            "symbol": symbol,
+            "interval": interval,
+            "candle_count": len(candles),
+            "comparison": comparison
+        }
+    except Exception as e:
+        logger.error(f"Error comparing indicators: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/indicators/signals", summary="Count indicator signals in period")
+async def get_indicator_signals(
+    symbol: str = Query("ETHUSDT", description="Trading symbol"),
+    interval: str = Query("3m", description="Candle interval"),
+    days: int = Query(7, ge=1, le=30, description="Number of days to analyze"),
+    limit: int = Query(3360, le=10000, description="Number of candles to fetch")
+):
+    """Count buy/sell signals for all indicators in the specified period"""
+    try:
+        # Get candles data
+        if symbol == "ETHUSDT" and interval == "3m":
+            if eth_data_manager:
+                candles = eth_data_manager.fetcher.get_recent_candles(limit)
+            else:
+                raise HTTPException(status_code=503, detail="ETH data service not available")
+        else:
+            raise HTTPException(status_code=400, detail="Currently only ETHUSDT with 3m interval is supported")
+
+        # Calculate indicators
+        indicators = calculate_all_indicators(candles)
+
+        # Count signals using simplified analysis
+        signal_summary = analyze_signals_simple(candles, indicators, days)
+
+        return {
+            "symbol": symbol,
+            "interval": interval,
+            "period_days": days,
+            "candle_count": len(candles),
+            "signal_summary": signal_summary
+        }
+    except Exception as e:
+        logger.error(f"Error counting signals: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/indicators/validity", summary="Analyze indicator validity")
+async def get_indicator_validity(
+    symbol: str = Query("ETHUSDT", description="Trading symbol"),
+    interval: str = Query("3m", description="Candle interval"),
+    days: int = Query(7, ge=1, le=30, description="Number of days to analyze"),
+    limit: int = Query(3360, le=10000, description="Number of candles to fetch"),
+    # MA parameters
+    ma_tol: float = Query(0.0015, ge=0, le=0.01, description="MA touch tolerance (0.15% default)"),
+    ma_win: int = Query(8, ge=2, le=20, description="MA confirmation window"),
+    ma_thr: float = Query(0.004, ge=0, le=0.02, description="MA bounce threshold (0.4% default)"),
+    # VWAP parameters
+    vwap_k: float = Query(2.0, ge=0.5, le=4.0, description="VWAP bands multiplier"),
+    vwap_win: int = Query(50, ge=10, le=200, description="VWAP rolling window"),
+    vwap_revert: float = Query(0.002, ge=0, le=0.01, description="VWAP reversion tolerance"),
+    # MACD parameters
+    macd_win: int = Query(8, ge=2, le=20, description="MACD confirmation window"),
+    macd_thr: float = Query(0.005, ge=0, le=0.02, description="MACD movement threshold"),
+    macd_hist: int = Query(2, ge=0, le=10, description="MACD histogram confirmation candles")
+):
+    """
+    Analyze validity of indicator signals based on effectiveness criteria.
+
+    Returns only valid signals where:
+    - MA: Price touches and bounces from moving average
+    - VWAP: Price reverts after touching bands
+    - MACD: Price confirms direction after crossover
+    """
+    try:
+        # Get candles data
+        if symbol == "ETHUSDT" and interval == "3m":
+            if eth_data_manager:
+                candles = eth_data_manager.fetcher.get_recent_candles(limit)
+            else:
+                raise HTTPException(status_code=503, detail="ETH data service not available")
+        else:
+            raise HTTPException(status_code=400, detail="Currently only ETHUSDT with 3m interval is supported")
+
+        # Calculate all indicators including new ones
+        indicators = calculate_all_indicators(candles)
+
+        # Prepare parameters
+        params = {
+            'ma_tol': ma_tol,
+            'ma_win': ma_win,
+            'ma_thr': ma_thr,
+            'vwap_k': vwap_k,
+            'vwap_win': vwap_win,
+            'vwap_revert': vwap_revert,
+            'vwap_min_touch': 0.003,
+            'macd_win': macd_win,
+            'macd_thr': macd_thr,
+            'macd_hist': macd_hist
+        }
+
+        # Analyze validity
+        validity_results = analyze_validity(candles, indicators, params)
+
+        # Filter by period
+        filtered_results = filter_validity_by_period(validity_results, candles, days)
+
+        return {
+            "symbol": symbol,
+            "interval": interval,
+            "validity_summary": filtered_results,
+            "parameters_used": params
+        }
+    except Exception as e:
+        logger.error(f"Error analyzing validity: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============= Trading Halt Records API =============
+
+@app.get("/api/halt/records", summary="Get trading halt records")
+async def get_halt_records(limit: int = 50):
+    """Get historical trading halt records (unexpected quote interruptions)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        query = """
+        SELECT
+            broker_name,
+            halt_date,
+            platform,
+            created_at
+        FROM halt_records
+        ORDER BY halt_date DESC
+        LIMIT ?
+        """
+
+        cursor.execute(query, (limit,))
+        rows = cursor.fetchall()
+
+        results = []
+        for row in rows:
+            results.append({
+                'broker_name': row[0],
+                'halt_date': row[1],
+                'platform': row[2],
+                'created_at': row[3]
+            })
+
+        conn.close()
+        return {"data": results}
+
+    except Exception as e:
+        logger.error(f"Error fetching halt records: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ============= 异常处理 =============
 
 @app.exception_handler(404)

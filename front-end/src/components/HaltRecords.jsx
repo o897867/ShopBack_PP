@@ -4,8 +4,8 @@ import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 
 const HaltRecords = ({ records = [] }) => {
-  const { language } = useLanguage();
-  const translate = (key, params) => t(key, language, params);
+  const { currentLanguage } = useLanguage();
+  const translate = (key, params) => t(key, currentLanguage, params);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -13,6 +13,23 @@ const HaltRecords = ({ records = [] }) => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${month}.${day}`;
+  };
+
+  const getBrokerLogo = (brokerName) => {
+    if (!brokerName) return null;
+    const normalized = brokerName.toLowerCase().replace(/\s+/g, '');
+    const logoMap = {
+      'fxcm': 'fxcm.png',
+      'icmarkets': 'ic.png',
+      'exness': 'exness.png',
+      'tmgm': 'tmgm.png',
+      'ecmarket': 'ec.png',
+      'avatrade': 'ava.png',
+      'ebc': 'ebc.png',
+      'pepperstone': 'pepperstone.png'
+    };
+    const logoFile = logoMap[normalized];
+    return logoFile ? `/broker-logos/${logoFile}` : null;
   };
 
   // Group records into sets of 3 for the grid layout
@@ -50,6 +67,15 @@ const HaltRecords = ({ records = [] }) => {
                   >
                     <div className="halt-card__inner">
                       <div className="halt-card__front">
+                        {getBrokerLogo(record.broker_name) && (
+                          <div className="halt-card__logo">
+                            <img
+                              src={getBrokerLogo(record.broker_name)}
+                              alt={record.broker_name}
+                              onError={(e) => e.target.style.display = 'none'}
+                            />
+                          </div>
+                        )}
                         <div className="halt-card__broker">
                           {record.broker_name}
                         </div>
