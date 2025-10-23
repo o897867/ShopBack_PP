@@ -333,7 +333,7 @@ const Home = ({ onNavigate }) => {
               <button className="btn btn-primary" onClick={() => handleNavigate('broker-hub')}>
                 {translate('home.hero.primary')}
               </button>
-              <button className="btn btn-ghost" onClick={() => handleNavigate('analytics')}>
+              <button className="btn btn-ghost" onClick={() => handleNavigate('indicators')}>
                 {translate('home.hero.secondary')}
               </button>
             </div>

@@ -1048,6 +1048,50 @@ export const translations = {
         platform: 'Platform'
       },
       noData: 'No halt records available'
+    },
+
+    // Indicator Testing
+    indicators: {
+      hero: {
+        badge: 'Indicators Lab',
+        subtitle: 'Track real price reactions from key moving averages and VWAP indicators. Use verifiable success counts to quickly evaluate strategy reliability.',
+        validCountPeriod: 'Valid signals in the past {{days}} days',
+        avgPerDay: 'Average daily valid signals',
+        syncButton: 'Sync latest market data',
+        syncButtonLoading: 'Syncing…',
+        topHitLabel: 'Top performer: {{label}} · {{count}} times',
+        topHitNoData: 'No data yet'
+      },
+      cards: {
+        sma14Description: 'Bounce confirmation after MA touch, measuring trend-following strength.',
+        ema20Description: 'More responsive MA confirmation, capturing effective signals in short-term trends.',
+        vwapDescription: 'Mean reversion from VWAP upper/lower bands, used to judge capital position and rebound strength.',
+        defaultDescription: 'Key indicator effectiveness statistics.',
+        avgConfirmation: 'Avg confirmation:',
+        avgConfirmationValue: '{{value}} candles',
+        avgConfirmationNoData: '—'
+      },
+      alert: {
+        close: 'Close'
+      },
+      panel: {
+        selectIndicators: 'Select Indicators',
+        timeRange: 'Time Range',
+        timeRangeDay: '{{count}} Day',
+        timeRangeDays: '{{count}} Days',
+        refresh: 'Refresh',
+        refreshLoading: 'Loading…'
+      },
+      chart: {
+        title: 'ETH/USDT 3-Minute Candles',
+        subtitle: 'Scroll to zoom, drag to pan, view candles and indicator performance in one view.',
+        panLeft: 'Pan left',
+        panRight: 'Pan right',
+        reset: 'Reset',
+        zoomHint: 'Scroll to zoom · Shift+Scroll to zoom Y-axis',
+        noData: 'Unable to fetch candle data'
+      },
+      loading: 'Loading market data…'
     }
   },
   
@@ -1087,10 +1131,10 @@ export const translations = {
     home: {
       hero: {
         badge: '外汇情报实验室',
-        title: '一站式经纪商情报平台',
-        subtitle: '实时追踪经纪商、分析表现、监控市场事件',
+        title: '一站式交易情报平台',
+        subtitle: '实时追踪经纪商、对比指标，分析表现、监控市场事件，帮助你做出更明智的交易决策',
         primary: '立即开始',
-        secondary: '查看分析'
+        secondary: '查看指标'
       },
       preview: {
         title: '本周表现榜',
@@ -2099,6 +2143,50 @@ export const translations = {
         platform: 'MT4/MT5'
       },
       noData: '暂无卡盘记录'
+    },
+
+    // 指标测试
+    indicators: {
+      hero: {
+        badge: '指标实验室',
+        subtitle: '均线？MACD?VWAP?谁才是你交易的好帮手？',
+        validCountPeriod: '过去 {{days}} 天有效次数',
+        avgPerDay: '平均每日有效',
+        syncButton: '同步最新市场数据',
+        syncButtonLoading: '同步中…',
+        topHitLabel: '当前准确率最高：{{label}} · {{count}} 次',
+        topHitNoData: '暂无数据'
+      },
+      cards: {
+        sma14Description: '以过去14根K线为基础，构建最古老的指标',
+        ema20Description: '过滤不必要的噪音，立足于经典之上',
+        vwapDescription: '结合量与价，新时代的挑战者',
+        defaultDescription: '关键指标有效性统计。',
+        avgConfirmation: '平均确认：',
+        avgConfirmationValue: '{{value}} 根K线',
+        avgConfirmationNoData: '—'
+      },
+      alert: {
+        close: '关闭'
+      },
+      panel: {
+        selectIndicators: '选择指标',
+        timeRange: '时间范围',
+        timeRangeDay: '{{count}} 天',
+        timeRangeDays: '{{count}} 天',
+        refresh: '刷新',
+        refreshLoading: '加载中…'
+      },
+      chart: {
+        title: 'ETH/USDT 3 分钟 K 线',
+        subtitle: '滚轮缩放、拖拽平移，在同一视图中查看 K 线与指标表现。',
+        panLeft: '向左平移',
+        panRight: '向右平移',
+        reset: 'Reset',
+        zoomHint: '滚轮缩放 · Shift+滚轮缩放纵轴',
+        noData: '暂无法获取 K 线数据'
+      },
+      loading: '正在加载市场数据…'
     }
   }
 };

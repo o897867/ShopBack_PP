@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,6 +17,8 @@ import './IndicatorTesting.css';
 import { chartZoomPlugin, resetZoom, panChart } from '../utils/chartZoomPlugin';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import LanguageSelector from '../components/LanguageSelector.jsx';
+import { useLanguage } from '../hooks/useLanguage.jsx';
+import { t } from '../translations/index';
 
 const candlestickRenderer = {
   id: 'candlestickRenderer',
@@ -122,6 +124,9 @@ ChartJS.register(
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
 const IndicatorTesting = () => {
+  const { currentLanguage } = useLanguage();
+  const translate = useCallback((key, params = {}) => t(key, currentLanguage, params), [currentLanguage]);
+
   const [candles, setCandles] = useState([]);
   const [indicators, setIndicators] = useState({});
   const [validity, setValidity] = useState(null);
@@ -148,11 +153,11 @@ const IndicatorTesting = () => {
   const chartRef = useRef(null);
 
   const indicatorOptions = useMemo(() => ([
-    { value: 'MACD', label: 'MACD', color: '#FF6B6B' },
-    { value: 'VWAP', label: 'VWAP', color: '#4ECDC4' },
-    { value: 'SMA14', label: 'SMA14', color: '#FFD93D' },
-    { value: 'EMA20', label: 'EMA20', color: '#6BCF7F' },
-    { value: 'RSI', label: 'RSI', color: '#A8E6CF' }
+    { value: 'MACD', label: 'MACD', color: '#C8102E' },
+    { value: 'VWAP', label: 'VWAP', color: '#138B7B' },
+    { value: 'SMA14', label: 'SMA14', color: '#D4A574' },
+    { value: 'EMA20', label: 'EMA20', color: '#8B4513' },
+    { value: 'RSI', label: 'RSI', color: '#2C5F2D' }
   ]), []);
 
   const indicatorOptionMap = useMemo(() => {
@@ -291,11 +296,11 @@ const IndicatorTesting = () => {
     });
   }, [validity, coreIndicators, indicatorOptionMap]);
 
-  const heroCardDescriptions = {
-    SMA14: '均线触碰后的反弹确认，衡量趋势跟随强度。',
-    EMA20: '更灵敏的均线确认，捕捉短期趋势的有效信号。',
-    VWAP: 'VWAP 上下轨的均值回归，用于判断资金位与反弹力度。'
-  };
+  const heroCardDescriptions = useMemo(() => ({
+    SMA14: translate('indicators.cards.sma14Description'),
+    EMA20: translate('indicators.cards.ema20Description'),
+    VWAP: translate('indicators.cards.vwapDescription')
+  }), [translate]);
 
   // Fetch indicators and validity
   const fetchData = async () => {
@@ -643,7 +648,7 @@ const IndicatorTesting = () => {
     return (
       <div className="indicators-loading">
         <div className="indicators-loading__spinner"></div>
-        <p>正在加载市场数据…</p>
+        <p>{translate('indicators.loading')}</p>
       </div>
     );
   }
@@ -658,29 +663,29 @@ const IndicatorTesting = () => {
           </div>
           <div className="indicators-hero__grid">
             <div className="indicators-hero__content">
-              <span className="indicators-hero__badge">Indicators Lab</span>
+              <span className="indicators-hero__badge">{translate('indicators.hero.badge')}</span>
               <p className="indicators-hero__subtitle">
-                从核心均线与 VWAP 指标出发，追踪价格触碰后的真实反应。通过可验证的有效次数，帮助你快速判断策略是否值得信赖。
+                {translate('indicators.hero.subtitle')}
               </p>
               <div className="indicators-hero__stats">
                 <div className="indicators-hero__stat">
-                  <span className="stat-label">过去 {timeRange} 天有效次数</span>
+                  <span className="stat-label">{translate('indicators.hero.validCountPeriod', { days: timeRange })}</span>
                   <span className="stat-value">{formatInteger(indicatorMetrics.totalValid)}</span>
                 </div>
                 <div className="indicators-hero__stat">
-                  <span className="stat-label">平均每日有效</span>
+                  <span className="stat-label">{translate('indicators.hero.avgPerDay')}</span>
                   <span className="stat-value">{formatDecimal(indicatorMetrics.avgPerDay)}</span>
                 </div>
               </div>
               <div className="indicators-hero__cta">
                 <button type="button" className="hero-cta-btn" onClick={fetchData} disabled={loading}>
-                  {loading ? '同步中…' : '同步最新市场数据'}
+                  {loading ? translate('indicators.hero.syncButtonLoading') : translate('indicators.hero.syncButton')}
                   <span className="hero-cta-btn__arrow">→</span>
                 </button>
                 <span className="hero-cta-note">
-                  当前命中最高：{topIndicatorLabel === '—'
-                    ? '暂无数据'
-                    : `${topIndicatorLabel} · ${formatInteger(topIndicatorCount)} 次`}
+                  {topIndicatorLabel === '—'
+                    ? translate('indicators.hero.topHitNoData')
+                    : translate('indicators.hero.topHitLabel', { label: topIndicatorLabel, count: formatInteger(topIndicatorCount) })}
                 </span>
               </div>
             </div>
@@ -703,15 +708,15 @@ const IndicatorTesting = () => {
                     <div className="hero-card__body">
                       <span className="hero-card__count">{formatInteger(card.count)}</span>
                       <p className="hero-card__description">
-                        {heroCardDescriptions[card.id] || '关键指标有效性统计。'}
+                        {heroCardDescriptions[card.id] || translate('indicators.cards.defaultDescription')}
                       </p>
                     </div>
                     <div className="hero-card__footer">
-                      <span>平均确认：</span>
+                      <span>{translate('indicators.cards.avgConfirmation')}</span>
                       <strong>
                         {card.avgConfirmCandles != null
-                          ? `${formatDecimal(card.avgConfirmCandles)} 根K线`
-                          : '—'}
+                          ? translate('indicators.cards.avgConfirmationValue', { value: formatDecimal(card.avgConfirmCandles) })
+                          : translate('indicators.cards.avgConfirmationNoData')}
                       </strong>
                     </div>
                   </button>
@@ -726,14 +731,14 @@ const IndicatorTesting = () => {
         {error && (
           <div className="indicators-alert" role="alert">
             <span>⚠️ {error}</span>
-            <button type="button" onClick={() => setError(null)}>关闭</button>
+            <button type="button" onClick={() => setError(null)}>{translate('indicators.alert.close')}</button>
           </div>
         )}
 
         <div className="indicators-card indicators-panel">
           <div className="indicators-panel__row">
             <div className="indicator-toggles">
-              <span className="indicator-toggles__label">选择指标</span>
+              <span className="indicator-toggles__label">{translate('indicators.panel.selectIndicators')}</span>
               {indicatorOptions.map(opt => (
                 <button
                   key={opt.value}
@@ -749,19 +754,19 @@ const IndicatorTesting = () => {
               ))}
             </div>
             <div className="indicators-panel__controls">
-              <label className="time-controls__label" htmlFor="time-range">时间范围</label>
+              <label className="time-controls__label" htmlFor="time-range">{translate('indicators.panel.timeRange')}</label>
               <select
                 id="time-range"
                 value={timeRange}
                 onChange={(e) => setTimeRange(parseInt(e.target.value))}
               >
-                <option value="1">1 天</option>
-                <option value="3">3 天</option>
-                <option value="7">7 天</option>
-                <option value="14">14 天</option>
+                <option value="1">{translate('indicators.panel.timeRangeDays', { count: 1 })}</option>
+                <option value="3">{translate('indicators.panel.timeRangeDays', { count: 3 })}</option>
+                <option value="7">{translate('indicators.panel.timeRangeDays', { count: 7 })}</option>
+                <option value="14">{translate('indicators.panel.timeRangeDays', { count: 14 })}</option>
               </select>
               <button className="refresh-btn" onClick={fetchData} disabled={loading}>
-                {loading ? '加载中…' : '🔄 刷新'}
+                {loading ? translate('indicators.panel.refreshLoading') : `🔄 ${translate('indicators.panel.refresh')}`}
               </button>
             </div>
           </div>
@@ -770,8 +775,8 @@ const IndicatorTesting = () => {
         <div className="indicators-card indicators-chart-card">
           <div className="indicators-card__header">
             <div>
-              <h3>ETH/USDT 3 分钟 K 线</h3>
-              <p>滚轮缩放、拖拽平移，在同一视图中查看 K 线与指标表现。</p>
+              <h3>{translate('indicators.chart.title')}</h3>
+              <p>{translate('indicators.chart.subtitle')}</p>
             </div>
           </div>
           <div className="chart-wrapper">
@@ -792,14 +797,14 @@ const IndicatorTesting = () => {
                   }}
                 />
                 <div className="zoom-controls">
-                  <button onClick={() => handlePan('left')} title="向左平移">←</button>
-                  <button onClick={handleResetZoom} title="重置缩放">Reset</button>
-                  <button onClick={() => handlePan('right')} title="向右平移">→</button>
-                  <div className="zoom-hint">滚轮缩放 · Shift+滚轮缩放纵轴</div>
+                  <button onClick={() => handlePan('left')} title={translate('indicators.chart.panLeft')}>←</button>
+                  <button onClick={handleResetZoom} title={translate('indicators.chart.reset')}>{translate('indicators.chart.reset')}</button>
+                  <button onClick={() => handlePan('right')} title={translate('indicators.chart.panRight')}>→</button>
+                  <div className="zoom-hint">{translate('indicators.chart.zoomHint')}</div>
                 </div>
               </>
             ) : (
-              <div className="chart-placeholder">暂无法获取 K 线数据</div>
+              <div className="chart-placeholder">{translate('indicators.chart.noData')}</div>
             )}
           </div>
         </div>
