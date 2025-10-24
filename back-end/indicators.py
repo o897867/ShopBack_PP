@@ -85,11 +85,19 @@ class TechnicalIndicators:
 
     @staticmethod
     def calculate_vwap(prices: np.ndarray, volumes: np.ndarray,
-                       highs: np.ndarray, lows: np.ndarray) -> np.ndarray:
+                       highs: np.ndarray, lows: np.ndarray,
+                       timestamps: np.ndarray = None) -> np.ndarray:
         """
         Volume Weighted Average Price
         VWAP = Σ(Typical Price × Volume) / Σ(Volume)
-        Resets daily or per session
+        Resets daily at 00:00 UTC
+
+        Args:
+            prices: Close prices
+            volumes: Trading volumes
+            highs: High prices
+            lows: Low prices
+            timestamps: Unix timestamps in milliseconds (optional)
         """
         if len(prices) != len(volumes):
             raise ValueError("Prices and volumes must have same length")
@@ -97,14 +105,41 @@ class TechnicalIndicators:
         # Calculate typical price (High + Low + Close) / 3
         typical_price = (highs + lows + prices) / 3
 
-        # Calculate cumulative values
-        cumulative_pv = np.cumsum(typical_price * volumes)
-        cumulative_volume = np.cumsum(volumes)
+        # If no timestamps provided, use simple cumulative VWAP
+        if timestamps is None or len(timestamps) == 0:
+            cumulative_pv = np.cumsum(typical_price * volumes)
+            cumulative_volume = np.cumsum(volumes)
+            vwap = np.where(cumulative_volume != 0,
+                            cumulative_pv / cumulative_volume,
+                            typical_price)
+            return vwap
 
-        # Avoid division by zero
-        vwap = np.where(cumulative_volume != 0,
-                        cumulative_pv / cumulative_volume,
-                        typical_price)
+        # Convert timestamps to days (UTC)
+        # Timestamps are in milliseconds
+        days = (timestamps // 86400000).astype(int)  # 86400000 ms = 1 day
+
+        # Initialize arrays
+        vwap = np.zeros(len(prices))
+        cumulative_pv = 0
+        cumulative_volume = 0
+        current_day = days[0]
+
+        for i in range(len(prices)):
+            # Reset on new day
+            if days[i] != current_day:
+                cumulative_pv = 0
+                cumulative_volume = 0
+                current_day = days[i]
+
+            # Accumulate for current day
+            cumulative_pv += typical_price[i] * volumes[i]
+            cumulative_volume += volumes[i]
+
+            # Calculate VWAP
+            if cumulative_volume > 0:
+                vwap[i] = cumulative_pv / cumulative_volume
+            else:
+                vwap[i] = typical_price[i]
 
         return vwap
 
@@ -156,7 +191,7 @@ class TechnicalIndicators:
                             window: int = 50, k: float = 2.0) -> Dict[str, np.ndarray]:
         """
         Calculate VWAP Bands using rolling standard deviation
-        Returns upper and lower bands
+        Returns upper and lower bands for both 1std and 2std
         """
         if len(vwap) != len(prices):
             raise ValueError("VWAP and prices must have same length")
@@ -164,13 +199,21 @@ class TechnicalIndicators:
         # Calculate rolling standard deviation
         rolling_std = TechnicalIndicators.calculate_rolling_std(prices, window)
 
-        # Calculate bands
-        upper_band = vwap + k * rolling_std
-        lower_band = vwap - k * rolling_std
+        # Calculate 1std bands
+        upper_1std = vwap + rolling_std
+        lower_1std = vwap - rolling_std
+
+        # Calculate 2std bands
+        upper_2std = vwap + 2 * rolling_std
+        lower_2std = vwap - 2 * rolling_std
 
         return {
-            'upper': upper_band,
-            'lower': lower_band,
+            'upper': upper_2std,  # Keep for backward compatibility
+            'lower': lower_2std,  # Keep for backward compatibility
+            'upper_1std': upper_1std,
+            'lower_1std': lower_1std,
+            'upper_2std': upper_2std,
+            'lower_2std': lower_2std,
             'std': rolling_std
         }
 
@@ -423,10 +466,13 @@ def calculate_all_indicators(candle_data: List[Dict]) -> Dict:
     lows = np.array([c['low'] for c in candle_data])
     volumes = np.array([c['volume'] for c in candle_data])
 
+    # Extract timestamps (in milliseconds)
+    timestamps = np.array([c.get('open_time', c.get('timestamp', 0)) for c in candle_data])
+
     indicators = TechnicalIndicators()
 
-    # Calculate base indicators
-    vwap = indicators.calculate_vwap(prices, volumes, highs, lows)
+    # Calculate base indicators with timestamps for daily reset
+    vwap = indicators.calculate_vwap(prices, volumes, highs, lows, timestamps)
 
     # Calculate all indicators
     result = {

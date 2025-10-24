@@ -458,6 +458,7 @@ const IndicatorTesting = () => {
           spanGaps: true
         });
       } else if (ind === 'VWAP' && indicators.vwap) {
+        // VWAP line
         datasets.push({
           label: 'VWAP',
           type: 'line',
@@ -469,6 +470,73 @@ const IndicatorTesting = () => {
           parsing: false,
           spanGaps: true
         });
+
+        // VWAP Bands (1std and 2std)
+        if (indicators.vwap_bands) {
+          const vwapBands = indicators.vwap_bands;
+
+          // 1std bands (darker, more prominent)
+          if (vwapBands.upper_1std) {
+            datasets.push({
+              label: 'VWAP +1σ',
+              type: 'line',
+              data: formatSeries(vwapBands.upper_1std),
+              borderColor: 'rgba(19, 139, 123, 0.6)',
+              backgroundColor: 'transparent',
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              parsing: false,
+              spanGaps: true
+            });
+          }
+
+          if (vwapBands.lower_1std) {
+            datasets.push({
+              label: 'VWAP -1σ',
+              type: 'line',
+              data: formatSeries(vwapBands.lower_1std),
+              borderColor: 'rgba(19, 139, 123, 0.6)',
+              backgroundColor: 'transparent',
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              parsing: false,
+              spanGaps: true
+            });
+          }
+
+          // 2std bands (lighter, less prominent)
+          if (vwapBands.upper_2std) {
+            datasets.push({
+              label: 'VWAP +2σ',
+              type: 'line',
+              data: formatSeries(vwapBands.upper_2std),
+              borderColor: 'rgba(19, 139, 123, 0.3)',
+              backgroundColor: 'transparent',
+              borderWidth: 1,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              parsing: false,
+              spanGaps: true
+            });
+          }
+
+          if (vwapBands.lower_2std) {
+            datasets.push({
+              label: 'VWAP -2σ',
+              type: 'line',
+              data: formatSeries(vwapBands.lower_2std),
+              borderColor: 'rgba(19, 139, 123, 0.3)',
+              backgroundColor: 'transparent',
+              borderWidth: 1,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              parsing: false,
+              spanGaps: true
+            });
+          }
+        }
       }
     });
 
@@ -697,27 +765,52 @@ const IndicatorTesting = () => {
                   <button
                     key={card.id}
                     type="button"
-                    className={`hero-card${isActive ? ' is-active' : ''}`}
+                    className={`hero-card hero-card--${card.id.toLowerCase()}${isActive ? ' is-active' : ''}`}
                     style={{ '--hero-card-accent': card.color }}
                     onClick={() => handleIndicatorToggle(card.id)}
                   >
-                    <div className="hero-card__header">
-                      <span className="hero-card__label">{card.label}</span>
-                      <span className="hero-card__icon">↗</span>
-                    </div>
-                    <div className="hero-card__body">
-                      <span className="hero-card__count">{formatInteger(card.count)}</span>
-                      <p className="hero-card__description">
-                        {heroCardDescriptions[card.id] || translate('indicators.cards.defaultDescription')}
-                      </p>
-                    </div>
-                    <div className="hero-card__footer">
-                      <span>{translate('indicators.cards.avgConfirmation')}</span>
-                      <strong>
-                        {card.avgConfirmCandles != null
-                          ? translate('indicators.cards.avgConfirmationValue', { value: formatDecimal(card.avgConfirmCandles) })
-                          : translate('indicators.cards.avgConfirmationNoData')}
-                      </strong>
+                    <div className="hero-card__inner">
+                      {/* Card Back - Shows icon/image */}
+                      <div className="hero-card__back">
+                        <div className="hero-card__title">{card.label}</div>
+                        <div className="hero-card__icon-wrapper">
+                          <img
+                            src={`/images/indicators/${card.id === 'SMA14' ? 'sma' : card.id === 'EMA20' ? 'ema' : 'vwap'}.png`}
+                            alt={`${card.label} icon`}
+                            className="hero-card__icon-image"
+                            onError={(e) => {
+                              // Fallback to emoji if image not found
+                              e.target.style.display = 'none';
+                              e.target.nextElementSibling.style.display = 'block';
+                            }}
+                          />
+                          <div className="hero-card__icon-fallback" style={{ display: 'none' }}>
+                            {card.id === 'SMA14' ? '📊' : card.id === 'EMA20' ? '📈' : '⚖️'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Front - Shows data */}
+                      <div className="hero-card__front">
+                        <div className="hero-card__header">
+                          <span className="hero-card__label">{card.label}</span>
+                          <span className="hero-card__icon">↗</span>
+                        </div>
+                        <div className="hero-card__body">
+                          <span className="hero-card__count">{formatInteger(card.count)}</span>
+                          <p className="hero-card__description">
+                            {heroCardDescriptions[card.id] || translate('indicators.cards.defaultDescription')}
+                          </p>
+                        </div>
+                        <div className="hero-card__footer">
+                          <span>{translate('indicators.cards.avgConfirmation')}</span>
+                          <strong>
+                            {card.avgConfirmCandles != null
+                              ? translate('indicators.cards.avgConfirmationValue', { value: formatDecimal(card.avgConfirmCandles) })
+                              : translate('indicators.cards.avgConfirmationNoData')}
+                          </strong>
+                        </div>
+                      </div>
                     </div>
                   </button>
                 );

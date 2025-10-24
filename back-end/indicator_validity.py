@@ -104,8 +104,9 @@ class ValidityDetector:
         revert_tol = params.get('revert_tol', 0.002)  # 0.2% from VWAP
         min_touch = params.get('min_touch_deviation', 0.003)  # 0.3% minimum
 
-        upper_band = bands.get('upper', np.array([]))
-        lower_band = bands.get('lower', np.array([]))
+        # Use 2std bands for reversion detection
+        upper_band = bands.get('upper_2std', bands.get('upper', np.array([])))
+        lower_band = bands.get('lower_2std', bands.get('lower', np.array([])))
 
         if len(upper_band) == 0 or len(lower_band) == 0:
             return {'valid_count': 0, 'valid_indices': [], 'events': []}

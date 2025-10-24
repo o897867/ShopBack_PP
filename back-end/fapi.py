@@ -508,6 +508,7 @@ async def calculate_indicators(
             return arr
 
         # Format response
+        vwap_bands = indicators.get('vwap_bands', {})
         return {
             "symbol": symbol,
             "interval": interval,
@@ -521,6 +522,12 @@ async def calculate_indicators(
                     "histogram": clean_nan(indicators.get('macd', {}).get('histogram', []))
                 },
                 "vwap": clean_nan(indicators.get('vwap', [])),
+                "vwap_bands": {
+                    "upper_1std": clean_nan(vwap_bands.get('upper_1std', [])),
+                    "lower_1std": clean_nan(vwap_bands.get('lower_1std', [])),
+                    "upper_2std": clean_nan(vwap_bands.get('upper_2std', [])),
+                    "lower_2std": clean_nan(vwap_bands.get('lower_2std', []))
+                },
                 "rsi": clean_nan(indicators.get('rsi', []))
             },
             "candles": candles

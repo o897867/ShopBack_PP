@@ -2158,8 +2158,8 @@ export const translations = {
         topHitNoData: '暂无数据'
       },
       cards: {
-        sma14Description: '以过去14根K线为基础，构建最古老的指标',
-        ema20Description: '过滤不必要的噪音，立足于经典之上',
+        sma14Description: '以过去14根K线为基础，构建最经典的指标',
+        ema20Description: '过滤不必要的噪音，传统指标的继任者',
         vwapDescription: '结合量与价，新时代的挑战者',
         defaultDescription: '关键指标有效性统计。',
         avgConfirmation: '平均确认：',
