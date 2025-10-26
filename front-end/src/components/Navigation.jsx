@@ -12,27 +12,22 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
       title: translate('nav.groups.explore'),
       items: [
         { id: 'home', label: translate('nav.home'), badge: 'recommended' },
-        { id: 'broker-hub', label: translate('nav.brokerHub') },
-        { id: 'analytics', label: translate('nav.analytics') }
+        { id: 'broker-hub', label: translate('nav.brokerHub') }
       ]
     },
     {
       title: translate('nav.groups.community'),
       items: [
-        { id: 'forum', label: translate('forum.title') },
         { id: 'trading', label: translate('nav.trading') },
         { id: 'eth', label: translate('nav.ethPrediction') },
-        { id: 'indicators', label: 'Indicator Testing' }
+        { id: 'indicators', label: translate('nav.indicators') }
       ]
     },
     {
       title: translate('nav.groups.account'),
       items: currentUser
         ? [{ id: 'forum-mod', label: 'Forum Mod' }]
-        : [
-            { id: 'login', label: translate('auth.login.nav') },
-            { id: 'register', label: translate('auth.register.nav') }
-          ]
+        : []
     }
   ];
 

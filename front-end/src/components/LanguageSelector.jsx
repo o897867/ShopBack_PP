@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../hooks/useLanguage';
+import './LanguageSelector.css';
 
 const LanguageSelector = () => {
   const { currentLanguage, changeLanguage } = useLanguage();
@@ -10,13 +11,20 @@ const LanguageSelector = () => {
   ];
 
   return (
-    <select value={currentLanguage} onChange={(e) => changeLanguage(e.target.value)}>
-      {languages.map(lang => (
-        <option key={lang.code} value={lang.code}>
-          {lang.flag} {lang.name}
-        </option>
-      ))}
-    </select>
+    <div className="language-selector">
+      <select
+        className="language-selector__control"
+        value={currentLanguage}
+        onChange={(e) => changeLanguage(e.target.value)}
+        aria-label="Select language"
+      >
+        {languages.map(lang => (
+          <option key={lang.code} value={lang.code}>
+            {lang.flag} {lang.name}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 };
 

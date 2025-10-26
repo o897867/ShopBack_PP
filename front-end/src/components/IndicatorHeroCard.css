@@ -1,0 +1,176 @@
+/* Overwatch-style Hero Card - Platinum-Gold theme */
+.indicator-hero-card {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.indicator-hero-card:hover {
+  transform: scale(1.05);
+  border-color: var(--card-accent, #D4AF37);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.indicator-hero-card.selected {
+  border-color: #D4AF37;
+  border-width: 3px;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.6),
+              inset 0 0 20px rgba(212, 175, 55, 0.1);
+  background: rgba(255, 255, 255, 1);
+}
+
+.hero-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Image container */
+.hero-card-image {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(45, 63, 95, 0.3) 0%, transparent 100%);
+}
+
+.hero-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+}
+
+.indicator-hero-card:hover .hero-card-image img {
+  transform: scale(1.1);
+}
+
+.hero-card-fallback {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  opacity: 0.6;
+}
+
+/* Info section */
+.hero-card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: linear-gradient(0deg, rgba(26, 35, 50, 0.95) 0%, transparent 100%);
+  backdrop-filter: blur(8px);
+}
+
+.hero-card-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.hero-card-role {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--card-accent, #f99e1a);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Selected indicator */
+.hero-card-selected-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: #f99e1a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(249, 158, 26, 0.6);
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+.selected-checkmark {
+  color: #1a2332;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(249, 158, 26, 0.6);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(249, 158, 26, 0.9);
+  }
+}
+
+/* Active glow effect */
+.indicator-hero-card.selected::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #f99e1a, #ff6b35, #f99e1a);
+  border-radius: 8px;
+  opacity: 0.3;
+  z-index: -1;
+  animation: borderGlow 3s linear infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes borderGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .indicator-hero-card {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: #1f2937;
+}
+
+[data-theme="dark"] .indicator-hero-card:hover {
+  border-color: var(--card-accent, #f99e1a);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .indicator-hero-card {
+    height: 140px;
+  }
+
+  .hero-card-name {
+    font-size: 0.95rem;
+  }
+
+  .hero-card-role {
+    font-size: 0.75rem;
+  }
+}

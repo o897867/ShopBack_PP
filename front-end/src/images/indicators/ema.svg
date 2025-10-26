@@ -1,0 +1,25 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blue background circle -->
+  <circle cx="100" cy="100" r="95" fill="#19398A"/>
+  <!-- White border -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="white" stroke-width="4"/>
+
+  <!-- Price line (jagged, showing volatility) in lighter color -->
+  <path d="M 50 120 L 65 110 L 75 125 L 90 100 L 105 115 L 120 85 L 135 95 L 150 70"
+        stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- EMA line (smooth and responsive, tracking closely) -->
+  <path d="M 50 120 Q 70 115, 90 105 Q 110 90, 135 80 L 150 72"
+        stroke="white" stroke-width="5" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Exponential weight symbol (decreasing circles showing older data has less weight) -->
+  <circle cx="55" cy="140" r="6" fill="white" opacity="1"/>
+  <circle cx="75" cy="140" r="5" fill="white" opacity="0.7"/>
+  <circle cx="90" cy="140" r="4" fill="white" opacity="0.5"/>
+  <circle cx="105" cy="140" r="3" fill="white" opacity="0.3"/>
+
+  <!-- Arrow showing direction/trend -->
+  <path d="M 145 65 L 155 72 L 148 75 Z" fill="white"/>
+</svg>

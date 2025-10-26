@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Indicator Icons Preview</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .icon-box {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .icon-box h3 {
+            margin: 10px 0 0 0;
+            color: #333;
+        }
+        img {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Indicator Icons Preview</h1>
+    <div class="container">
+        <div class="icon-box">
+            <img src="sma.svg" alt="SMA">
+            <h3>SMA (Simple Moving Average)</h3>
+        </div>
+        <div class="icon-box">
+            <img src="ema.svg" alt="EMA">
+            <h3>EMA (Exponential Moving Average)</h3>
+        </div>
+        <div class="icon-box">
+            <img src="vwap.svg" alt="VWAP">
+            <h3>VWAP (Volume Weighted Average Price)</h3>
+        </div>
+    </div>
+</body>
+</html>

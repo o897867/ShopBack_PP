@@ -1,0 +1,318 @@
+/* Overwatch-style Detail Panel - Platinum-Gold theme */
+.indicator-detail-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  height: 100%;
+  overflow-y: auto;
+  animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Header Section */
+.detail-panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.detail-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.detail-indicator-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.detail-role-badge {
+  padding: 8px 16px;
+  border: 2px solid;
+  border-radius: 20px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.detail-indicator-description {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #4b5563;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Stats Section */
+.detail-panel-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.detail-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(249, 250, 251, 0.8);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.detail-stat-card:hover {
+  background: rgba(249, 250, 251, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.stat-card-icon {
+  font-size: 28px;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.stat-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.stat-card-label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card-value {
+  font-family: var(--font-numeric);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-feature-settings: 'tnum';
+}
+
+.stat-card-unit {
+  font-size: 0.9rem;
+  margin-left: 4px;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+/* Abilities Section */
+.detail-panel-abilities {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.abilities-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.abilities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ability-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(249, 250, 251, 0.5);
+  border-left: 3px solid #D4AF37;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.ability-item:hover {
+  background: rgba(249, 250, 251, 0.9);
+  transform: translateX(4px);
+}
+
+.ability-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ability-text {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: #374151;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Action Button */
+.detail-panel-action {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.detail-action-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #D4AF37 0%, #B87333 100%);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+}
+
+.detail-action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+  background: linear-gradient(135deg, #E5C158 0%, #C98544 100%);
+}
+
+.detail-action-button:active {
+  transform: translateY(0);
+}
+
+.action-button-text {
+  flex: 1;
+  text-align: left;
+  letter-spacing: 0.02em;
+}
+
+.action-button-arrow {
+  font-size: 1.5rem;
+  font-weight: 900;
+  transition: transform 0.3s ease;
+}
+
+.detail-action-button:hover .action-button-arrow {
+  transform: translateX(4px);
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .indicator-detail-panel {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: #1f2937;
+}
+
+[data-theme="dark"] .detail-stat-card {
+  background: rgba(31, 41, 55, 0.4);
+  border-color: #374151;
+}
+
+[data-theme="dark"] .detail-stat-card:hover {
+  background: rgba(31, 41, 55, 0.6);
+}
+
+[data-theme="dark"] .ability-item {
+  background: rgba(31, 41, 55, 0.3);
+}
+
+[data-theme="dark"] .ability-item:hover {
+  background: rgba(31, 41, 55, 0.5);
+}
+
+/* Scrollbar styling */
+.indicator-detail-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.indicator-detail-panel::-webkit-scrollbar-track {
+  background: rgba(229, 231, 235, 0.5);
+  border-radius: 4px;
+}
+
+.indicator-detail-panel::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.5);
+  border-radius: 4px;
+}
+
+.indicator-detail-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.7);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .indicator-detail-panel {
+    padding: 24px;
+    gap: 20px;
+  }
+
+  .detail-indicator-name {
+    font-size: 1.6rem;
+  }
+
+  .detail-panel-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .indicator-detail-panel {
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .detail-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stat-card-value {
+    font-size: 1.5rem;
+  }
+
+  .detail-action-button {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+}

@@ -19,6 +19,8 @@ import ThemeToggle from '../components/ThemeToggle.jsx';
 import LanguageSelector from '../components/LanguageSelector.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
+import IndicatorHeroCard from '../components/IndicatorHeroCard.jsx';
+import IndicatorDetailPanel from '../components/IndicatorDetailPanel.jsx';
 
 const candlestickRenderer = {
   id: 'candlestickRenderer',
@@ -151,14 +153,17 @@ const IndicatorTesting = () => {
     macd_hist: 2
   });
   const chartRef = useRef(null);
+  const [_, forceTick] = useState(0); // re-render trigger for theme changes
+  const [selectedHeroId, setSelectedHeroId] = useState('VWAP'); // Default selected indicator
+  const chartSectionRef = useRef(null);
 
   const indicatorOptions = useMemo(() => ([
-    { value: 'MACD', label: 'MACD', color: '#C8102E' },
-    { value: 'VWAP', label: 'VWAP', color: '#138B7B' },
-    { value: 'SMA14', label: 'SMA14', color: '#D4A574' },
-    { value: 'EMA20', label: 'EMA20', color: '#8B4513' },
-    { value: 'RSI', label: 'RSI', color: '#2C5F2D' }
-  ]), []);
+    { value: 'MACD', label: 'MACD', color: '#C8102E', role: translate('indicators.roles.momentum') },
+    { value: 'VWAP', label: 'VWAP', color: '#138B7B', role: translate('indicators.roles.volumePrice') },
+    { value: 'SMA14', label: 'SMA14', color: '#D4A574', role: translate('indicators.roles.trend') },
+    { value: 'EMA20', label: 'EMA20', color: '#8B4513', role: translate('indicators.roles.trend') },
+    { value: 'RSI', label: 'RSI', color: '#2C5F2D', role: translate('indicators.roles.momentum') }
+  ]), [translate]);
 
   const indicatorOptionMap = useMemo(() => {
     return indicatorOptions.reduce((acc, option) => {
@@ -168,6 +173,20 @@ const IndicatorTesting = () => {
   }, [indicatorOptions]);
 
   const coreIndicators = useMemo(() => ['SMA14', 'EMA20', 'VWAP'], []);
+
+  // Re-render when theme attribute changes to refresh chart colors
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const observer = new MutationObserver(mutations => {
+      for (const m of mutations) {
+        if (m.type === 'attributes' && m.attributeName === 'data-theme') {
+          forceTick(v => v + 1);
+        }
+      }
+    });
+    observer.observe(document.documentElement, { attributes: true });
+    return () => observer.disconnect();
+  }, []);
 
   const integerFormatter = useMemo(() => new Intl.NumberFormat('en-US'), []);
   const decimalFormatter = useMemo(
@@ -603,6 +622,17 @@ const IndicatorTesting = () => {
     return volume > max ? volume : max;
   }, 0);
 
+  // Theme-aware chart palette for better contrast
+  const theme = typeof document !== 'undefined'
+    ? (document.documentElement.getAttribute('data-theme') || 'light')
+    : 'light';
+  const isDark = theme === 'dark';
+  const palette = {
+    text: isDark ? '#e5e7eb' : '#111827',
+    muted: isDark ? '#cbd5e1' : '#334155',
+    grid: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(17,24,39,0.06)'
+  };
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -613,11 +643,19 @@ const IndicatorTesting = () => {
     plugins: {
       legend: {
         display: true,
-        position: 'top'
+        position: 'top',
+        labels: {
+          color: palette.text,
+          usePointStyle: true,
+          padding: 20,
+          font: { weight: '600', size: 12 }
+        }
       },
       title: {
         display: true,
-        text: `ETH/USDT - 3 Minute Candles`
+        text: `ETH/USDT - 3 Minute Candles`,
+        color: palette.text,
+        font: { weight: '700', size: 14 }
       },
       tooltip: {
         callbacks: {
@@ -658,15 +696,23 @@ const IndicatorTesting = () => {
           }
         },
         grid: {
-          display: chartSettings.showGrid
+          display: chartSettings.showGrid,
+          color: palette.grid
+        },
+        ticks: {
+          color: palette.muted,
+          font: { weight: '600' }
         }
       },
       y: {
         position: 'right',
         grid: {
-          display: chartSettings.showGrid
+          display: chartSettings.showGrid,
+          color: palette.grid
         },
         ticks: {
+          color: palette.text,
+          font: { weight: '600' },
           callback: function(value) {
             return '$' + value.toFixed(0);
           }
@@ -680,6 +726,8 @@ const IndicatorTesting = () => {
           display: false
         },
         ticks: {
+          color: palette.muted,
+          font: { weight: '600' },
           callback: function(value) {
             return (value / 1000).toFixed(1) + 'K';
           }
@@ -697,12 +745,6 @@ const IndicatorTesting = () => {
     }
   };
 
-  const handleResetZoom = () => {
-    if (chartRef.current) {
-      resetZoom(chartRef.current);
-    }
-  };
-
   const handlePan = (direction) => {
     if (chartRef.current) {
       panChart(chartRef.current, direction);
@@ -711,6 +753,18 @@ const IndicatorTesting = () => {
 
   const topIndicatorLabel = indicatorMetrics.topIndicator?.label ?? '—';
   const topIndicatorCount = indicatorMetrics.topIndicator?.count ?? 0;
+
+  // Handler for viewing full chart analysis
+  const handleViewChart = useCallback(() => {
+    if (chartSectionRef.current) {
+      chartSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, []);
+
+  // Get selected hero data
+  const selectedHero = useMemo(() => {
+    return heroCards.find(card => card.id === selectedHeroId) || heroCards[0];
+  }, [selectedHeroId, heroCards]);
 
   if (loading && candles.length === 0) {
     return (
@@ -722,105 +776,148 @@ const IndicatorTesting = () => {
   }
 
   return (
-    <div className="indicators-page">
-      <section className="indicators-hero">
+    <div className="indicators-page indicators-page--overwatch">
+      <section className="indicators-hero indicators-hero--overwatch">
         <div className="indicators-hero__inner">
           <div className="indicators-top-controls">
             <ThemeToggle />
             <LanguageSelector />
           </div>
-          <div className="indicators-hero__grid">
-            <div className="indicators-hero__content">
-              <span className="indicators-hero__badge">{translate('indicators.hero.badge')}</span>
-              <p className="indicators-hero__subtitle">
+
+          {/* Overwatch-style hero selection layout */}
+          <div className="overwatch-hero-section">
+            {/* Header section */}
+            <div className="overwatch-hero-header">
+              <h1 className="overwatch-hero-title">
+                {translate('indicators.hero.badge')}
+              </h1>
+              <p className="overwatch-hero-subtitle">
                 {translate('indicators.hero.subtitle')}
               </p>
-              <div className="indicators-hero__stats">
-                <div className="indicators-hero__stat">
-                  <span className="stat-label">{translate('indicators.hero.validCountPeriod', { days: timeRange })}</span>
-                  <span className="stat-value">{formatInteger(indicatorMetrics.totalValid)}</span>
-                </div>
-                <div className="indicators-hero__stat">
-                  <span className="stat-label">{translate('indicators.hero.avgPerDay')}</span>
-                  <span className="stat-value">{formatDecimal(indicatorMetrics.avgPerDay)}</span>
-                </div>
-              </div>
-              <div className="indicators-hero__cta">
-                <button type="button" className="hero-cta-btn" onClick={fetchData} disabled={loading}>
-                  {loading ? translate('indicators.hero.syncButtonLoading') : translate('indicators.hero.syncButton')}
-                  <span className="hero-cta-btn__arrow">→</span>
-                </button>
-                <span className="hero-cta-note">
-                  {topIndicatorLabel === '—'
-                    ? translate('indicators.hero.topHitNoData')
-                    : translate('indicators.hero.topHitLabel', { label: topIndicatorLabel, count: formatInteger(topIndicatorCount) })}
-                </span>
-              </div>
             </div>
 
-            <div className="indicators-hero__cards">
-              {heroCards.map(card => {
-                const isActive = selectedIndicators.includes(card.id);
-                return (
-                  <button
-                    key={card.id}
-                    type="button"
-                    className={`hero-card hero-card--${card.id.toLowerCase()}${isActive ? ' is-active' : ''}`}
-                    style={{ '--hero-card-accent': card.color }}
-                    onClick={() => handleIndicatorToggle(card.id)}
-                  >
-                    <div className="hero-card__inner">
-                      {/* Card Back - Shows icon/image */}
-                      <div className="hero-card__back">
-                        <div className="hero-card__title">{card.label}</div>
-                        <div className="hero-card__icon-wrapper">
-                          <img
-                            src={`/images/indicators/${card.id === 'SMA14' ? 'sma' : card.id === 'EMA20' ? 'ema' : 'vwap'}.png`}
-                            alt={`${card.label} icon`}
-                            className="hero-card__icon-image"
-                            onError={(e) => {
-                              // Fallback to emoji if image not found
-                              e.target.style.display = 'none';
-                              e.target.nextElementSibling.style.display = 'block';
-                            }}
-                          />
-                          <div className="hero-card__icon-fallback" style={{ display: 'none' }}>
-                            {card.id === 'SMA14' ? '📊' : card.id === 'EMA20' ? '📈' : '⚖️'}
-                          </div>
-                        </div>
-                      </div>
+            <div className="overwatch-hero-grid-new">
+              {/* Left blank space (15%) */}
+              <div className="hero-blank-left"></div>
 
-                      {/* Card Front - Shows data */}
-                      <div className="hero-card__front">
-                        <div className="hero-card__header">
-                          <span className="hero-card__label">{card.label}</span>
-                          <span className="hero-card__icon">↗</span>
+              {/* Hero image section (30%) */}
+              <div className="overwatch-hero-image-section">
+                <div className="hero-image-container">
+                  <img
+                    src={`/images/indicators/${selectedHero.id === 'SMA14' ? 'sma' : selectedHero.id === 'EMA20' ? 'ema' : 'vwap'}.png`}
+                    alt={`${selectedHero.label} indicator`}
+                    className="hero-large-image"
+                  />
+                </div>
+              </div>
+
+              {/* Details panel (30%) */}
+              <div className="overwatch-hero-detail-new">
+                {/* Indicator name */}
+                <h1 className="indicator-name-large" style={{ color: selectedHero.color }}>
+                  {selectedHero.label}
+                </h1>
+
+                {/* Thumbnail selector */}
+                <div className="thumbnail-selector">
+                  {heroCards.map(card => (
+                    <button
+                      key={card.id}
+                      className={`thumbnail-btn ${selectedHeroId === card.id ? 'active' : ''}`}
+                      onClick={() => setSelectedHeroId(card.id)}
+                      style={{ '--btn-accent': card.color }}
+                    >
+                      <img
+                        src={`/images/indicators/${card.id === 'SMA14' ? 'sma' : card.id === 'EMA20' ? 'ema' : 'vwap'}.svg`}
+                        alt={card.label}
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Type section */}
+                <div className="type-section">
+                  <div className="type-label">{translate('indicators.detail.typeLabel') || '指标类型 / INDICATOR TYPE'}</div>
+                  <span className="type-value" style={{ borderColor: selectedHero.color, color: selectedHero.color }}>
+                    {indicatorOptions.find(opt => opt.value === selectedHero.id)?.role || translate('indicators.roles.default')}
+                  </span>
+                </div>
+
+                {/* Description section */}
+                <div className="description-section">
+                  <p className="indicator-description">
+                    {selectedHero.id === 'SMA14' && (translate('indicators.cards.sma14Description') || '以过去14根K线为基础，构建最经典的指标')}
+                    {selectedHero.id === 'EMA20' && (translate('indicators.cards.ema20Description') || '过滤不必要的噪音，传统指标的继任者')}
+                    {selectedHero.id === 'VWAP' && (translate('indicators.cards.vwapDescription') || '结合量与价，新时代的挑战者')}
+                  </p>
+                </div>
+
+                {/* Features section */}
+                <div className="features-section">
+                  <h3 className="features-title" style={{ color: selectedHero.color }}>
+                    {translate('indicators.detail.keyFeatures') || '核心特性 / Key Features'}
+                  </h3>
+                  <div className="features-list">
+                    {selectedHero.id === 'SMA14' && (
+                      <>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.sma1') || 'Smooth trend identification'}</span>
                         </div>
-                        <div className="hero-card__body">
-                          <span className="hero-card__count">{formatInteger(card.count)}</span>
-                          <p className="hero-card__description">
-                            {heroCardDescriptions[card.id] || translate('indicators.cards.defaultDescription')}
-                          </p>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.sma2') || 'Classic 14-period moving average'}</span>
                         </div>
-                        <div className="hero-card__footer">
-                          <span>{translate('indicators.cards.avgConfirmation')}</span>
-                          <strong>
-                            {card.avgConfirmCandles != null
-                              ? translate('indicators.cards.avgConfirmationValue', { value: formatDecimal(card.avgConfirmCandles) })
-                              : translate('indicators.cards.avgConfirmationNoData')}
-                          </strong>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.sma3') || 'Reliable support/resistance levels'}</span>
                         </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+                      </>
+                    )}
+                    {selectedHero.id === 'EMA20' && (
+                      <>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.ema1') || 'Faster response to price changes'}</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.ema2') || 'Reduces noise compared to SMA'}</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.ema3') || 'Ideal for short-term trend trading'}</span>
+                        </div>
+                      </>
+                    )}
+                    {selectedHero.id === 'VWAP' && (
+                      <>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.vwap1') || 'Volume-weighted price analysis'}</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.vwap2') || 'Institutional trading reference'}</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-text">{translate('indicators.detail.vwap3') || 'Mean reversion opportunities'}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action button */}
+                <button
+                  className="action-button-new"
+                  onClick={handleViewChart}
+                  style={{ '--button-bg': selectedHero.color }}
+                >
+                  {translate('indicators.detail.viewFullAnalysis') || 'View Full K-Line Analysis'} →
+                </button>
+              </div>
+
+              {/* Right blank space (15%) */}
+              <div className="hero-blank-right"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="indicators-content">
+      <section className="indicators-content" ref={chartSectionRef}>
         {error && (
           <div className="indicators-alert" role="alert">
             <span>⚠️ {error}</span>
@@ -889,12 +986,6 @@ const IndicatorTesting = () => {
                     }
                   }}
                 />
-                <div className="zoom-controls">
-                  <button onClick={() => handlePan('left')} title={translate('indicators.chart.panLeft')}>←</button>
-                  <button onClick={handleResetZoom} title={translate('indicators.chart.reset')}>{translate('indicators.chart.reset')}</button>
-                  <button onClick={() => handlePan('right')} title={translate('indicators.chart.panRight')}>→</button>
-                  <div className="zoom-hint">{translate('indicators.chart.zoomHint')}</div>
-                </div>
               </>
             ) : (
               <div className="chart-placeholder">{translate('indicators.chart.noData')}</div>

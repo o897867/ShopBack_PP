@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap');
+
 .indicators-page {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
+  background: linear-gradient(135deg, #F5F5F5 0%, #E5E4E2 30%, #D3D3D3 60%, #C0C0C0 100%);
   /* Layout tokens */
   --ind-container: min(1120px, 92vw);
   --radius: 14px;
@@ -10,8 +13,8 @@
   /* Minimal palette + Chinese gradients */
   --bg: #f8fafc;          /* slate-50 */
   --surface: #ffffff;      /* white */
-  --text: #111827;         /* gray-900 */
-  --muted: #6b7280;        /* gray-500 */
+  --text: #2d3748;         /* flat dark gray */
+  --muted: #718096;        /* flat gray */
   --line: #e5e7eb;         /* gray-200 */
 
   /* Chinese-style primaries */
@@ -27,11 +30,13 @@
 
   /* Solid accent used for borders/text */
   --accent: var(--gold-600);
-  /* Typography System */
-  --font-display: "IBM Plex Sans", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-body: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
-  --font-numeric: "JetBrains Mono", "SF Mono", "Roboto Mono", ui-monospace, monospace;
+  /* Typography System - Heritage Modern */
+  --font-headline: "Cinzel", "Noto Serif SC", "Times New Roman", serif;
+  --font-sans: "Manrope", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-headline);
+  --font-body: var(--font-sans);
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  --font-numeric: "JetBrains Mono", "Roboto Mono", "Noto Sans Mono CJK SC", monospace;
   font-family: var(--font-body);
   color: var(--text);
   /* Back-compat for existing variables used below */
@@ -41,30 +46,19 @@
   --ind-muted: rgba(212, 175, 55, 0.12);
 }
 
-/* Animated rotating background gradient */
+/* Overwatch-specific theme overrides - Keep original Platinum-Gold palette */
+.indicators-page--overwatch {
+  /* Keep the original color scheme */
+}
+
+/* Remove overlay since we have direct gradient background */
 .indicators-page::before {
-  content: '';
-  position: fixed;
-  top: -100%;
-  left: -100%;
-  width: 300%;
-  height: 300%;
-  background: linear-gradient(135deg, #f5f6f7 0%, #352424 50%, #dbb250 100%);
-  animation: rotateGradient 60s linear infinite;
-  z-index: 0;
-  pointer-events: none;
+  display: none;
 }
 
-@keyframes rotateGradient {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.indicators-page::after {
+  display: none;
 }
-
-.indicators-page::after { display: none; }
 
 [data-theme="dark"] .indicators-page {
   --bg: #0f172a;          /* slate-900 */
@@ -92,7 +86,10 @@
 }
 
 [data-theme="dark"] .indicators-page::before {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  /* Dark platinum-gold gradient */
+  background: linear-gradient(135deg, #1a1a1a 0%, #4a3f2e 50%, #2a2419 100%);
+  opacity: 0.4;
+  animation: none;
 }
 
 [data-theme="dark"] .indicators-page::after {
@@ -113,20 +110,23 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: var(--ind-container);
-  margin: 0 auto;
-  padding: 0 24px;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .indicators-top-controls {
-  position: relative;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
   display: flex;
   gap: 12px;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-bottom: 32px;
-  z-index: 10;
+  width: auto;
 }
 
 .indicators-hero__grid {
@@ -176,7 +176,8 @@
   font-family: var(--font-display);
   font-size: clamp(2.2rem, 4vw, 3.2rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   color: var(--text);
   margin: 0;
 }
@@ -242,7 +243,7 @@
   font-family: var(--font-display);
   font-weight: 650;
   font-size: 0.97rem;
-  letter-spacing: -0.005em;
+  letter-spacing: 0.02em;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: filter 150ms ease, transform 120ms ease;
@@ -406,7 +407,7 @@
   font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.04em;
   color: var(--text);
   text-align: center;
   text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
@@ -446,7 +447,7 @@
 .hero-card__label {
   font-family: var(--font-display);
   font-weight: 650;
-  letter-spacing: -0.015em;
+  letter-spacing: 0.04em;
   font-size: 1.05rem;
   color: var(--text);
 }
@@ -568,11 +569,11 @@
 
 .indicator-toggles__label {
   font-family: var(--font-display);
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
 }
 
 .indicator-toggle {
@@ -581,9 +582,9 @@
   border: 1px solid var(--line);
   border-radius: 999px;
   font-family: var(--font-display);
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: -0.005em;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   color: var(--text);
   transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
   cursor: pointer;
@@ -647,7 +648,7 @@
   color: var(--text);
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.005em;
+  letter-spacing: 0.02em;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: border-color 140ms ease, color 140ms ease, background-color 140ms ease;
@@ -674,9 +675,9 @@
 .indicators-card__header h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
+  font-size: 1.2rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
   color: var(--text);
 }
 
@@ -704,8 +705,8 @@
   justify-content: center;
   color: var(--muted);
   font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 450;
+  font-size: 1rem;
+  font-weight: 600;
   letter-spacing: -0.01em;
   background: transparent;
 }
@@ -742,7 +743,7 @@
   cursor: pointer;
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.005em;
+  letter-spacing: 0.02em;
   transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
 }
 
@@ -781,7 +782,7 @@
   color: inherit;
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.005em;
+  letter-spacing: 0.04em;
   cursor: pointer;
 }
 
@@ -868,13 +869,56 @@
 }
 
 @media (max-width: 768px) {
+  .indicators-hero {
+    padding: 48px 0 60px;
+  }
+
+  .indicators-hero__inner {
+    padding: 0 16px;
+  }
+
+  .indicators-hero__stats {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .indicators-hero__stat {
+    min-width: 140px;
+  }
+
+  .indicators-hero__cards {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .hero-card {
+    max-width: 100%;
+    min-height: 260px;
+  }
+
+  .hero-card__inner {
+    min-height: 260px;
+  }
+
+  .hero-card__front,
+  .hero-card__back {
+    min-height: 260px;
+    padding: 16px 18px;
+  }
+
   .indicators-content {
-    padding: 0 24px 80px;
+    padding: 0 16px 80px;
+    margin: 20px auto 80px;
   }
 
   .indicators-panel__row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 16px;
+  }
+
+  .indicator-toggles {
+    width: 100%;
   }
 
   .indicators-panel__controls {
@@ -886,15 +930,97 @@
     height: 380px;
   }
 
-  .hero-card {
-    padding: 20px;
+  .zoom-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 0.75rem;
+    padding: 4px 6px;
+  }
+
+  .zoom-controls button {
+    padding: 3px 8px;
+    font-size: 0.8rem;
+  }
+
+  .zoom-hint {
+    display: none;
   }
 }
 
 @media (max-width: 520px) {
+  .indicators-hero {
+    padding: 32px 0 40px;
+  }
+
+  .indicators-hero__badge {
+    font-size: 0.7rem;
+    padding: 8px 16px;
+  }
+
+  .indicators-hero__subtitle {
+    font-size: 1rem;
+  }
+
+  .indicators-hero__stats {
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .indicators-hero__stat {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+  }
+
+  .hero-cta-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 20px;
+  }
+
+  .hero-cta-note {
+    text-align: center;
+  }
+
+  .hero-card {
+    min-height: 240px;
+  }
+
+  .hero-card__inner {
+    min-height: 240px;
+  }
+
+  .hero-card__front,
+  .hero-card__back {
+    min-height: 240px;
+    padding: 14px 16px;
+  }
+
+  .hero-card__count {
+    font-size: 2rem;
+  }
+
+  .hero-card__description {
+    font-size: 0.88rem;
+  }
+
+  .hero-card__footer {
+    font-size: 0.82rem;
+  }
 
   .indicator-toggles {
     gap: 8px;
+    width: 100%;
   }
 
   .indicator-toggle {
@@ -904,17 +1030,731 @@
 
   .indicators-panel__controls {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .time-controls__label {
+    font-size: 0.75rem;
+  }
+
+  .indicators-panel select {
+    width: 100%;
+    padding: 10px 12px;
   }
 
   .refresh-btn {
     width: 100%;
     text-align: center;
+    padding: 10px 14px;
+  }
+
+  .indicators-card {
+    padding: 16px;
+  }
+
+  .indicators-card__header {
+    margin-bottom: 16px;
+  }
+
+  .indicators-card__header h3 {
+    font-size: 1.1rem;
+  }
+
+  .indicators-card__header p {
+    font-size: 0.88rem;
   }
 
   .chart-wrapper {
-    height: 340px;
+    height: 320px;
   }
 
+  .zoom-controls {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    padding: 3px 5px;
+    gap: 4px;
+  }
+
+  .zoom-controls button {
+    padding: 2px 6px;
+    font-size: 0.75rem;
+  }
+
+  /* 禁用移动端的3D翻转效果，改为点击展开 */
+  .hero-card:hover .hero-card__inner {
+    transform: none;
+  }
+
+  .hero-card.is-active .hero-card__inner {
+    transform: rotateY(180deg);
+  }
+
+  .hero-card--sma14.is-active .hero-card__inner {
+    transform: rotateX(180deg);
+  }
+
+  .hero-card--ema20.is-active .hero-card__inner {
+    transform: rotateY(180deg) scale(1.05);
+  }
+
+  .hero-card--vwap.is-active .hero-card__inner {
+    transform: rotate3d(1, 1, 0, 180deg);
+  }
+}
+
+/* ========================================
+   OVERWATCH STYLE HERO SELECTION LAYOUT
+   ======================================== */
+
+.indicators-hero--overwatch {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  align-items: stretch;
+  padding: 0;
+  position: relative;
+}
+
+.overwatch-hero-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+}
+
+.overwatch-hero-header {
+  text-align: center;
+  padding: 30px 0 20px 0;
+  z-index: 50;
+}
+
+.overwatch-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 600;
+  color: #1a202c;
+  text-transform: none;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px 0;
+  text-shadow: none;
+}
+
+.overwatch-hero-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  color: #4a5568;
+  margin: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Main grid: left cards + right detail */
+.overwatch-hero-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.overwatch-hero-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.overwatch-hero-detail {
+  min-height: 600px;
+}
+
+/* Keep original background gradient */
+
+/* Responsive Overwatch layout */
+@media (max-width: 1024px) {
+  .overwatch-hero-grid {
+    grid-template-columns: 220px 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .overwatch-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .overwatch-hero-list {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 8px;
+  }
+
+  .overwatch-hero-list > * {
+    flex: 0 0 160px;
+  }
+
+  .overwatch-hero-detail {
+    min-height: 500px;
+  }
+
+  .overwatch-hero-title {
+    font-size: 1.8rem;
+  }
+
+  .overwatch-hero-subtitle {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .overwatch-hero-section {
+    gap: 24px;
+  }
+
+  .overwatch-hero-list {
+    gap: 8px;
+  }
+
+  .overwatch-hero-list > * {
+    flex: 0 0 140px;
+  }
+}
+
+/* ===== NEW OVERWATCH LAYOUT ===== */
+/* Grid: 15% blank | 30% image | 30% content | 15% blank */
+.overwatch-hero-grid-new {
+  display: grid;
+  grid-template-columns: 15% 30% 30% 15%;
+  gap: 0;
+  width: 100vw;
+  flex: 1;
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* Blank spaces */
+.hero-blank-left,
+.hero-blank-right {
+  background: transparent;
+}
+
+/* Hero image section (30%) */
+.overwatch-hero-image-section {
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-image-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 80vh;
+  animation: heroFadeIn 0.5s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-large-image {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 0;
+  box-shadow: none;
+  transform: scale(1.5);
+}
+
+@keyframes heroFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Right side: Details panel */
+.overwatch-hero-detail-new {
+  padding: 50px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: transparent;
+  overflow-y: auto;
+}
+
+/* Indicator name */
+.indicator-name-large {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3rem);
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+/* Thumbnail selector */
+.thumbnail-selector {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.thumbnail-btn {
+  width: 70px;
+  height: 70px;
+  border: 3px solid #e5e7eb;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.thumbnail-btn:hover {
+  transform: scale(1.1);
+  border-color: #D4AF37;
+}
+
+.thumbnail-btn.active {
+  border-color: var(--btn-accent, #D4AF37);
+  border-width: 4px;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+.thumbnail-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Type section */
+.type-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Description section */
+.description-section {
+  margin: 0;
+}
+
+.indicator-description {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4a5568;
+  margin: 0;
+  font-weight: 400;
+}
+
+.type-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #718096;
+}
+
+.type-value {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid #D4AF37;
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: #B87333;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  align-self: flex-start;
+}
+
+/* Features section */
+.features-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.features-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(249, 250, 251, 0.8);
+  border-left: 3px solid #D4AF37;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+  background: rgba(249, 250, 251, 1);
+  transform: translateX(4px);
+}
+
+.feature-text {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: #2d3748;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Action button */
+.action-button-new {
+  margin-top: auto;
+  padding: 14px 28px;
+  background: #D4AF37;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.action-button-new:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+  background: #E5C158;
+}
+
+.action-button-new:active {
+  transform: translateY(0);
+}
+
+/* Dark theme support */
+[data-theme="dark"] .overwatch-hero-grid-new {
+  background: transparent;
+}
+
+[data-theme="dark"] .overwatch-hero-detail-new {
+  background: transparent;
+}
+
+[data-theme="dark"] .indicator-name-large {
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .thumbnail-selector {
+  border-bottom-color: #374151;
+}
+
+[data-theme="dark"] .thumbnail-btn {
+  background: #111827;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .thumbnail-btn:hover {
+  border-color: #D4AF37;
+}
+
+[data-theme="dark"] .type-label {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .type-value {
+  background: rgba(212, 175, 55, 0.15);
+}
+
+[data-theme="dark"] .indicator-description {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .feature-item {
+  background: rgba(31, 41, 55, 0.5);
+}
+
+[data-theme="dark"] .feature-item:hover {
+  background: rgba(31, 41, 55, 0.8);
+}
+
+[data-theme="dark"] .feature-text {
+  color: #d1d5db;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
+  .overwatch-hero-grid-new {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .hero-blank-left,
+  .hero-blank-right {
+    display: none;
+  }
+
+  .overwatch-hero-image-section {
+    min-height: 50vh;
+    padding: 40px;
+    order: 1;
+  }
+
+  .hero-image-container {
+    max-width: 500px;
+  }
+
+  .overwatch-hero-detail-new {
+    padding: 40px 30px;
+    gap: 20px;
+    order: 2;
+  }
+
+  .indicator-name-large {
+    font-size: 2rem;
+  }
+
+  .thumbnail-btn {
+    width: 65px;
+    height: 65px;
+  }
+
+  .type-section {
+    gap: 10px;
+  }
+
+  .features-section {
+    gap: 10px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .indicators-top-controls {
+    top: 10px;
+    right: 10px;
+    gap: 8px;
+  }
+
+  .overwatch-hero-grid-new {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .hero-blank-left,
+  .hero-blank-right {
+    display: none;
+  }
+
+  .overwatch-hero-image-section {
+    min-height: 40vh;
+    padding: 20px;
+    order: 1;
+  }
+
+  .hero-image-container {
+    max-width: 400px;
+  }
+
+  .overwatch-hero-detail-new {
+    padding: 30px 20px;
+    gap: 16px;
+    order: 2;
+  }
+
+  .indicator-name-large {
+    font-size: 1.8rem;
+  }
+
+  .thumbnail-selector {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .thumbnail-btn {
+    width: 55px;
+    height: 55px;
+    border-width: 2px;
+  }
+
+  .thumbnail-btn.active {
+    border-width: 3px;
+  }
+
+  .type-label {
+    font-size: 0.75rem;
+  }
+
+  .type-value {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  .features-title {
+    font-size: 1.1rem;
+  }
+
+  .feature-item {
+    padding: 10px 12px;
+  }
+
+  .feature-text {
+    font-size: 0.85rem;
+  }
+
+  .action-button-new {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Responsive - Small Mobile */
+@media (max-width: 480px) {
+  .overwatch-hero-image-section {
+    min-height: 35vh;
+    padding: 15px;
+  }
+
+  .hero-image-container {
+    max-width: 300px;
+  }
+
+  .overwatch-hero-detail-new {
+    padding: 20px 15px;
+    gap: 14px;
+  }
+
+  .indicator-name-large {
+    font-size: 1.5rem;
+  }
+
+  .thumbnail-selector {
+    gap: 8px;
+    padding: 10px 0;
+  }
+
+  .thumbnail-btn {
+    width: 50px;
+    height: 50px;
+  }
+
+  .type-value {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .features-title {
+    font-size: 1rem;
+  }
+
+  .features-list {
+    gap: 8px;
+  }
+
+  .feature-item {
+    padding: 8px 10px;
+  }
+
+  .feature-text {
+    font-size: 0.8rem;
+  }
+
+  .action-button-new {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Landscape mode for mobile */
+@media (max-width: 900px) and (orientation: landscape) {
+  .overwatch-hero-grid-new {
+    grid-template-columns: 10% 35% 45% 10%;
+    height: 100vh;
+  }
+
+  .hero-blank-left,
+  .hero-blank-right {
+    display: block;
+  }
+
+  .overwatch-hero-header {
+    display: none;
+  }
+
+  .overwatch-hero-image-section {
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .hero-image-container {
+    max-width: 90%;
+  }
+
+  .overwatch-hero-detail-new {
+    padding: 30px 20px;
+    gap: 12px;
+    overflow-y: auto;
+  }
+
+  .indicator-name-large {
+    font-size: 1.6rem;
+  }
+
+  .thumbnail-btn {
+    width: 50px;
+    height: 50px;
+  }
+
+  .features-section {
+    gap: 8px;
+  }
+
+  .feature-item {
+    padding: 6px 10px;
+  }
+
+  .feature-text {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
 }

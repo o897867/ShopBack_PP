@@ -3,6 +3,7 @@ export const translations = {
   en: {
     // Navigation & General
     nav: {
+      indicators: 'Indicator Testing',
       dashboard: 'ShopBack Management',
       home: 'Workspace Home',
       brokerHub: 'Broker Hub',
@@ -1062,6 +1063,12 @@ export const translations = {
         topHitLabel: 'Top performer: {{label}} · {{count}} times',
         topHitNoData: 'No data yet'
       },
+      roles: {
+        trend: 'Trend Type',
+        volumePrice: 'Volume-Price Type',
+        momentum: 'Momentum Type',
+        default: 'Indicator'
+      },
       cards: {
         sma14Description: 'Bounce confirmation after MA touch, measuring trend-following strength.',
         ema20Description: 'More responsive MA confirmation, capturing effective signals in short-term trends.',
@@ -1069,7 +1076,25 @@ export const translations = {
         defaultDescription: 'Key indicator effectiveness statistics.',
         avgConfirmation: 'Avg confirmation:',
         avgConfirmationValue: '{{value}} candles',
-        avgConfirmationNoData: '—'
+        avgConfirmationNoData: '—',
+        validSignals: 'Valid Signals',
+        times: 'times',
+        candles: 'candles',
+        accuracy: 'Accuracy'
+      },
+      detail: {
+        typeLabel: 'INDICATOR TYPE',
+        keyFeatures: 'Key Features',
+        viewFullAnalysis: 'View Full K-Line Analysis',
+        sma1: 'Smooth trend identification',
+        sma2: 'Classic 14-period moving average',
+        sma3: 'Reliable support/resistance levels',
+        ema1: 'Faster response to price changes',
+        ema2: 'Reduces noise compared to SMA',
+        ema3: 'Ideal for short-term trend trading',
+        vwap1: 'Volume-weighted price analysis',
+        vwap2: 'Institutional trading reference',
+        vwap3: 'Mean reversion opportunities'
       },
       alert: {
         close: 'Close'
@@ -1098,6 +1123,7 @@ export const translations = {
   'zh-CN': {
     // Navigation & General
     nav: {
+      indicators: '指标',
       dashboard: 'ShopBack管理',
       home: '工作台首页',
       brokerHub: '经纪商控制台',
@@ -2157,6 +2183,12 @@ export const translations = {
         topHitLabel: '当前准确率最高：{{label}} · {{count}} 次',
         topHitNoData: '暂无数据'
       },
+      roles: {
+        trend: '趋势型',
+        volumePrice: '价量型',
+        momentum: '动量型',
+        default: '指标'
+      },
       cards: {
         sma14Description: '以过去14根K线为基础，构建最经典的指标',
         ema20Description: '过滤不必要的噪音，传统指标的继任者',
@@ -2164,7 +2196,25 @@ export const translations = {
         defaultDescription: '关键指标有效性统计。',
         avgConfirmation: '平均确认：',
         avgConfirmationValue: '{{value}} 根K线',
-        avgConfirmationNoData: '—'
+        avgConfirmationNoData: '—',
+        validSignals: '有效信号',
+        times: '次',
+        candles: '根K线',
+        accuracy: '准确率'
+      },
+      detail: {
+        typeLabel: '指标类型',
+        keyFeatures: '核心特性',
+        viewFullAnalysis: '查看完整K线分析',
+        sma1: '平滑趋势识别',
+        sma2: '经典14周期移动平均',
+        sma3: '可靠的支撑/阻力位',
+        ema1: '对价格变化反应更快',
+        ema2: '相比SMA减少噪音',
+        ema3: '适合短期趋势交易',
+        vwap1: '成交量加权价格分析',
+        vwap2: '机构交易参考指标',
+        vwap3: '均值回归机会'
       },
       alert: {
         close: '关闭'

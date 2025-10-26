@@ -1,0 +1,28 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blue background circle -->
+  <circle cx="100" cy="100" r="95" fill="#19398A"/>
+  <!-- White border -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="white" stroke-width="4"/>
+
+  <!-- Volume bars (different heights showing volume) -->
+  <rect x="50" y="120" width="14" height="30" fill="rgba(255,255,255,0.4)"/>
+  <rect x="68" y="105" width="14" height="45" fill="rgba(255,255,255,0.5)"/>
+  <rect x="86" y="115" width="14" height="35" fill="rgba(255,255,255,0.4)"/>
+  <rect x="104" y="90" width="14" height="60" fill="rgba(255,255,255,0.6)"/>
+  <rect x="122" y="110" width="14" height="40" fill="rgba(255,255,255,0.5)"/>
+  <rect x="140" y="118" width="14" height="32" fill="rgba(255,255,255,0.4)"/>
+
+  <!-- VWAP line (weighted average price line over volume) -->
+  <path d="M 50 75 L 68 72 L 86 80 L 104 70 L 122 78 L 154 75"
+        stroke="white" stroke-width="5" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- V symbol (for Volume) in bottom left -->
+  <text x="60" y="65" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">V</text>
+
+  <!-- P symbol (for Price) near the line -->
+  <text x="135" y="68" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">P</text>
+
+  <!-- Small multiplication sign showing V × P -->
+  <text x="97" y="60" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">×</text>
+</svg>

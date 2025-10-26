@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicator Overwatch Layout Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero-selection-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 700px;
+        }
+
+        /* Left side - Hero image */
+        .hero-image-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-image-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.08) 0%, transparent 50%);
+        }
+
+        .hero-image-container {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .hero-image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Right side - Details panel */
+        .details-panel {
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            background: white;
+        }
+
+        /* Indicator name */
+        .indicator-name {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        /* Thumbnail selector */
+        .thumbnail-selector {
+            display: flex;
+            gap: 16px;
+            padding: 20px 0;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .thumbnail-btn {
+            width: 70px;
+            height: 70px;
+            border: 3px solid #e5e7eb;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .thumbnail-btn:hover {
+            transform: scale(1.1);
+            border-color: #D4AF37;
+        }
+
+        .thumbnail-btn.active {
+            border-color: #D4AF37;
+            border-width: 4px;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .thumbnail-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Type section */
+        .type-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .type-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #6b7280;
+        }
+
+        .type-value {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+            border: 2px solid #D4AF37;
+            border-radius: 24px;
+            font-weight: 700;
+            color: #B87333;
+            font-size: 1rem;
+            letter-spacing: 0.05em;
+            align-self: flex-start;
+        }
+
+        /* Description section */
+        .description-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .description-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #D4AF37;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .description-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #4b5563;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(249, 250, 251, 0.8);
+            border-left: 3px solid #D4AF37;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(249, 250, 251, 1);
+            transform: translateX(4px);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        .feature-text {
+            font-size: 0.95rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        /* Action button */
+        .action-button {
+            margin-top: auto;
+            padding: 18px 32px;
+            background: linear-gradient(135deg, #D4AF37 0%, #B87333 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+            background: linear-gradient(135deg, #E5C158 0%, #C98544 100%);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-selection-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-image-section {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-selection-layout">
+            <!-- Left side: Hero Image -->
+            <div class="hero-image-section">
+                <div class="hero-image-container" id="heroImage">
+                    <img src="../../../public/images/indicators/sma.png" alt="SMA Indicator" id="heroImg">
+                </div>
+            </div>
+
+            <!-- Right side: Details Panel -->
+            <div class="details-panel">
+                <!-- Indicator Name -->
+                <h1 class="indicator-name" id="indicatorName">SMA14</h1>
+
+                <!-- Thumbnail Selector -->
+                <div class="thumbnail-selector">
+                    <button class="thumbnail-btn active" data-indicator="sma" onclick="selectIndicator('sma')">
+                        <img src="sma.svg" alt="SMA">
+                    </button>
+                    <button class="thumbnail-btn" data-indicator="ema" onclick="selectIndicator('ema')">
+                        <img src="ema.svg" alt="EMA">
+                    </button>
+                    <button class="thumbnail-btn" data-indicator="vwap" onclick="selectIndicator('vwap')">
+                        <img src="vwap.svg" alt="VWAP">
+                    </button>
+                </div>
+
+                <!-- Type Section -->
+                <div class="type-section">
+                    <div class="type-label">指标类型 / INDICATOR TYPE</div>
+                    <span class="type-value" id="indicatorType">趋势型 (Trend Type)</span>
+                </div>
+
+                <!-- Description Section -->
+                <div class="description-section">
+                    <h3 class="description-title">核心特性 / Key Features</h3>
+                    <div class="feature-list" id="featureList">
+                        <div class="feature-item">
+                            <span class="feature-icon">🎯</span>
+                            <span class="feature-text">平滑趋势识别 - Smooth trend identification</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">📈</span>
+                            <span class="feature-text">经典14周期移动平均 - Classic 14-period moving average</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🛡️</span>
+                            <span class="feature-text">可靠的支撑/阻力位 - Reliable support/resistance levels</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button class="action-button">
+                    查看完整K线分析 / View Full K-Line Analysis →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const indicatorData = {
+            sma: {
+                name: 'SMA14',
+                type: '趋势型 (Trend Type)',
+                image: '../../../public/images/indicators/sma.png',
+                features: [
+                    { icon: '🎯', text: '平滑趋势识别 - Smooth trend identification' },
+                    { icon: '📈', text: '经典14周期移动平均 - Classic 14-period moving average' },
+                    { icon: '🛡️', text: '可靠的支撑/阻力位 - Reliable support/resistance levels' }
+                ]
+            },
+            ema: {
+                name: 'EMA20',
+                type: '趋势型 (Trend Type)',
+                image: '../../../public/images/indicators/ema.png',
+                features: [
+                    { icon: '⚡', text: '快速响应价格变化 - Faster response to price changes' },
+                    { icon: '🎨', text: '相比SMA降低噪音 - Reduces noise compared to SMA' },
+                    { icon: '🔥', text: '适合短期趋势交易 - Ideal for short-term trend trading' }
+                ]
+            },
+            vwap: {
+                name: 'VWAP',
+                type: '价量型 (Volume-Price Type)',
+                image: '../../../public/images/indicators/vwap.png',
+                features: [
+                    { icon: '⚖️', text: '成交量加权价格分析 - Volume-weighted price analysis' },
+                    { icon: '💎', text: '机构交易参考 - Institutional trading reference' },
+                    { icon: '🎯', text: '均值回归机会 - Mean reversion opportunities' }
+                ]
+            }
+        };
+
+        function selectIndicator(indicator) {
+            const data = indicatorData[indicator];
+
+            // Update active state
+            document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-indicator="${indicator}"]`).classList.add('active');
+
+            // Update content with animation
+            const heroContainer = document.getElementById('heroImage');
+            heroContainer.style.animation = 'none';
+            setTimeout(() => {
+                heroContainer.style.animation = 'fadeIn 0.5s ease-out';
+            }, 10);
+
+            // Update hero image
+            document.getElementById('heroImg').src = data.image;
+            document.getElementById('heroImg').alt = `${data.name} Indicator`;
+
+            // Update name
+            document.getElementById('indicatorName').textContent = data.name;
+
+            // Update type
+            document.getElementById('indicatorType').textContent = data.type;
+
+            // Update features
+            const featureList = document.getElementById('featureList');
+            featureList.innerHTML = data.features.map(feature => `
+                <div class="feature-item">
+                    <span class="feature-icon">${feature.icon}</span>
+                    <span class="feature-text">${feature.text}</span>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
