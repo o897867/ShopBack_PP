@@ -300,6 +300,8 @@
   .indicator-detail-panel {
     padding: 20px;
     gap: 16px;
+    height: auto;
+    overflow: visible;
   }
 
   .detail-header-top {

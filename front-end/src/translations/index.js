@@ -10,14 +10,23 @@ export const translations = {
       analytics: 'Broker Analytics',
       trading: 'TradingView',
       ethPrediction: 'ETH Price Prediction',
+      news: 'Financial News',
+      health: 'Health Trading',
+      healthToken: 'Health Token',
+      healthMatch: 'K-Line Matcher',
+      fortune: 'Fortune Timing',
+      leverage: 'Leverage Calculator',
+      guide: 'User Guide',
       donations: 'Donations',
       groups: {
         explore: 'Explore',
+        health: 'Health & Fitness',
         community: 'Community',
         account: 'Account'
       },
       badges: {
-        recommended: 'Recommended'
+        recommended: 'Recommended',
+        new: 'NEW'
       },
       logout: 'Logout'
     },
@@ -32,7 +41,195 @@ export const translations = {
       warning: 'Warning',
       info: 'Information',
       clear: 'Clear',
-      selected: 'Selected {{count}} brokers'
+      selected: 'Selected {{count}} brokers',
+      back: 'Back',
+      loading: 'Loading'
+    },
+    // News Module Translations
+    news: {
+      title: 'Financial News',
+      subtitle: 'Where the wise listen to the whispers of the market',
+      eyebrow: 'Real-time Financial News',
+      searchPlaceholder: 'Search news...',
+      filterSymbol: 'Symbol',
+      filterSentiment: 'Sentiment',
+      allSymbols: 'All Symbols',
+      allCategories: 'All Categories',
+      allImpacts: 'All Impact Levels',
+      allSentiments: 'All Sentiments',
+      category: {
+        tech_stocks: 'Tech Stocks',
+        market_indices: 'Market Indices',
+        precious_metals: 'Precious Metals',
+        bonds: 'Bonds',
+        forex: 'Forex',
+        central_banks: 'Central Banks',
+        monetary_policy: 'Monetary Policy',
+        crypto: 'Crypto'
+      },
+      sentiment: {
+        positive: 'Positive',
+        negative: 'Negative',
+        neutral: 'Neutral'
+      },
+      impact: {
+        high: 'High Impact',
+        medium: 'Medium Impact',
+        low: 'Low Impact'
+      },
+      refresh: 'Refresh',
+      autoRefreshOn: 'Auto Refresh ON',
+      autoRefreshOff: 'Auto Refresh OFF',
+      lastUpdate: 'Last updated',
+      loading: 'Loading news...',
+      noNews: 'No news available',
+      totalNews: 'Total News',
+      openOriginal: 'Open original article',
+      fetchError: 'Failed to fetch news',
+      newUpdate: 'New news update received',
+      summarized: 'Summarized',
+      titleOnly: 'Title Only',
+      aiNote: 'Important news summarized by the most advanced AI model - ChatGPT',
+      importantNews: 'Important News (With Summary)',
+      otherNews: 'Other News (Title Only)',
+      totalCount: 'Total {{count}}',
+      noImportantNews: 'No important news yet',
+      noOtherNews: 'No other news yet',
+      timeAgo: {
+        seconds: '{{count}} seconds ago',
+        minutes: '{{count}} minutes ago',
+        hours: '{{count}} hours ago'
+      }
+    },
+    // Health Module Translations
+    health: {
+      title: 'Health Trading Platform',
+      subtitle: 'Trade Your Weight Like a Pro Trader',
+      marketStatus: 'Body Market Status',
+      currentPosition: 'Current Position',
+      targetPosition: 'Target Position',
+      trend: 'Market Trend',
+      daysToTarget: 'Days to Target',
+      progressToTarget: 'Progress to Target',
+      dailyLog: 'Daily Trading Log',
+      enterWeight: 'Enter today\'s weight',
+      logWeight: 'Log Position',
+      weightLogged: 'Position Logged',
+      setTargets: 'Set Trading Targets',
+      targetWeight: 'Target Weight (kg)',
+      targetDate: 'Target Date',
+      updateTargets: 'Update Targets',
+      analysis: 'Market Analysis',
+      requiredChange: 'Required Change',
+      dailyTarget: 'Daily Target',
+      riskTolerance: 'Risk Tolerance',
+      quickActions: 'Quick Actions',
+      matchKline: 'Match K-Line',
+      matchDesc: 'Find your market twin',
+      logTraining: 'Log Training',
+      burnCalories: 'Burn calories like fees',
+      viewStats: 'View Stats',
+      analytics: 'Advanced analytics',
+      weightHistory: 'Position History',
+      timeframe: 'Timeframe',
+      days: 'days',
+      symbol: 'Market Symbol',
+      autoBest: 'Auto (Best Match)',
+      matching: 'Matching...',
+      findMatch: 'Find Match',
+      matchFound: 'Match Found!',
+      matchedWith: 'Matched With',
+      similarityScore: 'Similarity Score',
+      period: 'Match Period',
+      performance: 'Performance',
+      yourPerformance: 'Your Performance',
+      weightLoss: 'weight change',
+      generating: 'Generating...',
+      shareResult: 'Share Result',
+      tryAgain: 'Try Another Match',
+      shareCopied: 'Share link copied!',
+      market: 'Market',
+      weightChange: 'Weight Change %',
+      marketChange: 'Market Change %',
+      similarity: 'similarity',
+      matchTitle: 'Weight vs Market',
+      calories: {
+        budget: 'Calorie Trading Budget',
+        dailyBudget: 'Daily Budget',
+        burned: 'Calories Burned',
+        remaining: 'Remaining',
+        deficit: 'Calorie Deficit',
+        surplus: 'Calorie Surplus'
+      },
+      weight: {
+        bullish: 'Bullish (Loss)',
+        bearish: 'Bearish (Gain)',
+        consolidation: 'Consolidating'
+      },
+      risk: {
+        conservative: 'Conservative',
+        moderate: 'Moderate',
+        aggressive: 'Aggressive'
+      },
+      riskLevel: 'Risk Level',
+      tabs: {
+        dashboard: 'Trading Dashboard',
+        targets: 'Position Targets',
+        history: 'Trade History'
+      },
+      klineMatch: {
+        title: 'Weight K-Line Matcher',
+        subtitle: 'Discover which market matches your journey'
+      },
+      tips: {
+        title: 'Pro Trading Tips',
+        tip1: 'More data = Better matching',
+        tip2: 'Consistent logging improves accuracy',
+        tip3: 'Try different timeframes',
+        tip4: 'Share your matches!'
+      },
+      messages: {
+        perfect: 'Incredible! Your journey mirrors {{symbol}}\'s legendary move!',
+        excellent: 'Amazing! Tracking {{symbol}} like a pro!',
+        good: 'Good correlation with {{symbol}}!',
+        interesting: 'Interesting similarity with {{symbol}}!'
+      },
+      token: {
+        title: 'Health Token Access',
+        subtitle: 'Your personal 8-digit key to health tracking',
+        enterToken: 'Enter Token',
+        newToken: 'Generate New Token',
+        generateTitle: 'Generate Your Personal Health Token',
+        generateDesc: 'Create a unique 8-digit token based on your physical metrics',
+        validateTitle: 'Enter Your Health Token',
+        validateDesc: 'Verify your identity with your personal token and metrics',
+        height: 'Height',
+        weight: 'Weight',
+        age: 'Age',
+        generate: 'Generate Token',
+        generating: 'Generating...',
+        validate: 'Validate Token',
+        validating: 'Validating...',
+        success: 'Token Generated Successfully!',
+        copy: 'Copy',
+        copied: 'Copied to clipboard!',
+        recoveryCode: 'Recovery Code',
+        saveNote: 'Save this token and recovery code securely!',
+        yourToken: 'Your 8-Digit Token',
+        verifyMetrics: 'Verify Your Metrics',
+        accessGranted: 'Access Granted!',
+        redirecting: 'Redirecting to your dashboard...',
+        fillAllFields: 'Please fill in all fields',
+        generateError: 'Error generating token. Please try again.',
+        validateError: 'Invalid token or metrics. Please check your input.',
+        howItWorks: 'How It Works',
+        info1: 'Your token is generated from your height, weight, and age',
+        info2: 'Each token is unique to your physical metrics',
+        info3: 'Keep your token private - it\'s your personal key',
+        info4: 'Use the recovery code if you forget your token',
+        example: 'Example',
+        exampleText: 'For someone with height {{height}}cm, weight {{weight}}kg, and age {{age}}, the token would be: {{token}}'
+      }
     },
     home: {
       hero: {
@@ -108,6 +305,71 @@ export const translations = {
         community: {
           title: 'Listen to the community',
           description: 'Jump into the forum to validate sentiment.'
+        }
+      },
+      fortune: {
+        title: 'Fortune timing',
+        subtitle: 'A feng-shui flavored read on whether today vibes with placing an order.',
+        refresh: 'Resets at local midnight · for vibes only, not financial advice.',
+        tier: {
+          lucky: 'Auspicious · qi is flowing',
+          balanced: 'Balanced · wait for the right candle',
+          cautious: 'Cautious · protect your chips'
+        },
+        fields: {
+          verdict: 'Today\'s read',
+          qi: 'Qi index',
+          amulet: 'Mood talisman',
+          ritual: 'Auspicious moves',
+          avoid: 'Avoid for now',
+          direction: 'Wealth direction',
+          compass: 'Compass'
+        },
+        actions: {
+          trade: 'Open chart',
+          compare: 'Compare brokers first'
+        }
+      },
+      leverage: {
+        badge: 'Risk Calculator',
+        title: 'US Stock Leverage Calculator',
+        subtitle: 'Calculate margin requirements, liquidation risk, and position management for leveraged trading',
+        inputs: {
+          title: 'Input Parameters',
+          totalFunds: 'Total Capital ($)',
+          marketPrice: 'Market Price ($)',
+          lots: 'Position Size (shares)',
+          priceChange: 'Price Movement ($)',
+          leverage: 'Leverage Ratio'
+        },
+        results: {
+          title: 'Calculation Results',
+          margin: 'Required Margin',
+          originalEquity: 'Initial Equity',
+          actualEquity: 'Current Equity',
+          marginRatio: 'Margin Ratio',
+          liquidationLine: 'Liquidation Threshold',
+          priceChangeToLiquidation: 'Distance to Liquidation'
+        },
+        warnings: {
+          critical: 'CRITICAL RISK: Your position is extremely close to liquidation!',
+          high: 'HIGH RISK: Margin ratio is dangerously high. Consider reducing position size.',
+          medium: 'MODERATE RISK: Monitor your position closely and manage risk carefully.'
+        },
+        formulas: {
+          title: 'Calculation Formulas',
+          margin: 'Required Margin',
+          marginFormula: '(Market Price × Shares) ÷ Leverage',
+          originalEquity: 'Initial Equity',
+          originalEquityFormula: 'Total Capital - Required Margin',
+          actualEquity: 'Current Equity',
+          actualEquityFormula: 'Initial Equity ± (Price Movement × Shares)',
+          marginRatio: 'Margin Ratio',
+          marginRatioFormula: 'Required Margin ÷ Current Equity × 100%',
+          liquidationLine: 'Liquidation Threshold',
+          liquidationLineFormula: '0.4 × Required Margin',
+          priceChangeToLiquidation: 'Distance to Liquidation',
+          priceChangeToLiquidationFormula: '(Current Equity - Liquidation Threshold) ÷ Shares'
         }
       },
       timeline: {
@@ -566,6 +828,85 @@ export const translations = {
       no: 'No',
       up: 'up',
       down: 'down'
+    },
+
+    // Leverage Calculator Page
+    leverageCalculator: {
+      badge: 'Risk Calculator',
+      title: 'Gold Futures Leverage Calculator',
+      subtitle: '欲假其力，先察深渊之深。',
+      loadingPrice: 'Loading real-time price...',
+      currentGoldPrice: 'Current Gold Price',
+      scenarios: {
+        title: 'Select Calculation Scenario',
+        scenario1: {
+          title: 'Calculate Maximum Position',
+          description: 'Find out the maximum position size you can open',
+          input1: 'Total Capital',
+          input2: 'Leverage Ratio',
+          input3: 'Price Movement',
+          output: '→ Maximum Lots'
+        },
+        scenario2: {
+          title: 'Calculate Required Capital',
+          description: 'Find out how much capital you need',
+          input1: 'Price Movement',
+          input2: 'Leverage Ratio',
+          input3: 'Position Size',
+          output: '→ Required Capital'
+        },
+        scenario3: {
+          title: 'Calculate Liquidation Price',
+          description: 'Find out at what price you will be liquidated',
+          input1: 'Total Capital',
+          input2: 'Market Price',
+          input3: 'Position Size',
+          input4: 'Leverage Ratio',
+          output: '→ Liquidation Price'
+        }
+      },
+      inputs: {
+        title: 'Input Parameters',
+        totalFunds: 'Total Capital ($)',
+        marketPrice: 'Gold Price ($/oz)',
+        lots: 'Position Size (lots)',
+        priceChange: 'Price Movement ($/oz)',
+        leverage: 'Leverage Ratio',
+        contractSize: 'Contract Size',
+        useLatest: 'Use Latest'
+      },
+      results: {
+        title: 'Calculation Results',
+        margin: 'Required Margin',
+        originalEquity: 'Initial Equity',
+        actualEquity: 'Liquidation Equity',
+        marginRatio: 'Margin Ratio',
+        liquidationLine: 'Liquidation Threshold',
+        priceChangeToLiquidation: 'Distance to Liquidation',
+        maxLots: 'Maximum Position Size',
+        requiredFunds: 'Required Capital',
+        liquidationPrice: 'Liquidation Price'
+      },
+      warnings: {
+        critical: 'CRITICAL RISK: Your position is extremely close to liquidation!',
+        high: 'HIGH RISK: Margin ratio is dangerously high. Consider reducing position size.',
+        medium: 'MODERATE RISK: Monitor your position closely and manage risk carefully.'
+      },
+      formulas: {
+        title: 'Calculation Formulas',
+        margin: 'Required Margin',
+        marginFormula: '(Market Price × Shares) ÷ Leverage',
+        originalEquity: 'Initial Equity',
+        originalEquityFormula: 'Total Capital - Required Margin',
+        actualEquity: 'Current Equity',
+        actualEquityFormula: 'Initial Equity ± (Price Movement × Shares)',
+        marginRatio: 'Margin Ratio',
+        marginRatioFormula: 'Required Margin ÷ Current Equity × 100%',
+        liquidationLine: 'Liquidation Threshold',
+        liquidationLineFormula: '0.4 × Required Margin',
+        priceChangeToLiquidation: 'Distance to Liquidation',
+        priceChangeToLiquidationFormula: '(Current Equity - Liquidation Threshold) ÷ Shares'
+      }
     },
     
     // Trading Symbols
@@ -1051,6 +1392,38 @@ export const translations = {
       noData: 'No halt records available'
     },
 
+    // Order Book
+    orderbook: {
+      hero: {
+        badge: 'Order Book Magnifier',
+        subtitle: 'See the unseen details, understand the grand from the minute'
+      },
+      cards: {
+        bidLabel: 'Bid',
+        askLabel: 'Ask',
+        midLabel: 'Mid',
+        quantityLabel: 'Quantity',
+        spreadLabel: 'Spread'
+      },
+      chart: {
+        priceDistribution: 'Price Distribution (Based on Recent Quotes)'
+      },
+      history: {
+        time: 'Time',
+        bidVolume: 'Bid Vol',
+        bidPrice: 'Bid',
+        askPrice: 'Ask',
+        askVolume: 'Ask Vol',
+        spread: 'Spread',
+        fetchError: 'Failed to fetch history: {{error}}'
+      },
+      footer: {
+        loading: 'Loading…',
+        error: 'Error: {{error}}',
+        lastUpdate: 'Last update: {{time}}'
+      }
+    },
+
     // Indicator Testing
     indicators: {
       hero: {
@@ -1074,6 +1447,8 @@ export const translations = {
         ema20Description: 'More responsive MA confirmation, capturing effective signals in short-term trends.',
         vwapDescription: 'Mean reversion from VWAP upper/lower bands, used to judge capital position and rebound strength.',
         defaultDescription: 'Key indicator effectiveness statistics.',
+        macdDescription: 'Moving Average Convergence Divergence, trend and momentum confirmation.',
+        rsiDescription: 'Relative Strength Index, measuring market overbought/oversold conditions.',
         avgConfirmation: 'Avg confirmation:',
         avgConfirmationValue: '{{value}} candles',
         avgConfirmationNoData: '—',
@@ -1086,6 +1461,10 @@ export const translations = {
         typeLabel: 'INDICATOR TYPE',
         keyFeatures: 'Key Features',
         viewFullAnalysis: 'View Full K-Line Analysis',
+        statistics: 'Statistics',
+        validSignals: 'Valid Signals',
+        avgConfirmCandles: 'Avg Confirm Candles',
+        avgPerDay: 'Avg Per Day',
         sma1: 'Smooth trend identification',
         sma2: 'Classic 14-period moving average',
         sma3: 'Reliable support/resistance levels',
@@ -1101,9 +1480,11 @@ export const translations = {
       },
       panel: {
         selectIndicators: 'Select Indicators',
+        intervalSelector: 'Interval',
         timeRange: 'Time Range',
         timeRangeDay: '{{count}} Day',
         timeRangeDays: '{{count}} Days',
+        timeRangeCandles: '{{count}} candles',
         refresh: 'Refresh',
         refreshLoading: 'Loading…'
       },
@@ -1114,28 +1495,146 @@ export const translations = {
         panRight: 'Pan right',
         reset: 'Reset',
         zoomHint: 'Scroll to zoom · Shift+Scroll to zoom Y-axis',
-        noData: 'Unable to fetch candle data'
+        noData: 'Unable to fetch candle data',
+        candles: 'Candles',
+        high: 'High',
+        low: 'Low',
+        open: 'Open',
+        close: 'Close',
+        volume: 'Volume',
+        validSignals: 'Valid Signals'
       },
       loading: 'Loading market data…'
+    },
+    guide: {
+      title: 'User Guide',
+      selectGuideType: 'Please select the guide type you want to view',
+      guideType: {
+        accountType: 'Account Types',
+        accountTypeDesc: 'Learn about Standard vs Raw Spread accounts',
+        registration: 'Registration',
+        registrationDesc: 'Step-by-step account registration guide',
+        rebate: 'Broker Rebate',
+        rebateDesc: 'MT5 platform setup guide for rebate',
+        invitation: 'Invite Code',
+        invitationDesc: 'How to use invite code / invite link',
+        unlockMore: 'Unlock more guides'
+      },
+      password: {
+        title: 'Enter Password',
+        placeholder: 'Password',
+        error: 'Incorrect password',
+        cancel: 'Cancel',
+        confirm: 'Confirm'
+      },
+      accountComparison: {
+        title: 'Account Type Comparison',
+        subtitle: 'Choosing the right account type for your trading style',
+        example: 'Example: Gold (XAUUSD) Trading',
+        standard: {
+          title: 'Standard Account',
+          spread: 'Spread',
+          spreadValue: '32 (0.32 pips)',
+          commission: 'Commission',
+          commissionValue: '$0 per lot',
+          rebate: 'Rebate',
+          rebateValue: '$20 per lot',
+          suitFor: 'Best For',
+          suitForValue: 'Position traders and long-term holders',
+          tradingCost: 'Trading Cost per Lot',
+          tradingCostValue: '$32',
+          netCost: 'Net Cost (After Rebate)',
+          netCostValue: '$12'
+        },
+        rawSpread: {
+          title: 'Raw Spread / ECN Account',
+          spread: 'Spread',
+          spreadValue: '9 (0.09 pips)',
+          commission: 'Commission',
+          commissionValue: '$5 per lot',
+          rebate: 'Rebate',
+          rebateValue: '$2 per lot',
+          suitFor: 'Best For',
+          suitForValue: 'Scalpers and high-frequency traders',
+          tradingCost: 'Trading Cost per Lot',
+          tradingCostValue: '$14',
+          netCost: 'Net Cost (After Rebate)',
+          netCostValue: '$12'
+        },
+        examples: {
+          title: 'Trading Examples',
+          scenario1: {
+            title: 'Scenario 1: Day Trading',
+            desc: '1 lot Gold, held for 4 hours',
+            standard: 'Trading Cost: $32 | Rebate: $20 | Net Cost: $12',
+            rawSpread: 'Trading Cost: $14 | Rebate: $2 | Net Cost: $12',
+            conclusion: 'Similar net cost for short-term trades'
+          },
+          scenario2: {
+            title: 'Scenario 2: High-Frequency Scalping',
+            desc: '10 trades per day, 1 lot each',
+            standard: 'Trading Cost: $320 | Rebate: $200 | Net Cost: $120',
+            rawSpread: 'Trading Cost: $140 | Rebate: $20 | Net Cost: $120',
+            conclusion: 'Raw Spread is more efficient for high-frequency trading'
+          },
+          scenario3: {
+            title: 'Scenario 3: Swing Trading',
+            desc: '1 lot Gold, held for 3 days',
+            standard: 'Trading Cost: $32 | Rebate: $20 | Net Cost: $12',
+            rawSpread: 'Trading Cost: $14 | Rebate: $2 | Net Cost: $12',
+            conclusion: 'Standard account provides better rebate for fewer trades'
+          }
+        },
+        recommendation: {
+          title: '💡 Recommendation',
+          highFrequency: 'Trade 10+ times per day → Choose Raw Spread Account',
+          longTerm: 'Hold positions longer, trade less frequently → Choose Standard Account',
+          key: 'Key: Raw Spread has lower spreads (quick trades). Standard has higher rebates (long holds).'
+        },
+        backToType: 'Back to Guide Type'
+      },
+      selectPlatform: 'Please select your device platform to view the corresponding guide',
+      platform: {
+        desktop: 'Desktop',
+        desktopDesc: 'View guide for computer users',
+        mobile: 'Mobile',
+        mobileDesc: 'View guide for mobile users'
+      },
+      step: 'Step',
+      completed: {
+        title: 'Guide Completed!',
+        message: 'Congratulations! You have completed all guide steps.',
+        backToHome: 'Back to Home',
+        restart: 'View Guide Again',
+        button: 'I Have Completed'
+      },
+      backToPlatform: 'Back to Platform Selection',
+      finishGuide: 'Finish Guide',
+      skipGuide: 'Skip Guide',
+      keyboardHint: 'Press Enter to continue to next step'
     }
   },
-  
+
   'zh-CN': {
     // Navigation & General
     nav: {
-      indicators: '指标',
+      indicators: '指标实验室',
       dashboard: 'ShopBack管理',
       home: '工作台首页',
       brokerHub: '经纪商控制台',
-      analytics: '券商象限分析',
-      trading: '交易图表',
-      ethPrediction: 'ETH价格预测',
-      donations: '项目捐赠',
-      groups: {
-        explore: '探索',
-        community: '社区',
-        account: '账户'
-      },
+        analytics: '券商象限分析',
+        trading: '交易图表',
+        ethPrediction: 'ETH价格预测',
+        news: '金融新闻',
+        donations: '项目捐赠',
+        fortune: '玄学择时',
+        leverage: '杠杆计算器',
+        guide: '使用指南',
+        groups: {
+          explore: '探索',
+          community: '社区',
+          account: '账户'
+        },
       badges: {
         recommended: '推荐起点'
       },
@@ -1153,6 +1652,62 @@ export const translations = {
       info: '信息',
       clear: '清空',
       selected: '已选择 {{count}} 个经纪商'
+    },
+    // News Module Translations
+    news: {
+      title: '金融新闻',
+      subtitle: '万象皆声，唯静者能听',
+      eyebrow: '实时金融快讯',
+      searchPlaceholder: '搜索新闻...',
+      filterSymbol: '标的物',
+      filterSentiment: '情感分析',
+      allSymbols: '全部标的',
+      allCategories: '全部分类',
+      allImpacts: '全部影响程度',
+      allSentiments: '全部情感',
+      category: {
+        tech_stocks: '科技股票',
+        market_indices: '市场指数',
+        precious_metals: '贵金属',
+        bonds: '债券',
+        forex: '外汇',
+        central_banks: '央行',
+        monetary_policy: '货币政策',
+        crypto: '加密货币'
+      },
+      sentiment: {
+        positive: '积极',
+        negative: '消极',
+        neutral: '中性'
+      },
+      impact: {
+        high: '高影响',
+        medium: '中等影响',
+        low: '低影响'
+      },
+      refresh: '刷新',
+      autoRefreshOn: '自动刷新 开',
+      autoRefreshOff: '自动刷新 关',
+      lastUpdate: '最后更新',
+      loading: '加载新闻中...',
+      noNews: '暂无新闻',
+      totalNews: '新闻总数',
+      openOriginal: '查看原文',
+      fetchError: '获取新闻失败',
+      newUpdate: '收到新的新闻更新',
+      summarized: '已摘要',
+      titleOnly: '仅标题',
+      aiNote: '重要新闻均由目前最强AI模型 ChatGPT 进行摘要',
+      importantNews: '重要新闻（有摘要）',
+      otherNews: '其他新闻（仅标题）',
+      totalCount: '共 {{count}} 条',
+      noImportantNews: '暂无重要新闻',
+      noOtherNews: '暂无其他新闻',
+      timeAgo: {
+        seconds: '{{count}}秒前',
+        minutes: '{{count}}分钟前',
+        hours: '{{count}}小时前'
+      }
     },
     home: {
       hero: {
@@ -1228,6 +1783,71 @@ export const translations = {
         community: {
           title: '倾听社区声音',
           description: '进入论坛验证真实口碑。'
+        }
+      },
+      fortune: {
+        title: '玄学择时',
+        subtitle: '用东方玄学口吻给今天的下单气运打个卦，图个好心情。',
+        refresh: '每日子时自动重置 · 仅供情绪价值，非投资建议。',
+        tier: {
+          lucky: '宜 · 气运在线',
+          balanced: '平 · 静守机会',
+          cautious: '忌 · 收敛锋芒'
+        },
+        fields: {
+          verdict: '今日解卦',
+          qi: '气场指数',
+          amulet: '情绪护符',
+          ritual: '宜',
+          avoid: '忌',
+          direction: '招财方位',
+          compass: '罗盘'
+        },
+        actions: {
+          trade: '去看盘/下单',
+          compare: '先去对比经纪商'
+        }
+      },
+      leverage: {
+        badge: '风险计算器',
+        title: '美股杠杆计算器',
+        subtitle: '计算保证金需求、爆仓风险和仓位管理，精确控制杠杆交易风险',
+        inputs: {
+          title: '输入参数',
+          totalFunds: '总资金 ($)',
+          marketPrice: '市价 ($)',
+          lots: '手数（股数）',
+          priceChange: '价格波动 ($)',
+          leverage: '杠杆倍数'
+        },
+        results: {
+          title: '计算结果',
+          margin: '保证金',
+          originalEquity: '原始净值',
+          actualEquity: '实际净值',
+          marginRatio: '保证金比例',
+          liquidationLine: '爆仓线',
+          priceChangeToLiquidation: '距离爆仓的价格波动'
+        },
+        warnings: {
+          critical: '危险警告：您的仓位极其接近爆仓线！',
+          high: '高风险警告：保证金比例过高，建议减少仓位。',
+          medium: '中等风险：请密切监控仓位，谨慎管理风险。'
+        },
+        formulas: {
+          title: '计算公式',
+          margin: '保证金',
+          marginFormula: '(市价 × 手数) ÷ 杠杆',
+          originalEquity: '原始净值',
+          originalEquityFormula: '总资金 - 保证金',
+          actualEquity: '实际净值',
+          actualEquityFormula: '净值 ± (价格波动 × 手数)',
+          marginRatio: '保证金比例',
+          marginRatioFormula: '保证金 ÷ 实际净值 × 100%',
+          liquidationLine: '爆仓线',
+          liquidationLineFormula: '0.4 × 保证金',
+          priceChangeToLiquidation: '距离爆仓的价格波动',
+          priceChangeToLiquidationFormula: '(实际净值 - 爆仓线) ÷ 手数'
         }
       },
       timeline: {
@@ -1686,6 +2306,85 @@ export const translations = {
       no: '否',
       up: '上涨',
       down: '下跌'
+    },
+
+    // Leverage Calculator Page
+    leverageCalculator: {
+      badge: '风险计算器',
+      title: '黄金期货杠杆计算器',
+      subtitle: '欲假其力，先察深渊之深。',
+      loadingPrice: '正在加载实时价格...',
+      currentGoldPrice: '当前金价',
+      scenarios: {
+        title: '选择计算场景',
+        scenario1: {
+          title: '计算最大开仓手数',
+          description: '计算您最多能开多少手',
+          input1: '本金',
+          input2: '杠杆倍数',
+          input3: '价格波动',
+          output: '→ 最大手数'
+        },
+        scenario2: {
+          title: '计算所需本金',
+          description: '计算需要多少资金',
+          input1: '价格波动',
+          input2: '杠杆倍数',
+          input3: '开仓手数',
+          output: '→ 所需本金'
+        },
+        scenario3: {
+          title: '计算爆仓价格',
+          description: '计算在什么价格会爆仓',
+          input1: '总资金',
+          input2: '市价',
+          input3: '开仓手数',
+          input4: '杠杆倍数',
+          output: '→ 爆仓价格'
+        }
+      },
+      inputs: {
+        title: '输入参数',
+        totalFunds: '总资金 ($)',
+        marketPrice: '金价 ($/盎司)',
+        lots: '手数',
+        priceChange: '价格波动 ($/盎司)',
+        leverage: '杠杆倍数',
+        contractSize: '合约大小',
+        useLatest: '使用最新价'
+      },
+      results: {
+        title: '计算结果',
+        margin: '保证金',
+        originalEquity: '原始净值',
+        actualEquity: '爆仓净值',
+        marginRatio: '保证金比例',
+        liquidationLine: '爆仓线',
+        priceChangeToLiquidation: '距离爆仓的价格波动',
+        maxLots: '最大开仓手数',
+        requiredFunds: '所需本金',
+        liquidationPrice: '爆仓价格'
+      },
+      warnings: {
+        critical: '危险警告：您的仓位极其接近爆仓线！',
+        high: '高风险警告：保证金比例过高，建议减少仓位。',
+        medium: '中等风险：请密切监控仓位，谨慎管理风险。'
+      },
+      formulas: {
+        title: '计算公式',
+        margin: '保证金',
+        marginFormula: '(市价 × 手数) ÷ 杠杆',
+        originalEquity: '原始净值',
+        originalEquityFormula: '总资金 - 保证金',
+        actualEquity: '实际净值',
+        actualEquityFormula: '净值 ± (价格波动 × 手数)',
+        marginRatio: '保证金比例',
+        marginRatioFormula: '实际净值 ÷ 保证金 × 100%',
+        liquidationLine: '爆仓线',
+        liquidationLineFormula: '0.4 × 保证金',
+        priceChangeToLiquidation: '距离爆仓的价格波动',
+        priceChangeToLiquidationFormula: '(实际净值 - 爆仓线) ÷ 手数'
+      }
     },
     
     // Trading Symbols
@@ -2171,11 +2870,43 @@ export const translations = {
       noData: '暂无卡盘记录'
     },
 
+    // 盘口
+    orderbook: {
+      hero: {
+        badge: '盘口放大镜',
+        subtitle: '见微知著，不见芥子如何悟须弥'
+      },
+      cards: {
+        bidLabel: '买价',
+        askLabel: '卖价',
+        midLabel: '中间价',
+        quantityLabel: '数量',
+        spreadLabel: '价差'
+      },
+      chart: {
+        priceDistribution: '价格分布（基于最近报价累积）'
+      },
+      history: {
+        time: '时间',
+        bidVolume: '买量',
+        bidPrice: '买价',
+        askPrice: '卖价',
+        askVolume: '卖量',
+        spread: '价差',
+        fetchError: '历史获取失败: {{error}}'
+      },
+      footer: {
+        loading: '加载中…',
+        error: '错误: {{error}}',
+        lastUpdate: '更新时间: {{time}}'
+      }
+    },
+
     // 指标测试
     indicators: {
       hero: {
         badge: '指标实验室',
-        subtitle: '均线？MACD?VWAP?谁才是你交易的好帮手？',
+        subtitle: '数不语，道自显。',
         validCountPeriod: '过去 {{days}} 天有效次数',
         avgPerDay: '平均每日有效',
         syncButton: '同步最新市场数据',
@@ -2190,9 +2921,11 @@ export const translations = {
         default: '指标'
       },
       cards: {
-        sma14Description: '以过去14根K线为基础，构建最经典的指标',
-        ema20Description: '过滤不必要的噪音，传统指标的继任者',
-        vwapDescription: '结合量与价，新时代的挑战者',
+        sma14Description: '自交易之初，经典永不过时。',
+        ema20Description: '速度揭示真相，迟疑即是偏离。',
+        vwapDescription: '交易量和价格，万声汇于一点，才看得见真正的价格。',
+        macdDescription: '趋势的呼吸，呼吸止处，即是转折。',
+        rsiDescription: '众生贪惧之处，正是力量的临界。',
         defaultDescription: '关键指标有效性统计。',
         avgConfirmation: '平均确认：',
         avgConfirmationValue: '{{value}} 根K线',
@@ -2206,6 +2939,10 @@ export const translations = {
         typeLabel: '指标类型',
         keyFeatures: '核心特性',
         viewFullAnalysis: '查看完整K线分析',
+        statistics: '有效统计',
+        validSignals: '有效信号数',
+        avgConfirmCandles: '平均确认K线',
+        avgPerDay: '日均信号',
         sma1: '平滑趋势识别',
         sma2: '经典14周期移动平均',
         sma3: '可靠的支撑/阻力位',
@@ -2221,9 +2958,11 @@ export const translations = {
       },
       panel: {
         selectIndicators: '选择指标',
+        intervalSelector: '时间周期',
         timeRange: '时间范围',
         timeRangeDay: '{{count}} 天',
         timeRangeDays: '{{count}} 天',
+        timeRangeCandles: '{{count}} 根K线',
         refresh: '刷新',
         refreshLoading: '加载中…'
       },
@@ -2234,9 +2973,123 @@ export const translations = {
         panRight: '向右平移',
         reset: 'Reset',
         zoomHint: '滚轮缩放 · Shift+滚轮缩放纵轴',
-        noData: '暂无法获取 K 线数据'
+        noData: '暂无法获取 K 线数据',
+        candles: 'K线',
+        high: '最高',
+        low: '最低',
+        open: '开盘',
+        close: '收盘',
+        volume: '成交量',
+        validSignals: '有效信号'
       },
       loading: '正在加载市场数据…'
+    },
+    guide: {
+      title: '使用指南',
+      selectGuideType: '请选择您想要查看的指南类型',
+      guideType: {
+        accountType: '账户组别',
+        accountTypeDesc: '了解标准账户与裸点账户的区别',
+        registration: '账户注册',
+        registrationDesc: '一步步教你注册开户',
+        rebate: '代理返佣',
+        rebateDesc: 'MT5平台开户返佣指南',
+        invitation: '邀请码',
+        invitationDesc: '如何使用邀请码 / 邀请链接',
+        unlockMore: '解锁更多指南'
+      },
+      password: {
+        title: '请输入密码',
+        placeholder: '密码',
+        error: '密码错误',
+        cancel: '取消',
+        confirm: '确认'
+      },
+      accountComparison: {
+        title: '账户类型对比',
+        subtitle: '选择适合您交易风格的账户类型',
+        example: '示例：黄金（XAUUSD）交易',
+        standard: {
+          title: '标准账户',
+          spread: '点差',
+          spreadValue: '32（小数位后0.32）',
+          commission: '手续费',
+          commissionValue: '$0 / 手',
+          rebate: '返佣',
+          rebateValue: '$20 / 手',
+          suitFor: '适合人群',
+          suitForValue: '长持交易者、波段交易者',
+          tradingCost: '每手交易成本',
+          tradingCostValue: '$32',
+          netCost: '算上返佣后净成本',
+          netCostValue: '$12'
+        },
+        rawSpread: {
+          title: '裸点账户 / ECN账户',
+          spread: '点差',
+          spreadValue: '9（小数位后0.09）',
+          commission: '手续费',
+          commissionValue: '$5 / 手',
+          rebate: '返佣',
+          rebateValue: '$2 / 手',
+          suitFor: '适合人群',
+          suitForValue: '剥头皮、高频交易者',
+          tradingCost: '每手交易成本',
+          tradingCostValue: '$14',
+          netCost: '算上返佣后净成本',
+          netCostValue: '$12'
+        },
+        examples: {
+          title: '交易举例',
+          scenario1: {
+            title: '场景1：日内交易',
+            desc: '1手黄金，持仓4小时',
+            standard: '交易成本：$32 | 返佣：$20 | 净成本：$12',
+            rawSpread: '交易成本：$14 | 返佣：$2 | 净成本：$12',
+            conclusion: '短期交易净成本相近'
+          },
+          scenario2: {
+            title: '场景2：高频剥头皮',
+            desc: '每天10笔，每笔1手',
+            standard: '交易成本：$320 | 返佣：$200 | 净成本：$120',
+            rawSpread: '交易成本：$140 | 返佣：$20 | 净成本：$120',
+            conclusion: '裸点账户更适合高频交易'
+          },
+          scenario3: {
+            title: '场景3：波段交易',
+            desc: '1手黄金，持仓3天',
+            standard: '交易成本：$32 | 返佣：$20 | 净成本：$12',
+            rawSpread: '交易成本：$14 | 返佣：$2 | 净成本：$12',
+            conclusion: '标准账户返佣更高，适合低频交易'
+          }
+        },
+        recommendation: {
+          title: '💡 选择建议',
+          highFrequency: '每天交易超过10次 → 选择裸点账户',
+          longTerm: '持仓时间较长，交易频次低 → 选择标准账户',
+          key: '关键：裸点账户点差低，适合快进快出；标准账户返佣高，适合长持。'
+        },
+        backToType: '返回指南类型'
+      },
+      selectPlatform: '请选择您使用的设备平台，以查看对应的指南',
+      platform: {
+        desktop: '电脑端',
+        desktopDesc: '查看电脑用户使用指南',
+        mobile: '手机端',
+        mobileDesc: '查看手机用户使用指南'
+      },
+      step: '第',
+      completed: {
+        title: '指南完成！',
+        message: '恭喜！您已完成所有指南步骤。',
+        backToHome: '返回首页',
+        restart: '重新查看指南',
+        button: '我已完成'
+      },
+      backToPlatform: '返回平台选择',
+      finishGuide: '完成指南',
+      skipGuide: '跳过指南',
+      keyboardHint: '按 Enter 键继续下一步'
     }
   }
 };

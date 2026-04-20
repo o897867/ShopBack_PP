@@ -106,11 +106,46 @@ def init_database():
             )
         """)
 
+        # 金融新闻表（InsightSentry 新闻推送 + ChatGPT 总结）
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS financial_news (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                news_id TEXT UNIQUE,
+                title TEXT NOT NULL,
+                content TEXT,
+                summary TEXT,
+                summary_cn TEXT,
+                source TEXT,
+                url TEXT,
+                published_at TIMESTAMP,
+                received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                symbols TEXT,
+                sentiment TEXT,
+                impact_level TEXT,
+                raw_data TEXT
+            )
+        """)
+
+        # 每日出金汇率表
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS withdrawal_rates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                rate REAL NOT NULL,
+                currency TEXT DEFAULT 'USD',
+                notes TEXT,
+                effective_date DATE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
         # 创建索引
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_cfd_news_broker ON cfd_broker_news (broker_id)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_leverage_positions_user ON leverage_positions (user_email)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_leverage_history_user ON leverage_trade_history (user_email)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_leverage_analysis_user ON leverage_analysis (user_email)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_financial_news_published ON financial_news (published_at DESC)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_financial_news_news_id ON financial_news (news_id)')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_withdrawal_rates_date ON withdrawal_rates (effective_date DESC)')
 
         conn.commit()
         logger.info("核心数据库表初始化完成")
@@ -210,6 +245,23 @@ def init_legacy_tables():
                 model_version TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
+        """)
+
+        # XAU (Gold) 相关表
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS xau_candles_1m (
+                open_time INTEGER PRIMARY KEY,
+                open REAL,
+                high REAL,
+                low REAL,
+                close REAL,
+                volume REAL
+            )
+        """)
+
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_xau_candles_open_time
+            ON xau_candles_1m(open_time DESC)
         """)
 
         # 其他Legacy表

@@ -8,10 +8,20 @@ import Home from './pages/Home.jsx';
 const Forum = lazy(() => import('./pages/Forum.jsx'));
 const ForumModeration = lazy(() => import('./pages/ForumModeration.jsx'));
 const BrokerAnalytics = lazy(() => import('./pages/BrokerAnalytics.jsx'));
-const EthKalmanPrediction = lazy(() => import('./pages/EthKalmanPrediction.jsx'));
+// ETH Prediction disabled
 const IndicatorTesting = lazy(() => import('./pages/IndicatorTesting.jsx'));
+const OrderBook = lazy(() => import('./pages/OrderBook.jsx'));
+const Health = lazy(() => import('./pages/Health.jsx'));
+const HealthToken = lazy(() => import('./pages/HealthToken.jsx'));
+const WeightKlineMatch = lazy(() => import('./pages/WeightKlineMatch.jsx'));
+const News = lazy(() => import('./pages/News.jsx'));
+const Fortune = lazy(() => import('./pages/Fortune.jsx'));
+const LeverageCalculator = lazy(() => import('./pages/LeverageCalculator.jsx'));
+const Guide = lazy(() => import('./pages/Guide.jsx'));
 const Login = lazy(() => import('./pages/Login.jsx'));
 const Register = lazy(() => import('./pages/Register.jsx'));
+const WithdrawalRate = lazy(() => import('./pages/WithdrawalRate.jsx'));
+const LiquidityCrisisMap = lazy(() => import('./pages/LiquidityCrisisMap.jsx'));
 import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
@@ -32,7 +42,7 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['home','broker-hub','analytics','forum','forum-mod','predictions','eth','indicators','trading','login','register'];
+      const known = ['home','broker-hub','analytics','forum','forum-mod','predictions','indicators','news','health','health-token','health-match','trading','orderbook','fortune','leverage-calculator','guide','login','register','withdrawal-rate','liquidity-crisis'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
@@ -71,6 +81,48 @@ const App = () => {
         <Suspense fallback={<div className="muted">Loading…</div>}>
           <IndicatorTesting />
         </Suspense>
+      ) : currentPage === 'orderbook' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <OrderBook />
+        </Suspense>
+      ) : currentPage === 'news' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <News />
+        </Suspense>
+      ) : currentPage === 'health-token' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <HealthToken
+            onNavigate={setCurrentPage}
+            onTokenValidated={(token, email) => {
+              console.log('Token validated:', token, email);
+              setCurrentPage('health');
+            }}
+          />
+        </Suspense>
+      ) : currentPage === 'health' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <Health onNavigate={setCurrentPage} />
+        </Suspense>
+      ) : currentPage === 'health-match' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <WeightKlineMatch onNavigate={setCurrentPage} />
+        </Suspense>
+      ) : currentPage === 'leverage-calculator' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <LeverageCalculator />
+        </Suspense>
+      ) : currentPage === 'guide' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <Guide onNavigate={setCurrentPage} />
+        </Suspense>
+      ) : currentPage === 'withdrawal-rate' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <WithdrawalRate />
+        </Suspense>
+      ) : currentPage === 'liquidity-crisis' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <LiquidityCrisisMap />
+        </Suspense>
       ) : (
         <div className="container">
           <div className="page-header">
@@ -86,13 +138,14 @@ const App = () => {
               {currentPage === 'forum' ? translate('forum.title') :
                currentPage === 'forum-mod' ? 'Forum Moderation' :
                currentPage === 'analytics' ? translate('nav.analytics') :
-               currentPage === 'eth' ? translate('nav.ethPrediction') :
                currentPage === 'login' ? translate('auth.login.title') :
                currentPage === 'register' ? translate('auth.register.title') :
+               currentPage === 'fortune' ? translate('home.fortune.title') :
                pausedPages[currentPage] ? pausedPages[currentPage].title :
                translate('nav.trading')}
             </h1>
           </div>
+
 
         {/* Pages */}
         {currentPage === 'forum' ? (
@@ -115,9 +168,9 @@ const App = () => {
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <Register onSuccess={() => setCurrentPage('login')} />
           </Suspense>
-        ) : currentPage === 'eth' ? (
+        ) : currentPage === 'fortune' ? (
           <Suspense fallback={<div className="muted">Loading…</div>}>
-            <EthKalmanPrediction />
+            <Fortune onNavigate={setCurrentPage} />
           </Suspense>
         ) : pausedPages[currentPage] ? (
           <div className="card card-padded" style={{ textAlign: 'center' }}>

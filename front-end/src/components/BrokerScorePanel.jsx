@@ -11,7 +11,7 @@ const BrokerScorePanel = ({ brokers = [], onBrokerClick }) => {
 
   // Quick signup URLs for each broker
   const signupUrls = {
-    'TMGM': 'https://portal.tmgmroadmaps.com/register?node=MjE4MzQw&language=zh-Hans',
+    'TMGM': 'https://portal.tmgrowinv.com/register?node=MjE4MzQw&language=zh-Hans',
     'Exness': '',
     'IC Markets': '',
     'FXCM': '',

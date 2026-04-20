@@ -1,0 +1,11 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="8" fill="#1a1a2e"/>
+  <text x="60" y="40" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#9b59b6" text-anchor="middle">RSI</text>
+  <line x1="20" y1="55" x2="100" y2="55" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+  <text x="105" y="58" font-family="monospace" font-size="8" fill="#e74c3c">70</text>
+  <line x1="20" y1="85" x2="100" y2="85" stroke="#27ae60" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+  <text x="105" y="88" font-family="monospace" font-size="8" fill="#27ae60">30</text>
+  <path d="M 20 75 Q 30 80, 40 70 T 60 60 T 80 75 T 100 65" stroke="#9b59b6" stroke-width="2.5" fill="none"/>
+  <path d="M 20 75 Q 30 80, 40 70 T 60 60 T 80 75 T 100 65 L 100 90 L 20 90 Z" fill="#9b59b6" opacity="0.15"/>
+  <text x="60" y="108" font-family="monospace" font-size="10" fill="#888" text-anchor="middle">Strength</text>
+</svg>

@@ -5,6 +5,19 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   base:'/',
+
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setup-tests.js',
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/setup-tests.js',
+      ]
+    }
+  },
   
   server: {
     port: 5173,
@@ -27,6 +40,7 @@ export default defineConfig({
   build: {
     outDir: 'build',
     sourcemap: true,
+    emptyOutDir: false, // 不清空输出目录，保留 index.html
     rollupOptions: {
       output: {
         manualChunks: {

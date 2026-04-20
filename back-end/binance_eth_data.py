@@ -27,6 +27,7 @@ class BinanceETHDataFetcher:
     BASE_URL = "https://api.binance.com"
     WS_URL = "wss://stream.binance.com:9443/ws"
     INTERVAL_MS = 180000  # 3 minutes in milliseconds
+    INTERVAL_15M_MS = 900000  # 15 minutes in milliseconds
     
     def __init__(self, db_path: str = "shopback_data.db"):
         self.db_path = db_path
@@ -82,10 +83,29 @@ class BinanceETHDataFetcher:
             
             # Create index for faster queries
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_eth_candles_open_time 
+                CREATE INDEX IF NOT EXISTS idx_eth_candles_open_time
                 ON eth_candles_3m(open_time DESC)
             """)
-            
+
+            # Create 15m aggregated candles table
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS eth_candles_15m (
+                    open_time INTEGER PRIMARY KEY,
+                    open REAL,
+                    high REAL,
+                    low REAL,
+                    close REAL,
+                    volume REAL
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_eth_candles_15m_open_time
+                ON eth_candles_15m(open_time DESC)
+            """)
+
+            logger.info("ETH candles tables initialized (3m and 15m)")
+
             # Migrate data if old table exists
             cursor = conn.execute("""
                 SELECT name FROM sqlite_master 
@@ -121,6 +141,10 @@ class BinanceETHDataFetcher:
     def floor_to_3m(self, timestamp_ms: int) -> int:
         """Floor timestamp to nearest 3-minute interval"""
         return (timestamp_ms // self.INTERVAL_MS) * self.INTERVAL_MS
+
+    def floor_to_15m(self, timestamp_ms: int) -> int:
+        """Floor timestamp to nearest 15-minute interval"""
+        return (timestamp_ms // self.INTERVAL_15M_MS) * self.INTERVAL_15M_MS
     
     def get_api_headers(self) -> Dict[str, str]:
         """Get API headers (includes API key if available)"""
@@ -516,7 +540,112 @@ class BinanceETHDataFetcher:
                     gaps.append((times[i-1], times[i]))
             
             return len(gaps) == 0, gaps
-    
+
+    def aggregate_to_15m(self, start_time_ms: Optional[int] = None, limit: Optional[int] = None):
+        """
+        Aggregate 3-minute candles to 15-minute candles
+
+        Args:
+            start_time_ms: Start time in milliseconds (if None, aggregate all)
+            limit: Maximum number of 15m candles to generate (if None, no limit)
+        """
+        import pandas as pd
+
+        with sqlite3.connect(self.db_path) as conn:
+            # Get 3-minute candles from database
+            if start_time_ms:
+                cursor = conn.execute("""
+                    SELECT open_time, open, high, low, close, volume
+                    FROM eth_candles_3m
+                    WHERE open_time >= ?
+                    ORDER BY open_time ASC
+                """, (start_time_ms,))
+            else:
+                cursor = conn.execute("""
+                    SELECT open_time, open, high, low, close, volume
+                    FROM eth_candles_3m
+                    ORDER BY open_time ASC
+                """)
+
+            # Convert to DataFrame for easier resampling
+            rows = cursor.fetchall()
+            if not rows:
+                logger.info("No 3m candles to aggregate")
+                return
+
+            df = pd.DataFrame(rows, columns=['open_time', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['open_time'], unit='ms')
+            df.set_index('timestamp', inplace=True)
+
+            # Resample to 15-minute intervals using OHLC logic
+            resampled = df.resample('15min').agg({
+                'open': 'first',
+                'high': 'max',
+                'low': 'min',
+                'close': 'last',
+                'volume': 'sum'
+            }).dropna()
+
+            # Convert back to list of dicts
+            candles_15m = []
+            for timestamp, row in resampled.iterrows():
+                open_time_ms = int(timestamp.timestamp() * 1000)
+                open_time_floored = self.floor_to_15m(open_time_ms)
+
+                candles_15m.append({
+                    'open_time': open_time_floored,
+                    'open': float(row['open']),
+                    'high': float(row['high']),
+                    'low': float(row['low']),
+                    'close': float(row['close']),
+                    'volume': float(row['volume'])
+                })
+
+            # Apply limit if specified
+            if limit and len(candles_15m) > limit:
+                candles_15m = candles_15m[-limit:]
+
+            # Batch insert into eth_candles_15m
+            if candles_15m:
+                conn.executemany("""
+                    INSERT OR REPLACE INTO eth_candles_15m
+                    (open_time, open, high, low, close, volume)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, [(
+                    c['open_time'],
+                    c['open'],
+                    c['high'],
+                    c['low'],
+                    c['close'],
+                    c['volume']
+                ) for c in candles_15m])
+
+                logger.info(f"Aggregated {len(candles_15m)} 15-minute candles")
+
+    def get_recent_candles_15m(self, limit: int = 100) -> List[Dict]:
+        """Get recent 15-minute candles from database"""
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute("""
+                SELECT open_time, open, high, low, close, volume
+                FROM eth_candles_15m
+                ORDER BY open_time DESC
+                LIMIT ?
+            """, (limit,))
+
+            candles = []
+            for row in cursor.fetchall():
+                candles.append({
+                    "timestamp": row[0] // 1000,  # Convert to seconds
+                    "open_time": row[0],
+                    "open": row[1],
+                    "high": row[2],
+                    "low": row[3],
+                    "close": row[4],
+                    "volume": row[5]
+                })
+
+            return list(reversed(candles))  # Return in chronological order
+
     async def test_api_connection(self) -> Dict[str, any]:
         """Test API connection and return status"""
         try:

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import './Home.css';
+import './Fortune.css';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import LanguageSelector from '../components/LanguageSelector.jsx';
 import BrokerScorePanel from '../components/BrokerScorePanel.jsx';
@@ -15,6 +16,7 @@ import {
   computeCompositeScore,
   formatRelativeTime
 } from '../utils/brokerData.js';
+import { generateFortune, fetchDailyFortuneFromApi } from '../utils/fortune.js';
 
 const getStatusMetadata = (score, translate) => {
   if (!Number.isFinite(score)) {
@@ -58,6 +60,7 @@ const Home = ({ onNavigate }) => {
   const locale = currentLanguage === 'zh-CN' ? 'zh-CN' : 'en-US';
   const formatNumber = useCallback((value) => new Intl.NumberFormat(locale).format(value ?? 0), [locale]);
   const [visibleSections, setVisibleSections] = useState(() => ({ hero: true }));
+  const [fortune, setFortune] = useState(() => generateFortune(currentLanguage, translate));
 
   const {
     brokers: rawBrokers,
@@ -278,6 +281,16 @@ const Home = ({ onNavigate }) => {
     }
   ]), [translate]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const remote = await fetchDailyFortuneFromApi(translate, currentLanguage);
+      if (cancelled) return;
+      setFortune(remote || generateFortune(currentLanguage, translate));
+    })();
+    return () => { cancelled = true; };
+  }, [currentLanguage, translate]);
+
   const activityFeed = useMemo(() => {
     const newsItems = (brokerNews || []).slice(0, 5).map((item) => ({
       id: `news-${item.id || item.title}`,
@@ -371,6 +384,80 @@ const Home = ({ onNavigate }) => {
                 brokers={formattedBrokers}
                 onBrokerClick={(broker) => handleNavigate('broker-hub')}
               />
+            </section>
+
+            {/* Segment: Fortune Timing */}
+            <section
+              className={`home-segment ${visibleSections.fortune ? 'home-segment--visible' : ''}`}
+              data-section="fortune"
+            >
+              <header className="home-section__header">
+                <div>
+                  <h2 className="home-section__title">{translate('home.fortune.title')}</h2>
+                  <p className="home-section__subtitle">{translate('home.fortune.subtitle')}</p>
+                </div>
+                <div className="home-fortune__meta">{translate('home.fortune.refresh')}</div>
+              </header>
+
+              <div className="fortune-grid home-segment__item">
+                <div className={`fortune-card fortune-card--${fortune.tier.accent}`}>
+                  <div className="fortune-card__pill">{fortune.tier.label}</div>
+                  <div className="fortune-card__verdict">
+                    <div className="fortune-card__label">{translate('home.fortune.fields.verdict')}</div>
+                    <h3 className="fortune-card__headline">{fortune.tier.verdict}</h3>
+                  </div>
+
+                  <div className="fortune-meter">
+                    <div className="fortune-meter__header">
+                      <span>{translate('home.fortune.fields.qi')}</span>
+                      <span className="fortune-meter__value">{fortune.qiIndex}/100</span>
+                    </div>
+                    <div className="fortune-meter__bar">
+                      <div
+                        className="fortune-meter__fill"
+                        style={{ width: `${Math.min(100, fortune.qiIndex)}%` }}
+                      />
+                    </div>
+                    <div className="fortune-meter__hint">
+                      <strong>{fortune.qi.label}</strong> · {fortune.qi.tip}
+                    </div>
+                  </div>
+
+                  <div className="fortune-grid__inline">
+                    <div className="fortune-inline-block">
+                      <div className="fortune-inline__label">{translate('home.fortune.fields.amulet')}</div>
+                      <div className="fortune-inline__value">{fortune.amulet.label}</div>
+                      <div className="fortune-inline__hint">{fortune.amulet.tip}</div>
+                    </div>
+                    <div className="fortune-inline-block">
+                      <div className="fortune-inline__label">{translate('home.fortune.fields.direction')}</div>
+                      <div className="fortune-inline__value">{fortune.direction}</div>
+                      <div className="fortune-inline__hint">{fortune.note}</div>
+                    </div>
+                  </div>
+
+                  <div className="fortune-actions">
+                    <button className="btn btn-primary" onClick={() => handleNavigate('trading')}>
+                      {translate('home.fortune.actions.trade')}
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => handleNavigate('broker-hub')}>
+                      {translate('home.fortune.actions.compare')}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="fortune-side">
+                  <div className="fortune-side__row">
+                    <span className="fortune-side__label">{translate('home.fortune.fields.ritual')}</span>
+                    <span className="fortune-side__value">{fortune.ritual}</span>
+                  </div>
+                  <div className="fortune-side__row">
+                    <span className="fortune-side__label">{translate('home.fortune.fields.avoid')}</span>
+                    <span className="fortune-side__value fortune-side__value--muted">{fortune.taboo}</span>
+                  </div>
+                  <div className="fortune-side__note">{fortune.note}</div>
+                </div>
+              </div>
             </section>
 
             {/* Segment 2: Rebate Comparison */}

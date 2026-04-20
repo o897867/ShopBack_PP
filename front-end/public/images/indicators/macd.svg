@@ -1,0 +1,12 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="8" fill="#1a1a2e"/>
+  <text x="60" y="40" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00d4aa" text-anchor="middle">MACD</text>
+  <path d="M 20 70 Q 35 60, 50 65 T 80 55 T 100 70" stroke="#00d4aa" stroke-width="2" fill="none"/>
+  <path d="M 20 75 Q 35 70, 50 68 T 80 62 T 100 75" stroke="#f39c12" stroke-width="2" fill="none"/>
+  <rect x="30" y="80" width="4" height="10" fill="#00d4aa" opacity="0.6"/>
+  <rect x="45" y="75" width="4" height="15" fill="#00d4aa" opacity="0.6"/>
+  <rect x="60" y="78" width="4" height="12" fill="#f39c12" opacity="0.6"/>
+  <rect x="75" y="82" width="4" height="8" fill="#f39c12" opacity="0.6"/>
+  <rect x="90" y="80" width="4" height="10" fill="#00d4aa" opacity="0.6"/>
+  <text x="60" y="108" font-family="monospace" font-size="10" fill="#888" text-anchor="middle">Momentum</text>
+</svg>

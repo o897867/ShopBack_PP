@@ -174,3 +174,9 @@
     font-size: 0.75rem;
   }
 }
+
+@media (hover: none) {
+  .indicator-hero-card:hover {
+    transform: none;
+  }
+}

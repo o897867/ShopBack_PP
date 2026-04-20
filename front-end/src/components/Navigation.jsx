@@ -12,22 +12,32 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
       title: translate('nav.groups.explore'),
       items: [
         { id: 'home', label: translate('nav.home'), badge: 'recommended' },
+        { id: 'guide', label: translate('nav.guide'), badge: 'new' },
+        { id: 'fortune', label: translate('nav.fortune'), badge: 'new' },
         { id: 'broker-hub', label: translate('nav.brokerHub') }
       ]
     },
+    // 健康相关功能暂时隐藏
+    // {
+    //   title: translate('nav.groups.health'),
+    //   items: [
+    //     { id: 'health-token', label: translate('nav.healthToken'), badge: 'key' },
+    //     { id: 'health', label: translate('nav.health'), badge: 'new' },
+    //     { id: 'health-match', label: translate('nav.healthMatch') }
+    //   ]
+    // },
     {
       title: translate('nav.groups.community'),
       items: [
-        { id: 'trading', label: translate('nav.trading') },
-        { id: 'eth', label: translate('nav.ethPrediction') },
-        { id: 'indicators', label: translate('nav.indicators') }
+        { id: 'orderbook', label: translate('orderbook.hero.badge') },
+        { id: 'indicators', label: translate('nav.indicators') },
+        { id: 'leverage-calculator', label: translate('nav.leverage') },
+        { id: 'news', label: translate('nav.news'), badge: 'new' },
+        ...(currentLanguage === 'cn' ? [
+          { id: 'withdrawal-rate', label: '出金汇率', badge: 'new' },
+          { id: 'liquidity-crisis', label: '流动性危机图', badge: 'new' }
+        ] : [])
       ]
-    },
-    {
-      title: translate('nav.groups.account'),
-      items: currentUser
-        ? [{ id: 'forum-mod', label: 'Forum Mod' }]
-        : []
     }
   ];
 
@@ -84,6 +94,12 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
                 {item.label}
                 {item.badge === 'recommended' && (
                   <span className="nav-badge">{translate('nav.badges.recommended')}</span>
+                )}
+                {item.badge === 'new' && (
+                  <span className="nav-badge new">{translate('nav.badges.new')}</span>
+                )}
+                {item.badge === 'key' && (
+                  <span className="nav-badge key">🔑</span>
                 )}
               </button>
             ))}

@@ -15,6 +15,50 @@ class ValidityDetector:
     """Detect valid indicator signals based on effectiveness criteria"""
 
     @staticmethod
+    def calculate_adaptive_threshold(prices: np.ndarray, highs: np.ndarray,
+                                    lows: np.ndarray, base_multiplier: float = 0.8,
+                                    atr_period: int = 14) -> float:
+        """
+        Calculate adaptive threshold based on ATR (Average True Range)
+
+        Args:
+            prices: Close prices array
+            highs: High prices array
+            lows: Low prices array
+            base_multiplier: ATR multiplier (recommended 0.7-0.9 for 1min XAU)
+            atr_period: ATR calculation period
+
+        Returns:
+            Dynamic threshold (percentage)
+        """
+        try:
+            # Import here to avoid circular dependency
+            from indicators import TechnicalIndicators
+
+            atr = TechnicalIndicators.calculate_atr(highs, lows, prices, atr_period)
+
+            # Get the latest valid ATR value
+            valid_atr = atr[~np.isnan(atr)]
+            if len(valid_atr) == 0:
+                return 0.0012  # Fallback to fixed threshold
+
+            current_atr = valid_atr[-1]
+            current_price = prices[-1]
+
+            # ATR as percentage of price
+            atr_pct = current_atr / current_price
+
+            # Dynamic threshold = k * ATR%
+            adaptive_threshold = base_multiplier * atr_pct
+
+            # Clip to reasonable bounds (0.08% - 0.30%)
+            return float(np.clip(adaptive_threshold, 0.0008, 0.0030))
+
+        except Exception as e:
+            logger.warning(f"Error calculating adaptive threshold: {e}")
+            return 0.0012  # Fallback to fixed threshold
+
+    @staticmethod
     def detect_ma_bounce_valid(prices: np.ndarray, ma_values: np.ndarray,
                                params: Dict = None) -> Dict:
         """
@@ -194,21 +238,34 @@ class ValidityDetector:
 
     @staticmethod
     def detect_macd_followthrough_valid(prices: np.ndarray, macd_data: Dict,
-                                       params: Dict = None) -> Dict:
+                                       params: Dict = None, highs: np.ndarray = None,
+                                       lows: np.ndarray = None) -> Dict:
         """
-        Detect valid MACD signals with price follow-through
+        Detect valid MACD signals with price follow-through using MFE
 
         Parameters:
-        - window: Confirmation window (default 8 candles)
-        - threshold: Required price movement (default 0.5%)
-        - hist_confirm: Required histogram confirmation candles (default 2)
+        - window: Confirmation window (default 12 candles)
+        - threshold: Required price movement (default 0.12% or adaptive)
+        - use_adaptive_threshold: Enable ATR-based adaptive threshold (default True)
+        - atr_multiplier: ATR multiplier for adaptive threshold (default 0.8)
+        - hist_confirm: Required histogram confirmation window (default 3)
+        - highs/lows: For MFE calculation (Maximum Favorable Excursion)
         """
         if params is None:
             params = {}
 
-        window = params.get('window', 8)
-        threshold = params.get('threshold', 0.005)  # 0.5% price movement
-        hist_confirm = params.get('hist_confirm', 2)  # 2 candles histogram confirmation
+        window = params.get('window', 12)
+        hist_confirm = params.get('hist_confirm', 3)  # 3 candles histogram window
+
+        # Calculate threshold (adaptive or fixed)
+        use_adaptive = params.get('use_adaptive_threshold', True)
+        if use_adaptive and highs is not None and lows is not None:
+            threshold = ValidityDetector.calculate_adaptive_threshold(
+                prices, highs, lows,
+                base_multiplier=params.get('atr_multiplier', 0.8)
+            )
+        else:
+            threshold = params.get('threshold', 0.0012)  # 0.12% fixed fallback
 
         macd_line = macd_data.get('macd', np.array([]))
         signal_line = macd_data.get('signal', np.array([]))
@@ -216,6 +273,9 @@ class ValidityDetector:
 
         if len(macd_line) == 0 or len(signal_line) == 0:
             return {'valid_count': 0, 'valid_indices': [], 'events': []}
+
+        # Use highs/lows if provided, otherwise fall back to prices
+        use_mfe = highs is not None and lows is not None
 
         valid_indices = []
         events = []
@@ -236,28 +296,40 @@ class ValidityDetector:
                     crossover_type = 'BEARISH'
 
                 if crossover_type:
-                    # Check price follow-through
+                    # Check price follow-through using MFE
                     max_movement = 0
                     movement_idx = -1
-                    hist_confirmed = True
+                    hist_confirmed = False
 
                     for j in range(1, min(window + 1, len(prices) - i)):
-                        if crossover_type == 'BULLISH':
-                            movement = (prices[i+j] - prices[i]) / prices[i]
+                        # Calculate MFE (Maximum Favorable Excursion)
+                        if use_mfe:
+                            if crossover_type == 'BULLISH':
+                                # Use highest high in window
+                                movement = (np.max(highs[i:i+j+1]) - prices[i]) / prices[i]
+                            else:
+                                # Use lowest low in window
+                                movement = (prices[i] - np.min(lows[i:i+j+1])) / prices[i]
                         else:
-                            movement = (prices[i] - prices[i+j]) / prices[i]
+                            # Fallback to close prices
+                            if crossover_type == 'BULLISH':
+                                movement = (prices[i+j] - prices[i]) / prices[i]
+                            else:
+                                movement = (prices[i] - prices[i+j]) / prices[i]
 
                         if movement > max_movement:
                             max_movement = movement
                             movement_idx = j
 
-                        # Check histogram confirmation
-                        if j <= hist_confirm and i+j < len(histogram):
-                            if not np.isnan(histogram[i+j]):
-                                if crossover_type == 'BULLISH' and histogram[i+j] <= 0:
-                                    hist_confirmed = False
-                                elif crossover_type == 'BEARISH' and histogram[i+j] >= 0:
-                                    hist_confirmed = False
+                    # Check histogram confirmation (any 1 candle within window)
+                    for k in range(min(hist_confirm, len(histogram) - i)):
+                        if i+k < len(histogram) and not np.isnan(histogram[i+k]):
+                            if crossover_type == 'BULLISH' and histogram[i+k] > 0:
+                                hist_confirmed = True
+                                break
+                            elif crossover_type == 'BEARISH' and histogram[i+k] < 0:
+                                hist_confirmed = True
+                                break
 
                     # Valid if price moves enough in the right direction
                     if max_movement >= threshold:
@@ -283,6 +355,121 @@ class ValidityDetector:
             'events': events
         }
 
+    @staticmethod
+    def detect_rsi_reversal_valid(prices: np.ndarray, rsi: np.ndarray,
+                                   params: Dict = None, highs: np.ndarray = None,
+                                   lows: np.ndarray = None) -> Dict:
+        """
+        Detect valid RSI reversal signals with price confirmation using MFE
+
+        Parameters:
+        - window: Confirmation window (default 12 candles)
+        - threshold: Required price movement (default 0.12% or adaptive)
+        - use_adaptive_threshold: Enable ATR-based adaptive threshold (default True)
+        - atr_multiplier: ATR multiplier for adaptive threshold (default 0.8)
+        - overbought: RSI overbought level (default 70)
+        - oversold: RSI oversold level (default 30)
+        - rsi_return_buffer: Buffer for RSI return to normal (default 3)
+        - highs/lows: For MFE calculation (Maximum Favorable Excursion)
+        """
+        if params is None:
+            params = {}
+
+        window = params.get('window', 12)
+        overbought = params.get('overbought', 70)
+        oversold = params.get('oversold', 30)
+        rsi_return_buffer = params.get('rsi_return_buffer', 3)
+
+        # Calculate threshold (adaptive or fixed)
+        use_adaptive = params.get('use_adaptive_threshold', True)
+        if use_adaptive and highs is not None and lows is not None:
+            threshold = ValidityDetector.calculate_adaptive_threshold(
+                prices, highs, lows,
+                base_multiplier=params.get('atr_multiplier', 0.8)
+            )
+        else:
+            threshold = params.get('threshold', 0.0012)  # 0.12% fixed fallback
+
+        if len(rsi) == 0:
+            return {'valid_count': 0, 'valid_indices': [], 'events': []}
+
+        # Use highs/lows if provided, otherwise fall back to prices
+        use_mfe = highs is not None and lows is not None
+
+        valid_indices = []
+        events = []
+
+        for i in range(1, min(len(prices), len(rsi)) - window):
+            try:
+                if np.isnan(rsi[i]) or np.isnan(rsi[i-1]):
+                    continue
+
+                reversal_type = None
+
+                # Oversold reversal (bullish)
+                if rsi[i-1] <= oversold and rsi[i] > oversold:
+                    reversal_type = 'BULLISH'
+                # Overbought reversal (bearish)
+                elif rsi[i-1] >= overbought and rsi[i] < overbought:
+                    reversal_type = 'BEARISH'
+
+                if reversal_type:
+                    # Check price follow-through using MFE
+                    max_movement = 0
+                    movement_idx = -1
+                    rsi_returned = False
+
+                    for j in range(1, min(window + 1, len(prices) - i)):
+                        # Calculate MFE (Maximum Favorable Excursion)
+                        if use_mfe:
+                            if reversal_type == 'BULLISH':
+                                # Use highest high in window
+                                movement = (np.max(highs[i:i+j+1]) - prices[i]) / prices[i]
+                            else:
+                                # Use lowest low in window
+                                movement = (prices[i] - np.min(lows[i:i+j+1])) / prices[i]
+                        else:
+                            # Fallback to close prices
+                            if reversal_type == 'BULLISH':
+                                movement = (prices[i+j] - prices[i]) / prices[i]
+                            else:
+                                movement = (prices[i] - prices[i+j]) / prices[i]
+
+                        if movement > max_movement:
+                            max_movement = movement
+                            movement_idx = j
+
+                        # Check if RSI returned to normal range
+                        if i+j < len(rsi) and not np.isnan(rsi[i+j]):
+                            if reversal_type == 'BULLISH' and rsi[i+j] >= (oversold + rsi_return_buffer):
+                                rsi_returned = True
+                            elif reversal_type == 'BEARISH' and rsi[i+j] <= (overbought - rsi_return_buffer):
+                                rsi_returned = True
+
+                    # Valid if price moves enough in the right direction
+                    if max_movement >= threshold:
+                        valid_indices.append(i)
+                        events.append({
+                            'index': i,
+                            'type': f'RSI_{reversal_type}',
+                            'price': float(prices[i]),
+                            'rsi': float(rsi[i]),
+                            'rsi_prev': float(rsi[i-1]),
+                            'max_movement': float(max_movement),
+                            'movement_candles': movement_idx,
+                            'rsi_returned': rsi_returned,
+                            'zone': 'oversold' if reversal_type == 'BULLISH' else 'overbought'
+                        })
+            except Exception as e:
+                logger.warning(f"Error processing RSI signal at index {i}: {e}")
+                continue
+
+        return {
+            'valid_count': len(valid_indices),
+            'valid_indices': valid_indices,
+            'events': events
+        }
+
 
 def analyze_validity(candles: List[Dict], indicators: Dict, params: Dict = None) -> Dict:
     """
@@ -298,6 +485,8 @@ def analyze_validity(candles: List[Dict], indicators: Dict, params: Dict = None)
 
     # Extract price data
     prices = np.array([c['close'] for c in candles])
+    highs = np.array([c['high'] for c in candles])
+    lows = np.array([c['low'] for c in candles])
 
     detector = ValidityDetector()
     results = {}
@@ -334,15 +523,32 @@ def analyze_validity(candles: List[Dict], indicators: Dict, params: Dict = None)
             prices, indicators['vwap'], indicators['vwap_bands'], vwap_params
         )
 
-    # MACD validity
+    # MACD validity (with MFE using highs/lows and adaptive threshold)
     if 'macd' in indicators and isinstance(indicators['macd'], dict):
         macd_params = {
-            'window': params.get('macd_win', 8),
-            'threshold': params.get('macd_thr', 0.005),
-            'hist_confirm': params.get('macd_hist', 2)
+            'window': params.get('macd_win', 12),
+            'threshold': params.get('macd_thr', 0.0012),  # 0.12% fixed fallback
+            'use_adaptive_threshold': params.get('use_adaptive', True),
+            'atr_multiplier': params.get('atr_multiplier', 0.8),
+            'hist_confirm': params.get('macd_hist', 3)
         }
         results['MACD'] = detector.detect_macd_followthrough_valid(
-            prices, indicators['macd'], macd_params
+            prices, indicators['macd'], macd_params, highs, lows
+        )
+
+    # RSI validity (with MFE using highs/lows and adaptive threshold)
+    if 'rsi' in indicators:
+        rsi_params = {
+            'window': params.get('rsi_win', 12),
+            'threshold': params.get('rsi_thr', 0.0012),  # 0.12% fixed fallback
+            'use_adaptive_threshold': params.get('use_adaptive', True),
+            'atr_multiplier': params.get('atr_multiplier', 0.8),
+            'overbought': params.get('rsi_overbought', 70),
+            'oversold': params.get('rsi_oversold', 30),
+            'rsi_return_buffer': params.get('rsi_return_buffer', 3)
+        }
+        results['RSI'] = detector.detect_rsi_reversal_valid(
+            prices, indicators['rsi'], rsi_params, highs, lows
         )
 
     return results

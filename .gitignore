@@ -14,21 +14,38 @@ logs/
 back-end/fapi.log*
 back-end/*.log.*
 
-# 数据库文件（保留主要数据库，忽略测试和临时数据库）
-back-end/test*.db
-back-end/temp*.db
-back-end/*_test.db
-back-end/*_debug.db
+# 数据库文件 — 全部忽略，数据库不进 git
+*.db
+*.sqlite
+*.sqlite3
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
 
-# 保留以下重要数据库文件：
-# back-end/shopback_data.db (主数据库)
-# 如果你想忽略所有数据库文件，请取消下面的注释：
-# *.db
-# *.sqlite
-# *.sqlite3
+# 测试覆盖率
+back-end/.coverage
+back-end/coverage.xml
+back-end/htmlcov/
+*.coverage
+coverage.xml
+htmlcov/
+
+# pip 安装残留
+back-end/=*
+
+# 网页存档 / 数据导出
+*.mhtml
+*.csv
+
+# 临时测试页面
+test_*.html
+insightsentry_ws.html
+
+# 一次性脚本
+fix_*.py
+
+# Notebook 临时文件
+front-end/rapid.ipynb
 
 # 临时文件和缓存
 *.tmp
@@ -43,7 +60,7 @@ __pycache__/
 *.pyd
 .Python
 
-# IDE和编辑器文件
+# IDE 和编辑器文件
 .vscode/
 .idea/
 *.swp
@@ -80,7 +97,6 @@ back-end/env/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db
 
 # 备份文件
 *.bak

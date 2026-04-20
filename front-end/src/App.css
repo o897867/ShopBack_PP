@@ -4,6 +4,15 @@
   background-color: var(--bg);
 }
 
+/* OrderBook page override - pure white background */
+.app:has(.orderbook-container) {
+  background-color: #ffffff;
+}
+
+[data-theme="dark"] .app:has(.orderbook-container) {
+  background-color: #0f172a;
+}
+
 /* 导航栏 */
 .navbar {
   background: var(--panel);

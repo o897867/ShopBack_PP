@@ -38,6 +38,12 @@ export const chartZoomPlugin = {
     storeOriginalLimits(chart);
     updateDataBounds(chart);
 
+    // Touch state for pinch zoom
+    plugin.touches = [];
+    plugin.lastTouchDistance = null;
+    plugin.touchStartX = null;
+    plugin.touchStartY = null;
+
     // Add wheel event listener for zoom
     const handleWheel = (event) => {
       if (!plugin.options.enabled) return;
@@ -218,6 +224,190 @@ export const chartZoomPlugin = {
       }
     };
 
+    // Touch event handlers for mobile support
+    const handleTouchStart = (event) => {
+      if (!plugin.options.enabled) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const chartArea = chart.chartArea;
+      if (!chartArea) return;
+
+      // Store all touches
+      plugin.touches = Array.from(event.touches).map(touch => ({
+        id: touch.identifier,
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      }));
+
+      if (plugin.touches.length === 1) {
+        // Single touch - prepare for panning
+        const touch = plugin.touches[0];
+        if (touch.x >= chartArea.left && touch.x <= chartArea.right &&
+            touch.y >= chartArea.top && touch.y <= chartArea.bottom) {
+          plugin.touchStartX = touch.clientX;
+          plugin.touchStartY = touch.clientY;
+
+          // Store initial scale values for panning
+          if (chart.scales.x) {
+            plugin.initialMinX = getCurrentScaleMin(chart.scales.x);
+            plugin.initialMaxX = getCurrentScaleMax(chart.scales.x);
+          }
+          if (chart.scales.y) {
+            plugin.initialMinY = getCurrentScaleMin(chart.scales.y);
+            plugin.initialMaxY = getCurrentScaleMax(chart.scales.y);
+          }
+        }
+      } else if (plugin.touches.length === 2) {
+        // Two fingers - prepare for pinch zoom
+        const dx = plugin.touches[1].x - plugin.touches[0].x;
+        const dy = plugin.touches[1].y - plugin.touches[0].y;
+        plugin.lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+
+        // Store the center point for zoom
+        plugin.touchCenterX = (plugin.touches[0].x + plugin.touches[1].x) / 2;
+        plugin.touchCenterY = (plugin.touches[0].y + plugin.touches[1].y) / 2;
+
+        // Store initial scale values for zooming
+        if (chart.scales.x) {
+          plugin.initialMinX = getCurrentScaleMin(chart.scales.x);
+          plugin.initialMaxX = getCurrentScaleMax(chart.scales.x);
+        }
+        if (chart.scales.y) {
+          plugin.initialMinY = getCurrentScaleMin(chart.scales.y);
+          plugin.initialMaxY = getCurrentScaleMax(chart.scales.y);
+        }
+      }
+
+      event.preventDefault();
+    };
+
+    const handleTouchMove = (event) => {
+      if (!plugin.options.enabled) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const chartArea = chart.chartArea;
+      if (!chartArea) return;
+
+      const currentTouches = Array.from(event.touches).map(touch => ({
+        id: touch.identifier,
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      }));
+
+      if (currentTouches.length === 1 && plugin.touchStartX !== null) {
+        // Single finger panning
+        const touch = currentTouches[0];
+        const deltaX = touch.clientX - plugin.touchStartX;
+        const deltaY = touch.clientY - plugin.touchStartY;
+
+        const width = chartArea.right - chartArea.left;
+        const height = chartArea.bottom - chartArea.top;
+        const boundsX = plugin.dataBounds.x;
+        const boundsY = plugin.dataBounds.y;
+
+        // Pan X axis
+        if (chart.scales.x && Math.abs(deltaX) > 0) {
+          const scale = chart.scales.x;
+          const dataRange = plugin.initialMaxX - plugin.initialMinX;
+          const pixelToValue = dataRange / width;
+          const shift = -deltaX * pixelToValue;
+
+          const newMin = plugin.initialMinX + shift;
+          const newMax = plugin.initialMaxX + shift;
+
+          // Get data boundaries
+          const dataMin = boundsX ? boundsX.min : null;
+          const dataMax = boundsX ? boundsX.max : null;
+
+          // Apply boundaries
+          if (dataMin !== null && dataMax !== null) {
+            if (newMin >= dataMin && newMax <= dataMax) {
+              scale.options.min = newMin;
+              scale.options.max = newMax;
+            } else if (newMin < dataMin) {
+              scale.options.min = dataMin;
+              scale.options.max = dataMin + dataRange;
+            } else if (newMax > dataMax) {
+              scale.options.min = dataMax - dataRange;
+              scale.options.max = dataMax;
+            }
+          } else {
+            scale.options.min = newMin;
+            scale.options.max = newMax;
+          }
+        }
+
+        chart.update('none');
+      } else if (currentTouches.length === 2 && plugin.lastTouchDistance !== null) {
+        // Pinch zoom
+        const dx = currentTouches[1].x - currentTouches[0].x;
+        const dy = currentTouches[1].y - currentTouches[0].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (plugin.lastTouchDistance > 0) {
+          // Calculate zoom factor
+          const zoomFactor = distance / plugin.lastTouchDistance;
+
+          // Get the center point of the pinch
+          const centerX = (currentTouches[0].x + currentTouches[1].x) / 2;
+          const centerY = (currentTouches[0].y + currentTouches[1].y) / 2;
+
+          // Apply zoom to X axis
+          if (chart.scales.x && centerX >= chartArea.left && centerX <= chartArea.right) {
+            const relativeX = centerX - chartArea.left;
+            const width = chartArea.right - chartArea.left;
+
+            // Inverse zoom factor (pinch out = zoom in, pinch in = zoom out)
+            const delta = 1 / zoomFactor;
+            zoomAxis(chart, 'x', delta, relativeX, width);
+          }
+
+          chart.update('none');
+        }
+
+        plugin.lastTouchDistance = distance;
+      }
+
+      event.preventDefault();
+    };
+
+    const handleTouchEnd = (event) => {
+      // Reset touch state
+      plugin.touches = Array.from(event.touches);
+
+      if (plugin.touches.length === 0) {
+        // All touches ended
+        plugin.touchStartX = null;
+        plugin.touchStartY = null;
+        plugin.lastTouchDistance = null;
+        plugin.touchCenterX = null;
+        plugin.touchCenterY = null;
+      } else if (plugin.touches.length === 1) {
+        // Went from 2 fingers to 1, reset for panning
+        plugin.lastTouchDistance = null;
+        const rect = canvas.getBoundingClientRect();
+        const touch = plugin.touches[0];
+        plugin.touchStartX = touch.clientX;
+        plugin.touchStartY = touch.clientY;
+
+        // Update initial values for new gesture
+        if (chart.scales.x) {
+          plugin.initialMinX = getCurrentScaleMin(chart.scales.x);
+          plugin.initialMaxX = getCurrentScaleMax(chart.scales.x);
+        }
+        if (chart.scales.y) {
+          plugin.initialMinY = getCurrentScaleMin(chart.scales.y);
+          plugin.initialMaxY = getCurrentScaleMax(chart.scales.y);
+        }
+      }
+
+      event.preventDefault();
+    };
+
     // Attach event listeners
     canvas.addEventListener('wheel', handleWheel, { passive: false });
     canvas.addEventListener('mousedown', handleMouseDown);
@@ -225,6 +415,11 @@ export const chartZoomPlugin = {
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mouseenter', handleMouseEnter);
     canvas.addEventListener('mouseleave', handleMouseLeave);
+
+    // Touch events for mobile
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     // Global mouseup for when mouse leaves canvas while dragging
     document.addEventListener('mouseup', handleMouseUp);
@@ -237,6 +432,9 @@ export const chartZoomPlugin = {
       mouseup: handleMouseUp,
       mouseenter: handleMouseEnter,
       mouseleave: handleMouseLeave,
+      touchstart: handleTouchStart,
+      touchmove: handleTouchMove,
+      touchend: handleTouchEnd,
       globalMouseup: handleMouseUp
     };
   },
@@ -254,6 +452,9 @@ export const chartZoomPlugin = {
       canvas.removeEventListener('mouseup', handlers.mouseup);
       canvas.removeEventListener('mouseenter', handlers.mouseenter);
       canvas.removeEventListener('mouseleave', handlers.mouseleave);
+      canvas.removeEventListener('touchstart', handlers.touchstart);
+      canvas.removeEventListener('touchmove', handlers.touchmove);
+      canvas.removeEventListener('touchend', handlers.touchend);
       document.removeEventListener('mouseup', handlers.globalMouseup);
     }
   },

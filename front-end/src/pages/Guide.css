@@ -1,0 +1,787 @@
+/* Guide Page Styles */
+.guide-container {
+  min-height: 100vh;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.guide-content {
+  margin-top: 2rem;
+}
+
+/* 平台选择界面 */
+.platform-selection {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.guide-subtitle {
+  font-size: 1.125rem;
+  margin-bottom: 3rem;
+  color: var(--text-secondary);
+}
+
+.platform-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto 2rem;
+}
+
+.platform-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.platform-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.platform-card:active {
+  transform: translateY(-2px);
+}
+
+.platform-icon {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.platform-card h3 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.platform-card .muted {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.skip-button {
+  margin-top: 1rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.skip-button:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+/* 步骤展示界面 */
+.guide-steps {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 进度条 */
+.guide-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.guide-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.guide-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.guide-progress-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* 图片容器 */
+.guide-image-container {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.guide-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 操作按钮 */
+.guide-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.guide-actions .btn {
+  min-width: 160px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.guide-actions .btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.guide-actions .btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.guide-actions .btn-secondary {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.guide-actions .btn-secondary:hover {
+  border-color: var(--text-secondary);
+  background: var(--hover-bg);
+}
+
+/* 键盘提示 */
+.guide-hint {
+  text-align: center;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* 完成状态 */
+.guide-completion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.completion-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.completion-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: bold;
+  animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.completion-card h2 {
+  margin: 0 0 1rem;
+  font-size: 1.75rem;
+  color: var(--text-primary);
+}
+
+.completion-card .muted {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.completion-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.completion-actions .btn {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.completion-actions .btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.completion-actions .btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.completion-actions .btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.completion-actions .btn-secondary:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  background: var(--hover-bg);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .guide-container {
+    padding: 1rem;
+  }
+
+  .platform-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .platform-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .guide-progress-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .guide-progress-text {
+    text-align: center;
+    min-width: auto;
+  }
+
+  .guide-actions {
+    flex-direction: column;
+  }
+
+  .guide-actions .btn {
+    width: 100%;
+  }
+
+  .completion-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .completion-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .guide-container {
+    padding: 0.75rem;
+  }
+
+  .guide-image-container {
+    padding: 0.5rem;
+  }
+
+  .platform-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .completion-card h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* 账户对比页面样式 */
+.account-comparison-view {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.account-comparison-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.account-comparison-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.account-comparison-header .muted {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.account-example {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+/* 账户对比卡片 */
+.account-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.account-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.account-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.standard-account {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02));
+}
+
+.raw-spread-account {
+  border-color: #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.02));
+}
+
+.account-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.account-details {
+  margin-bottom: 1.5rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row.total {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--border-color);
+  font-weight: 600;
+}
+
+.detail-row.net-cost {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.detail-row .label {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.detail-row .value {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.detail-row .value.highlight {
+  color: #f59e0b;
+  font-size: 1.125rem;
+}
+
+.detail-row .value.net {
+  color: #10b981;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.account-suit {
+  background: rgba(0, 0, 0, 0.03);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.suit-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.suit-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* 交易举例 */
+.trading-examples {
+  margin-bottom: 3rem;
+}
+
+.trading-examples h3 {
+  font-size: 1.75rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.example-cards {
+  display: grid;
+  gap: 2rem;
+}
+
+.example-card {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.example-card h4 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.example-desc {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.example-comparison {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.comparison-item {
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.comparison-item.standard {
+  background: rgba(59, 130, 246, 0.05);
+  border-left-color: #3b82f6;
+}
+
+.comparison-item.raw {
+  background: rgba(16, 185, 129, 0.05);
+  border-left-color: #10b981;
+}
+
+.comparison-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.comparison-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.example-conclusion {
+  background: rgba(245, 158, 11, 0.1);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+/* 建议框 */
+.recommendation-box {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.recommendation-box h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.recommendation-items {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.recommendation-item {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.recommendation-key {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* 响应式设计 - 账户对比 */
+@media (max-width: 768px) {
+  .account-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .account-comparison-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .trading-examples h3 {
+    font-size: 1.5rem;
+  }
+
+  .example-card {
+    padding: 1.25rem;
+  }
+
+  .recommendation-box {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .account-card {
+    padding: 1.5rem;
+  }
+
+  .account-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .detail-row {
+    padding: 0.5rem 0;
+  }
+
+  .comparison-item {
+    padding: 0.75rem;
+  }
+}
+
+/* 深色模式优化 */
+@media (prefers-color-scheme: dark) {
+  .platform-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .guide-image-container {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .completion-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .account-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .account-suit {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* 解锁更多按钮 */
+.rebate-unlock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rebate-unlock-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* 密码弹窗 */
+.password-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.password-modal {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.password-modal h3 {
+  margin: 0 0 1.5rem;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.password-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.password-input:focus {
+  border-color: var(--primary);
+}
+
+.password-input.error {
+  border-color: #ef4444;
+}
+
+.password-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0;
+}
+
+.password-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.password-modal-actions .btn {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.password-modal-actions .btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.password-modal-actions .btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.password-modal-actions .btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.password-modal-actions .btn-secondary:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
