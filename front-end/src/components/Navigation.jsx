@@ -33,6 +33,7 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
         { id: 'indicators', label: translate('nav.indicators') },
         { id: 'leverage-calculator', label: translate('nav.leverage') },
         { id: 'news', label: translate('nav.news'), badge: 'new' },
+        { id: 'weekly-mindmap', label: currentLanguage === 'cn' ? '周报导图' : 'Weekly Mindmap', badge: 'new' },
         ...(currentLanguage === 'cn' ? [
           { id: 'withdrawal-rate', label: '出金汇率', badge: 'new' },
           { id: 'liquidity-crisis', label: '流动性危机图', badge: 'new' }
@@ -42,6 +43,10 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
   ];
 
   const handleSelect = (id) => {
+    if (id === 'weekly-mindmap') {
+      window.location.href = '/weekly-mindmap';
+      return;
+    }
     setCurrentPage(id);
     setIsOpen(false);
   };

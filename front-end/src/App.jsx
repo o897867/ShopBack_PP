@@ -1,7 +1,14 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
 import './index.css';
 import Navigation from './components/Navigation.jsx';
+
+// Weekly mindmap module (lazy-loaded, fully isolated)
+const TimelineView = lazy(() => import('./weekly/pages/TimelineView.tsx'));
+const NodeDetailPage = lazy(() => import('./weekly/pages/NodeDetailPage.tsx'));
+const TopicsView = lazy(() => import('./weekly/pages/TopicsView.tsx'));
+const GraphView = lazy(() => import('./weekly/pages/GraphView.tsx'));
 import TradingViewPage from './pages/trading.jsx';
 import BrokerHub from './pages/BrokerHub.jsx';
 import Home from './pages/Home.jsx';
@@ -68,6 +75,50 @@ const App = () => {
 
 
 
+  return (
+    <Routes>
+      {/* Weekly mindmap module — isolated routes */}
+      <Route path="/weekly-mindmap" element={
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TimelineView />
+        </Suspense>
+      } />
+      <Route path="/weekly-mindmap/nodes/:id" element={
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <NodeDetailPage />
+        </Suspense>
+      } />
+      <Route path="/weekly-mindmap/topics" element={
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TopicsView />
+        </Suspense>
+      } />
+      <Route path="/weekly-mindmap/topics/:slug" element={
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TopicsView />
+        </Suspense>
+      } />
+      <Route path="/weekly-mindmap/graph" element={
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <GraphView />
+        </Suspense>
+      } />
+
+      {/* Existing hash-based app — catch-all */}
+      <Route path="*" element={
+        <HashApp
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          pausedPages={pausedPages}
+          translate={translate}
+        />
+      } />
+    </Routes>
+  );
+};
+
+/** Original hash-based app, extracted so Routes can render it as a fallback. */
+const HashApp = ({ currentPage, setCurrentPage, pausedPages, translate }) => {
   return (
     <div className="app">
       {/* 全局导航 - 始终显示 */}

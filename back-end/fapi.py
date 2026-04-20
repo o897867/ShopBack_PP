@@ -273,6 +273,10 @@ app.include_router(
     tags=["Authentication"],
 )
 
+# ============= Weekly Mindmap 模块 =============
+from weekly.router import router as weekly_router
+app.include_router(weekly_router)
+
 # ============= Legacy功能路由 (可选) =============
 
 if ENABLE_LEGACY_FEATURES:

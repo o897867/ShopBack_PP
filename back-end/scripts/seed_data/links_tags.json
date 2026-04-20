@@ -1,0 +1,300 @@
+{
+  "tags": [
+    {"slug": "gold", "name": "黄金", "color": "c-amber", "description": "黄金及其长期趋势、锚定机制", "parent_slug": null},
+    {"slug": "resources", "name": "资源", "color": "c-amber", "description": "资源类资产的大类配置与重估", "parent_slug": null},
+    {"slug": "energy", "name": "能源", "color": "c-purple", "description": "原油、天然气、电力、核能等能源议题", "parent_slug": null},
+    {"slug": "liquidity", "name": "流动性", "color": "c-teal", "description": "全球流动性周期与货币政策传导", "parent_slug": null},
+    {"slug": "policy", "name": "政策", "color": "c-teal", "description": "货币政策、监管政策", "parent_slug": null},
+    {"slug": "geopolitics", "name": "地缘政治", "color": "c-blue", "description": "大国博弈、外交、军事", "parent_slug": null},
+    {"slug": "cycle", "name": "周期", "color": "c-pink", "description": "周期股、周期投资方法论", "parent_slug": null},
+    {"slug": "methodology", "name": "方法论", "color": "c-gray", "description": "交易与投资方法论", "parent_slug": null},
+    {"slug": "macro", "name": "宏观", "color": "c-gray", "description": "宏观经济判断与趋势", "parent_slug": null},
+    {"slug": "us-stocks", "name": "美股", "color": "c-coral", "description": "美国股市", "parent_slug": null},
+    {"slug": "us-economy", "name": "美国经济", "color": "c-coral", "description": "美国宏观经济数据与走向", "parent_slug": null},
+    {"slug": "a-stocks", "name": "A股", "color": "c-pink", "description": "A股市场", "parent_slug": null},
+    {"slug": "hk-stocks", "name": "港股", "color": "c-pink", "description": "港股市场", "parent_slug": null},
+    {"slug": "china", "name": "中国", "color": "c-blue", "description": "涉及中国的战略与政策议题", "parent_slug": null},
+    {"slug": "education", "name": "科普", "color": "c-gray", "description": "基础概念科普", "parent_slug": null},
+    {"slug": "iran", "name": "伊朗", "color": "c-blue", "description": "伊朗政局与霍尔木兹海峡", "parent_slug": "geopolitics"},
+    {"slug": "trump", "name": "特朗普", "color": "c-blue", "description": "特朗普个人决策与执政逻辑", "parent_slug": "geopolitics"},
+    {"slug": "rare-earth", "name": "稀土", "color": "c-blue", "description": "稀土的战略价值与博弈", "parent_slug": "geopolitics"},
+    {"slug": "copper", "name": "铜", "color": "c-coral", "description": "铜的供需与末日信仰", "parent_slug": "resources"},
+    {"slug": "pork", "name": "猪肉", "color": "c-pink", "description": "生猪周期与养殖业", "parent_slug": "cycle"},
+    {"slug": "nuclear", "name": "核能", "color": "c-purple", "description": "核电复兴与小型模块化反应堆", "parent_slug": "energy"},
+    {"slug": "stagflation", "name": "滞胀", "color": "c-red", "description": "滞胀宏观情景", "parent_slug": "macro"},
+    {"slug": "recession", "name": "衰退", "color": "c-red", "description": "衰退宏观情景", "parent_slug": "macro"},
+    {"slug": "de-dollarization", "name": "去美元化", "color": "c-teal", "description": "全球去美元化长期趋势", "parent_slug": "liquidity"},
+    {"slug": "buffett", "name": "巴菲特", "color": "c-gray", "description": "巴菲特及伯克希尔的动向", "parent_slug": "methodology"},
+    {"slug": "psychology", "name": "投资心理", "color": "c-gray", "description": "交易心理、踏空恐惧、情绪管理", "parent_slug": "methodology"}
+  ],
+
+  "links": [
+    {
+      "id": "link-e01",
+      "from_node_id": "node-301-gold-trend",
+      "to_node_id": "node-308-gold-anchor",
+      "type": "evolution",
+      "label": "长线看好 → 锚定机制展开",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.1 给出'长线看好'的大方向判断但没展开为什么，3.8 用'中美博弈 + 去美元化'把锚定机制讲清楚，是对前一期判断的深化。"
+    },
+    {
+      "id": "link-e02",
+      "from_node_id": "node-308-gold-anchor",
+      "to_node_id": "node-315-gold-standby",
+      "type": "evolution",
+      "label": "锚定逻辑 → 配角静候姿态",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.8 把黄金的长期锚点讲清楚后，3.15 明确当前阶段黄金'不是主场、只是配角'——从战略框架落到阶段性定位。"
+    },
+    {
+      "id": "link-e03",
+      "from_node_id": "node-315-gold-standby",
+      "to_node_id": "node-405-two-golden-pits",
+      "type": "evolution",
+      "label": "静候 → 两个坑的展开",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.15 的'配角静候'为未来机会埋下伏笔，4.5 将这个机会具象化为流动性坑（3600-3650）和 A 股坑两个具体坐标。"
+    },
+    {
+      "id": "link-e04",
+      "from_node_id": "node-405-two-golden-pits",
+      "to_node_id": "node-412-gold-add",
+      "type": "evolution",
+      "label": "坑的理论 → 4700 加仓执行",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "4.5 预测流动性黄金坑在 3600-3650 区间，4.12 在 4700 止盈后 5.5% 回调加仓 5 成——没等精确底部，用性价比思路落地了 4.5 的预测。"
+    },
+    {
+      "id": "link-e05",
+      "from_node_id": "node-412-gold-add",
+      "to_node_id": "node-419-reflection",
+      "type": "evolution",
+      "label": "4700 加仓 → 4800 验证",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "4.12 的加仓判断在 4.19 得到兑现——金价冲到 4800，作者明确表示'再次验证了之前的判断'。这是整条黄金链的收官节点。"
+    },
+    {
+      "id": "link-e06",
+      "from_node_id": "node-308-iran-succession",
+      "to_node_id": "node-315-oil-management",
+      "type": "evolution",
+      "label": "瘫痪状态 → 精细化管理",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.8 把霍尔木兹描述为'物理瘫痪'，3.15 把这种瘫痪升级为'精细化管理'——中国印度放行、美西方彻底封锁，操作层面更精细。"
+    },
+    {
+      "id": "link-e07",
+      "from_node_id": "node-315-oil-management",
+      "to_node_id": "node-405-trump-trapped",
+      "type": "evolution",
+      "label": "长期化 → 特朗普绷不住",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.15 预判海峡短期不会开放，特朗普必须考虑地面战。4.5 验证了这个预判——压力积累到临界点，特朗普公开威胁'电厂和桥梁日'。"
+    },
+    {
+      "id": "link-e08",
+      "from_node_id": "node-405-trump-trapped",
+      "to_node_id": "node-412-trump-uncontrolled",
+      "type": "evolution",
+      "label": "绷不住 → 反复摇摆",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "4.5 预判特朗普大概率用疯狂方式结束对峙，4.12 给出了疯狂方式的第一次表现——周日晚扬言封锁海峡、拍船、放开交涉费用，但态度反复。"
+    },
+    {
+      "id": "link-e09",
+      "from_node_id": "node-315-rare-earth-setup",
+      "to_node_id": "node-412-china-japan",
+      "type": "evolution",
+      "label": "伏笔 → 中日博弈升级",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.15 把稀土作为'黄金坑伏笔'埋下，强调其战略地位。4.12 稀土成为中日博弈的核心武器（一剑封喉）——完成故事兑现。"
+    },
+    {
+      "id": "link-e10",
+      "from_node_id": "node-308-us-stagflation",
+      "to_node_id": "node-322-critical-point",
+      "type": "evolution",
+      "label": "滞胀回归 → 临界点博弈",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.8 提出美国重回'滞胀'逻辑，3.22 把这个判断升级为更精细的问题——我们面对的到底是大滞胀还是衰退？从定性判断变成临界点博弈。"
+    },
+    {
+      "id": "link-e11",
+      "from_node_id": "node-315-rare-earth-setup",
+      "to_node_id": "node-412-energy-anxiety",
+      "type": "evolution",
+      "label": "伏笔 → 能源博弈焦点",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.15 稀土作为'黄金坑伏笔'埋下，4.12 能源安全焦虑全球升温——法德核电、风电扩张都直接推高稀土战略需求，稀土从议题升级为博弈焦点。"
+    },
+
+    {
+      "id": "link-c01",
+      "from_node_id": "node-412-energy-anxiety",
+      "to_node_id": "node-419-us-stocks",
+      "type": "causation",
+      "label": "能源焦虑 → 期现背离",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "4.12 全球能源安全焦虑升温，4.19 一周内就出现现货原油 150-170 与期货 80-100 的极端背离——能源溢价在实体端飞涨但虚拟金融端仍未定价，4.12 的焦虑直接引发了 4.19 的定价矛盾。"
+    },
+    {
+      "id": "link-c02",
+      "from_node_id": "node-322-recession-transit",
+      "to_node_id": "node-412-buffett-cash",
+      "type": "causation",
+      "label": "中转站预期 → 现金投票",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.22 作者预测'衰退是滞胀的中转站'，这种对资产普跌的预期与 4.12 巴菲特 58.2% 现金仓位形成因果呼应——聪明钱正在为衰退情形做准备。"
+    },
+    {
+      "id": "link-c03",
+      "from_node_id": "node-301-oilfield-case",
+      "to_node_id": "node-308-iran-succession",
+      "type": "causation",
+      "label": "price in 完成 → 事件落地",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.1 用油服股图形展示 price in 的过程（事件落地时反而回调），3.8 伊朗事件真正落地——正好完成了 price in 的最后一环：提前消化后的兑现行情。"
+    },
+
+    {
+      "id": "link-t01",
+      "from_node_id": "node-412-pork-contrarian",
+      "to_node_id": "node-419-baijiu",
+      "type": "contrast",
+      "label": "何时入场 vs 如何识别退出",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "同一套周期交易思维框架的正反两面：猪肉讨论'逆周期何时入场'、白酒讨论'如何识别下跌三阶段'。两篇合起来构成周期交易的完整工具箱。"
+    },
+    {
+      "id": "link-t02",
+      "from_node_id": "node-301-revaluation",
+      "to_node_id": "node-322-energy-stockpicking",
+      "type": "contrast",
+      "label": "重估逻辑 vs 筛选标准",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.1 给出资产重估的理论框架（储量 > 当期利润），3.22 给出把该框架落到选股上的具体过滤器（储量高+低市值+地缘安全+上游利润）。理论与实操的对照。"
+    },
+    {
+      "id": "link-t03",
+      "from_node_id": "node-405-two-golden-pits",
+      "to_node_id": "node-315-rare-earth-setup",
+      "type": "contrast",
+      "label": "流动性坑 vs 稀土坑",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "两个不同类型的'黄金坑'对照：4.5 的坑是流动性收缩带来的普跌机会，3.15 的坑是稀土短期消息反复带来的错杀机会。同一个'黄金坑'概念在不同资产类别的应用。"
+    },
+    {
+      "id": "link-t04",
+      "from_node_id": "node-301-pricein-concept",
+      "to_node_id": "node-405-tradeoff-cognition",
+      "type": "contrast",
+      "label": "price in 方法 vs 胜率×盈亏比",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "两个方法论的对照：3.1 的 price in 侧重'市场定价机制的客观理解'，4.5 的胜率×盈亏比侧重'交易者主观性价比的动态衡量'。一个看市场怎么定价，一个看自己怎么决策。"
+    },
+
+    {
+      "id": "link-r01",
+      "from_node_id": "node-412-buffett-cash",
+      "to_node_id": "node-419-reflection",
+      "type": "resonance",
+      "label": "现金投票 ≈ 流动性天花板",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "巴菲特 58.2% 现金（4.12）与作者提出的'流动性收缩是天花板'（4.19）是同一个宏观判断的两种表达——都在说：流动性收缩期，只有极少数真资产值得重仓。"
+    },
+    {
+      "id": "link-r02",
+      "from_node_id": "node-412-china-japan",
+      "to_node_id": "node-419-us-stocks",
+      "type": "resonance",
+      "label": "地缘升级 ≈ 市场定价趋零",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "4.12 中日关系升级到'稀土一剑封喉'级别，4.19 美股对战争风险定价趋近于零——地缘实际上在恶化，但市场在反向定价，形成了一种令人不安的错配。"
+    },
+    {
+      "id": "link-r03",
+      "from_node_id": "node-308-assets-2026",
+      "to_node_id": "node-419-reflection",
+      "type": "resonance",
+      "label": "资源年 ≈ 矮子里拔将军",
+      "strength": 3,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.8 提出'2026 是资源年'的大类判断，4.19 在流动性收缩的约束条件下，得出'资源赛道依然是矮子里拔将军'——两者指向同一个结论：在整体天花板存在的环境下，资源是相对最优选择。"
+    },
+    {
+      "id": "link-r04",
+      "from_node_id": "node-322-energy-stockpicking",
+      "to_node_id": "node-412-energy-anxiety",
+      "type": "resonance",
+      "label": "筛选逻辑 ≈ 安全焦虑",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.22 作者的选股'三要'中有'要地缘安全'这一条，4.12 全球范围内的能源安全焦虑（法德核电、风电招标）在宏观层面印证了同一个逻辑——地缘安全已成为各方决策的核心维度。"
+    },
+    {
+      "id": "link-r05",
+      "from_node_id": "node-315-copper-apocalypse",
+      "to_node_id": "node-322-critical-point",
+      "type": "resonance",
+      "label": "末世信仰 ≈ 大滞胀判断",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "3.15 用'末世宗教'解释美国行为（非经济理性），3.22 把这种非理性具象化为大滞胀 vs 衰退的临界点博弈——都在表达：传统宏观模型已经失灵，需要用更极端的框架理解市场。"
+    },
+    {
+      "id": "link-r06",
+      "from_node_id": "node-405-tradeoff-cognition",
+      "to_node_id": "node-419-baijiu",
+      "type": "resonance",
+      "label": "胜率框架 ≈ 下跌三阶段",
+      "strength": 2,
+      "ai_suggested": true,
+      "user_confirmed": true,
+      "ai_reasoning": "4.5 的胜率×时间框架和 4.19 的下跌三阶段框架，都是在教读者如何在不同时间窗口做不同胜率的决策——胜率随时间颗粒度变化（4.5）、阶段决定策略（4.19），底层逻辑一致。"
+    }
+  ]
+}
