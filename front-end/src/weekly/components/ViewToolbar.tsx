@@ -7,7 +7,6 @@ interface Props {
 const VIEWS = [
   { path: "/weekly-mindmap", label: "Timeline" },
   { path: "/weekly-mindmap/topics", label: "Topics" },
-  { path: "/weekly-mindmap/graph", label: "Graph" },
 ] as const;
 
 export default function ViewToolbar({ children }: Props) {
@@ -22,7 +21,7 @@ export default function ViewToolbar({ children }: Props) {
 
   return (
     <div className="wm-toolbar">
-      <h1>Weekly Mindmap</h1>
+      <h1>郝有道理 · 周报</h1>
       <div className="wm-view-btns">
         {VIEWS.map((v) => (
           <Link

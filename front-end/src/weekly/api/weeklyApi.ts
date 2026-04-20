@@ -1,5 +1,6 @@
 import type {
   LinkDetail,
+  LinkIndexResponse,
   NodeDetail,
   ReportDetail,
   ReportSummary,
@@ -30,6 +31,8 @@ export const weeklyApi = {
     const q = nodeId ? `?node=${encodeURIComponent(nodeId)}` : "";
     return get<LinkDetail[]>(`/api/weekly/links${q}`);
   },
+
+  getLinkIndex: () => get<LinkIndexResponse>("/api/weekly/links/index"),
 
   listTags: () => get<Tag[]>("/api/weekly/tags"),
 

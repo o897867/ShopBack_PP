@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { weeklyApi } from "../api/weeklyApi";
 import type { NodeDetail, LinkDetail, ReportSummary } from "../types";
+import { useTimelineStore } from "../store/timelineStore";
 import { TYPE_LABELS } from "../utils/linkStyles";
 import "../weekly.css";
 
@@ -20,6 +21,8 @@ export default function NodeDetailPage() {
   const [report, setReport] = useState<ReportSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const tagMap = useTimelineStore((s) => s.tagMap);
+  const setTagMap = useTimelineStore((s) => s.setTagMap);
 
   useEffect(() => {
     if (!id) return;
@@ -38,8 +41,16 @@ export default function NodeDetailPage() {
         setNode(nodeData);
         setLinks(linksData);
 
-        // 2. Fetch the parent report for breadcrumb
-        const reports = await weeklyApi.listReports();
+        // 2. Fetch tags if not cached, and parent report
+        const [reports, tags] = await Promise.all([
+          weeklyApi.listReports(),
+          Object.keys(tagMap).length === 0 ? weeklyApi.listTags() : Promise.resolve(null),
+        ]);
+        if (tags) {
+          const m: Record<string, string> = {};
+          for (const t of tags) m[t.slug] = t.name;
+          setTagMap(m);
+        }
         if (cancelled) return;
         const parentReport = reports.find((r) => r.id === nodeData.report_id) ?? null;
         setReport(parentReport);
@@ -89,7 +100,7 @@ export default function NodeDetailPage() {
     <div className="wm-detail">
       {/* Breadcrumb */}
       <nav className="wm-breadcrumb">
-        <Link to="/weekly-mindmap">Timeline</Link>
+        <Link to="/weekly-mindmap">周报</Link>
         <span className="sep">/</span>
         {report && (
           <>
@@ -125,7 +136,7 @@ export default function NodeDetailPage() {
         <aside className="wm-detail-sidebar">
           {node.key_points && node.key_points.length > 0 && (
             <div className="wm-sidebar-section">
-              <div className="wm-sidebar-label">Key Points</div>
+              <div className="wm-sidebar-label">要点</div>
               <ul className="wm-sidebar-kp">
                 {node.key_points.map((kp, i) => (
                   <li key={i}>{kp}</li>
@@ -136,11 +147,11 @@ export default function NodeDetailPage() {
 
           {node.tags && node.tags.length > 0 && (
             <div className="wm-sidebar-section">
-              <div className="wm-sidebar-label">Tags</div>
+              <div className="wm-sidebar-label">标签</div>
               <div className="wm-sidebar-tags">
                 {node.tags.map((tag) => (
                   <span key={tag} className="wm-sidebar-tag">
-                    {tag}
+                    {tagMap[tag] || tag}
                   </span>
                 ))}
               </div>
@@ -153,7 +164,7 @@ export default function NodeDetailPage() {
       {linkedNodes.length > 0 && (
         <div className="wm-linked-section">
           <h2 className="wm-linked-heading">
-            Related Nodes ({linkedNodes.length})
+            关联节点 ({linkedNodes.length})
           </h2>
           <div className="wm-linked-grid">
             {linkedNodes.map(({ node: other, link, reportDate }) => (

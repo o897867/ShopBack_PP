@@ -35,6 +35,15 @@ import LanguageSelector from './components/LanguageSelector.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
 
 
+/** Thin wrapper so weekly routes also show the hamburger nav. */
+const WeeklyNav = ({ currentPage, setCurrentPage }) => {
+  const handleSetPage = (id) => {
+    if (id === 'weekly-mindmap') return; // already there
+    window.location.href = `/#${id}`;
+  };
+  return <Navigation currentPage="weekly-mindmap" setCurrentPage={handleSetPage} />;
+};
+
 const App = () => {
   const { currentLanguage, isLoading: languageLoading } = useLanguage();
   const translate = (key) => t(key, currentLanguage);
@@ -80,26 +89,31 @@ const App = () => {
       {/* Weekly mindmap module — isolated routes */}
       <Route path="/weekly-mindmap" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
           <TimelineView />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/nodes/:id" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
           <NodeDetailPage />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/topics" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
           <TopicsView />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/topics/:slug" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
           <TopicsView />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/graph" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
           <GraphView />
         </Suspense>
       } />

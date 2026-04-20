@@ -60,6 +60,65 @@
   accent-color: #3b82f6;
 }
 
+/* ── Timeline toolbar (link controls) ── */
+
+.wm-timeline-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 24px;
+  border-bottom: 0.5px solid #e2e8f0;
+  background: #fff;
+  flex-shrink: 0;
+}
+.wm-link-controls-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-right: 2px;
+}
+.wm-link-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wm-type-chip {
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 0.5px solid #e2e8f0;
+  border-radius: 4px;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
+}
+.wm-type-chip:hover {
+  background: #f8fafc;
+}
+.wm-type-chip.is-active {
+  background: #fff;
+  font-weight: 500;
+}
+.wm-chip-divider {
+  width: 1px;
+  height: 16px;
+  background: #e2e8f0;
+  margin: 0 4px;
+}
+.wm-show-all-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+  cursor: pointer;
+}
+.wm-show-all-toggle input {
+  margin: 0;
+  width: 12px;
+  height: 12px;
+  accent-color: #3b82f6;
+}
+
 /* ── Timeline container ── */
 
 .wm-timeline {
@@ -96,6 +155,11 @@
   font-weight: 600;
   color: #1e293b;
 }
+.wm-column-author {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 2px;
+}
 
 .wm-ai-badge {
   display: inline-block;
@@ -124,10 +188,31 @@
 .wm-node:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+.wm-node-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
 .wm-node-title {
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+.wm-link-badge {
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 6px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.wm-link-badge.is-hub {
+  background: #eff6ff;
+  color: #3b82f6;
 }
 .wm-node-subtitle {
   font-size: 0.75rem;

@@ -41,6 +41,12 @@ export interface LinkDetail {
   created_at: string;
 }
 
+export interface LinkIndexResponse {
+  node_link_count: Record<string, number>;
+  node_to_links: Record<string, string[]>;
+  links_by_id: Record<string, LinkDetail>;
+}
+
 export interface ReportSummary {
   id: string;
   date: string;

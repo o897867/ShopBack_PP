@@ -1,24 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { weeklyApi } from "../api/weeklyApi";
-import type { LinkDetail, NodeDetail, ReportDetail } from "../types";
+import type { ReportDetail } from "../types";
+import { useTimelineStore } from "../store/timelineStore";
 import ReportColumn from "../components/ReportColumn";
-import HoverPanel from "../components/HoverPanel";
 import LinkLayer from "../components/LinkLayer";
+import TimelineToolbar from "../components/TimelineToolbar";
 import ViewToolbar from "../components/ViewToolbar";
 import "../weekly.css";
 
 export default function TimelineView() {
   const [reports, setReports] = useState<ReportDetail[]>([]);
-  const [links, setLinks] = useState<LinkDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [showLinks, setShowLinks] = useState(true);
 
-  // Hover state
-  const [hovered, setHovered] = useState<{
-    node: NodeDetail;
-    pos: { x: number; y: number };
-  } | null>(null);
+  // Zustand store
+  const setLinkIndex = useTimelineStore((s) => s.setLinkIndex);
+  const setTagMap = useTimelineStore((s) => s.setTagMap);
+  const clearFocus = useTimelineStore((s) => s.clearFocus);
 
   // Refs
   const nodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -29,39 +27,23 @@ export default function TimelineView() {
     let cancelled = false;
     setLoading(true);
 
-    Promise.all([weeklyApi.listReports(), weeklyApi.listLinks()])
-      .then(async ([summaries, allLinks]) => {
+    Promise.all([weeklyApi.listReports(), weeklyApi.getLinkIndex(), weeklyApi.listTags()])
+      .then(async ([summaries, linkIdx, tags]) => {
         if (cancelled) return;
-        // Load full detail for all reports
+        setLinkIndex(linkIdx);
+        const m: Record<string, string> = {};
+        for (const t of tags) m[t.slug] = t.name;
+        setTagMap(m);
         const ids = summaries.map((s) => s.id);
         const details = await Promise.all(ids.map((id) => weeklyApi.getReport(id)));
         if (cancelled) return;
         setReports(details);
-        setLinks(allLinks);
       })
       .catch((e) => { if (!cancelled) setError(e); })
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, []);
-
-  // Hover handlers
-  const onNodeHover = useCallback(
-    (e: React.MouseEvent, node: NodeDetail) => {
-      setHovered({ node, pos: { x: e.clientX, y: e.clientY } });
-    },
-    [],
-  );
-  const onNodeLeave = useCallback(() => setHovered(null), []);
-
-  // Links related to hovered node
-  const hoveredLinks = hovered
-    ? links.filter(
-        (l) =>
-          l.from_node_id === hovered.node.id ||
-          l.to_node_id === hovered.node.id,
-      )
-    : [];
+  }, [setLinkIndex]);
 
   if (loading) {
     return (
@@ -80,44 +62,29 @@ export default function TimelineView() {
 
   return (
     <div className="wm-root">
-      <ViewToolbar>
-        <label className="wm-toggle">
-          <input
-            type="checkbox"
-            checked={showLinks}
-            onChange={(e) => setShowLinks(e.target.checked)}
-          />
-          Show cross-week links
-        </label>
-      </ViewToolbar>
+      <ViewToolbar />
+      <TimelineToolbar />
 
       {/* Timeline */}
-      <div className="wm-timeline" ref={containerRef}>
+      <div
+        className="wm-timeline"
+        ref={containerRef}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) clearFocus();
+        }}
+      >
         <LinkLayer
-          links={links}
           nodeRefs={nodeRefs}
           containerRef={containerRef}
-          visible={showLinks}
         />
         {reports.map((r) => (
           <ReportColumn
             key={r.id}
             report={r}
             nodeRefs={nodeRefs}
-            onNodeHover={onNodeHover}
-            onNodeLeave={onNodeLeave}
           />
         ))}
       </div>
-
-      {/* Hover panel */}
-      {hovered && (
-        <HoverPanel
-          node={hovered.node}
-          links={hoveredLinks}
-          position={hovered.pos}
-        />
-      )}
     </div>
   );
 }

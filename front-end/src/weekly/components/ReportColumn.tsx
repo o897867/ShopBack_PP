@@ -1,20 +1,28 @@
 import { useCallback } from "react";
-import type { NodeDetail, ReportDetail } from "../types";
+import { useNavigate } from "react-router-dom";
+import type { ReportDetail } from "../types";
+import { useTimelineStore } from "../store/timelineStore";
+import { getNodeVisualState, type VisibilityInputs } from "../store/selectors";
 import NodeCard from "./NodeCard";
 
 interface Props {
   report: ReportDetail;
   nodeRefs: React.MutableRefObject<Map<string, HTMLDivElement>>;
-  onNodeHover: (e: React.MouseEvent, node: NodeDetail) => void;
-  onNodeLeave: () => void;
 }
 
-export default function ReportColumn({
-  report,
-  nodeRefs,
-  onNodeHover,
-  onNodeLeave,
-}: Props) {
+export default function ReportColumn({ report, nodeRefs }: Props) {
+  const {
+    hoveredNodeId,
+    focusedNodeId,
+    visibleTypes,
+    showAllLinks,
+    linkIndex,
+    tagMap,
+  } = useTimelineStore();
+  const setHovered = useTimelineStore((s) => s.setHovered);
+  const setFocused = useTimelineStore((s) => s.setFocused);
+  const navigate = useNavigate();
+
   const refCallback = useCallback(
     (nodeId: string) => (el: HTMLDivElement | null) => {
       if (el) nodeRefs.current.set(nodeId, el);
@@ -22,6 +30,17 @@ export default function ReportColumn({
     },
     [nodeRefs],
   );
+
+  const inputs: VisibilityInputs | null = linkIndex
+    ? {
+        hoveredNodeId,
+        focusedNodeId,
+        showAllLinks,
+        visibleTypes,
+        nodeToLinks: linkIndex.node_to_links,
+        linksById: linkIndex.links_by_id,
+      }
+    : null;
 
   return (
     <div className="wm-column">
@@ -33,6 +52,7 @@ export default function ReportColumn({
             <span className="wm-ai-badge">AI 整理</span>
           )}
         </div>
+        <div className="wm-column-author">{report.author}</div>
       </div>
       {report.nodes
         .slice()
@@ -42,8 +62,17 @@ export default function ReportColumn({
             key={node.id}
             ref={refCallback(node.id)}
             node={node}
-            onMouseEnter={onNodeHover}
-            onMouseLeave={onNodeLeave}
+            visualState={inputs ? getNodeVisualState(node.id, inputs) : "normal"}
+            linkCount={linkIndex?.node_link_count[node.id] || 0}
+            tagMap={tagMap}
+            onHover={setHovered}
+            onClick={() => {
+              if (focusedNodeId === node.id) {
+                navigate(`/weekly-mindmap/nodes/${node.id}`);
+              } else {
+                setFocused(node.id);
+              }
+            }}
           />
         ))}
     </div>
