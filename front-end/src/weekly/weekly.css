@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 24px;
+  padding: 12px 24px 12px 72px;  /* left padding clears the fixed nav-toggle (42px + 16px + margin) */
   border-bottom: 1px solid #e2e8f0;
   background: #fff;
   flex-shrink: 0;

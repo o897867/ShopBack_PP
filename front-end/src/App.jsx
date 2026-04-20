@@ -5,10 +5,16 @@ import './index.css';
 import Navigation from './components/Navigation.jsx';
 
 // Weekly mindmap module (lazy-loaded, fully isolated)
+import { useIsMobile } from './weekly/hooks/useIsMobile';
 const TimelineView = lazy(() => import('./weekly/pages/TimelineView.tsx'));
 const NodeDetailPage = lazy(() => import('./weekly/pages/NodeDetailPage.tsx'));
 const TopicsView = lazy(() => import('./weekly/pages/TopicsView.tsx'));
 const GraphView = lazy(() => import('./weekly/pages/GraphView.tsx'));
+// Mobile weekly
+const MobileApp = lazy(() => import('./weekly/mobile/MobileApp.tsx'));
+const MobileNodeDetail = lazy(() => import('./weekly/mobile/MobileNodeDetail.tsx'));
+const MobileTopicView = lazy(() => import('./weekly/mobile/MobileTopicView.tsx'));
+const MobileErrorBoundary = lazy(() => import('./weekly/mobile/components/MobileErrorBoundary.tsx').then(m => ({ default: m.MobileErrorBoundary })));
 import TradingViewPage from './pages/trading.jsx';
 import BrokerHub from './pages/BrokerHub.jsx';
 import Home from './pages/Home.jsx';
@@ -36,13 +42,27 @@ import ThemeToggle from './components/ThemeToggle.jsx';
 
 
 /** Thin wrapper so weekly routes also show the hamburger nav. */
-const WeeklyNav = ({ currentPage, setCurrentPage }) => {
+const WeeklyNav = () => {
   const handleSetPage = (id) => {
-    if (id === 'weekly-mindmap') return; // already there
+    if (id === 'weekly-mindmap') return;
     window.location.href = `/#${id}`;
   };
   return <Navigation currentPage="weekly-mindmap" setCurrentPage={handleSetPage} />;
 };
+
+/** Viewport-based dispatch for weekly routes */
+function WeeklyEntry() {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileApp /> : <TimelineView />;
+}
+function WeeklyNodeEntry() {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileNodeDetail /> : <NodeDetailPage />;
+}
+function WeeklyTopicEntry() {
+  const isMobile = useIsMobile();
+  return isMobile ? <MobileTopicView /> : <TopicsView />;
+}
 
 const App = () => {
   const { currentLanguage, isLoading: languageLoading } = useLanguage();
@@ -86,34 +106,34 @@ const App = () => {
 
   return (
     <Routes>
-      {/* Weekly mindmap module — isolated routes */}
+      {/* Weekly mindmap module — isolated routes, mobile/desktop dispatch */}
       <Route path="/weekly-mindmap" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
-          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
-          <TimelineView />
+          <WeeklyNav />
+          <WeeklyEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/nodes/:id" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
-          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
-          <NodeDetailPage />
+          <WeeklyNav />
+          <WeeklyNodeEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/topics" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
-          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
-          <TopicsView />
+          <WeeklyNav />
+          <WeeklyTopicEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/topics/:slug" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
-          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
-          <TopicsView />
+          <WeeklyNav />
+          <WeeklyTopicEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/graph" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
-          <WeeklyNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
+          <WeeklyNav />
           <GraphView />
         </Suspense>
       } />
