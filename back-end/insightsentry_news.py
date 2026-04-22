@@ -222,6 +222,7 @@ class NewsWebSocketClient:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     news_id TEXT UNIQUE,
                     title TEXT NOT NULL,
+                    title_cn TEXT,
                     content TEXT,
                     summary TEXT,
                     summary_cn TEXT,
@@ -236,6 +237,13 @@ class NewsWebSocketClient:
                     raw_data TEXT
                 )
             """)
+
+            # 迁移：为已有数据库添加 title_cn 列
+            try:
+                conn.execute("ALTER TABLE financial_news ADD COLUMN title_cn TEXT")
+                logger.info("✅ Added title_cn column to financial_news table")
+            except sqlite3.OperationalError:
+                pass  # 列已存在
 
             # 创建索引
             conn.execute("""
@@ -472,6 +480,7 @@ class NewsWebSocketClient:
                     "Ignore travel/route/consumer lifestyle announcements unless they contain material financial impact. "
                     "Return a concise JSON object with keys: "
                     "is_financial (boolean, true only if the item is financially relevant), "
+                    "title_cn (简洁的中文标题翻译 - REQUIRED, MUST BE IN CHINESE), "
                     "summary_en (concise professional English summary), "
                     "summary_cn (简洁的中文总结 - REQUIRED, MUST BE IN CHINESE), "
                     "sentiment (MUST be one of: positive/negative/neutral), "
@@ -482,7 +491,7 @@ class NewsWebSocketClient:
                 )
 
                 if attempt > 0:
-                    system_content += " IMPORTANT: You MUST provide summary_cn in Chinese language (中文). This is mandatory."
+                    system_content += " IMPORTANT: You MUST provide title_cn and summary_cn in Chinese language (中文). This is mandatory."
 
                 user_content = f"""Summarize this financial news in 2-3 sentences:
 
@@ -490,12 +499,13 @@ Title: {title}
 Content: {text_to_summarize}
 
 Provide analysis with:
-1. English summary (concise, professional)
-2. Chinese summary (简洁专业的中文总结) - THIS IS REQUIRED, MUST BE IN CHINESE LANGUAGE
-3. Sentiment: positive/negative/neutral
-4. Impact level: high/medium/low
-5. Symbols: list of impacted tickers/commodities (e.g., BTC, ETH, XAU, XAG, EURUSD)
-6. Category: MUST be EXACTLY one of these 8 categories (choose the most relevant):
+1. Chinese title translation (简洁的中文标题) - THIS IS REQUIRED, MUST BE IN CHINESE LANGUAGE
+2. English summary (concise, professional)
+3. Chinese summary (简洁专业的中文总结) - THIS IS REQUIRED, MUST BE IN CHINESE LANGUAGE
+4. Sentiment: positive/negative/neutral
+5. Impact level: high/medium/low
+6. Symbols: list of impacted tickers/commodities (e.g., BTC, ETH, XAU, XAG, EURUSD)
+7. Category: MUST be EXACTLY one of these 8 categories (choose the most relevant):
    - tech_stocks (for NVDA, AMD, GOOGL, META, TSM, tech companies)
    - market_indices (for NASDAQ, DOW, NYSE, CME, stock indices)
    - precious_metals (for Gold, Silver, XAU, XAG)
@@ -508,6 +518,7 @@ Provide analysis with:
 Respond ONLY with JSON:
 {{
   "is_financial": true|false,
+  "title_cn": "必须是中文标题",
   "summary_en": "...",
   "summary_cn": "必须是中文摘要",
   "sentiment": "positive|negative|neutral",
@@ -517,7 +528,7 @@ Respond ONLY with JSON:
 }}"""
 
                 if attempt > 0:
-                    user_content += f"\n\nIMPORTANT: Previous attempt did not include Chinese summary. You MUST provide summary_cn in Chinese (中文). This is attempt {attempt + 1} of {max_retries}."
+                    user_content += f"\n\nIMPORTANT: Previous attempt did not include Chinese content. You MUST provide title_cn and summary_cn in Chinese (中文). This is attempt {attempt + 1} of {max_retries}."
 
                 payload = {
                     "model": "gpt-4.1-mini",  # 使用更经济的模型
@@ -558,9 +569,12 @@ Respond ONLY with JSON:
 
                             parsed = _parse_response(summary_text)
 
-                            # 检查是否有中文摘要，以及是否真的是中文
+                            # 检查是否有中文摘要和中文标题，以及是否真的是中文
                             summary_cn = parsed.get("summary_cn", "")
-                            has_chinese = bool(summary_cn) and any('\u4e00' <= char <= '\u9fff' for char in summary_cn)
+                            title_cn = parsed.get("title_cn", "")
+                            has_chinese_summary = bool(summary_cn) and any('\u4e00' <= char <= '\u9fff' for char in summary_cn)
+                            has_chinese_title = bool(title_cn) and any('\u4e00' <= char <= '\u9fff' for char in title_cn)
+                            has_chinese = has_chinese_summary and has_chinese_title
 
                             if not has_chinese and attempt < max_retries - 1:
                                 logger.warning(f"⚠️ Attempt {attempt + 1}: No Chinese summary received for: {title[:50]}... Retrying...")
@@ -568,8 +582,8 @@ Respond ONLY with JSON:
                                 continue  # 重试
 
                             # 调试日志
-                            if not parsed.get("summary_en") or not has_chinese:
-                                logger.warning(f"⚠️ GPT returned incomplete summary for: {title[:50]}... (attempt {attempt + 1})")
+                            if not parsed.get("summary_en") or not has_chinese_summary or not has_chinese_title:
+                                logger.warning(f"⚠️ GPT returned incomplete summary/title for: {title[:50]}... (attempt {attempt + 1})")
                                 logger.debug(f"GPT response: {summary_text[:500]}")
 
                             # 兜底保证字段存在
@@ -581,18 +595,24 @@ Respond ONLY with JSON:
 
                             # 确保摘要是纯文本，不是JSON字符串
                             summary_en = parsed.get("summary_en") or default_summary
-                            if not has_chinese:
+                            if not has_chinese_summary:
                                 summary_cn = default_summary  # 最后的兜底：使用英文标题
                                 logger.warning(f"⚠️ Using English title as Chinese summary fallback after {attempt + 1} attempts")
+                            if not has_chinese_title:
+                                title_cn = default_summary  # 兜底：使用英文标题
+                                logger.warning(f"⚠️ Using English title as Chinese title fallback after {attempt + 1} attempts")
 
                             # 如果摘要仍然是JSON字符串，尝试提取内容
                             if summary_en and summary_en.startswith('{'):
                                 summary_en = default_summary
                             if summary_cn and summary_cn.startswith('{'):
                                 summary_cn = default_summary
+                            if title_cn and title_cn.startswith('{'):
+                                title_cn = default_summary
 
                             result = {
                                 "is_financial": bool(parsed.get("is_financial", True)),
+                                "title_cn": title_cn,
                                 "summary_en": summary_en,
                                 "summary_cn": summary_cn,
                                 "sentiment": parsed.get("sentiment", "").lower(),
@@ -629,6 +649,7 @@ Respond ONLY with JSON:
                             logger.error(f"❌ OpenAI API error {response.status}: {error_text}")
                             # API错误，不重试
                             return {
+                                "title_cn": title,
                                 "summary_en": title,
                                 "summary_cn": title,
                                 "sentiment": "",
@@ -641,6 +662,7 @@ Respond ONLY with JSON:
             logger.error("❌ OpenAI API timeout")
             return {
                 "is_financial": True,
+                "title_cn": title,
                 "summary_en": title,
                 "summary_cn": title,
                 "sentiment": "",
@@ -653,6 +675,7 @@ Respond ONLY with JSON:
             title_fallback = news_item.get('title', '')
             return {
                 "is_financial": True,
+                "title_cn": title_fallback,
                 "summary_en": title_fallback,
                 "summary_cn": title_fallback,
                 "sentiment": "",
@@ -676,31 +699,37 @@ Respond ONLY with JSON:
             llm_result = None
             summary_en = ""
             summary_cn = ""
+            title_cn = ""
 
             # 最多尝试两次，避免因偶发返回不含中文导致落盘空中文
             for attempt in (1, 2):
                 llm_result = await self.summarize_with_chatgpt(news_item)
                 summary_en = llm_result.get("summary_en", "")
                 summary_cn = llm_result.get("summary_cn", "")
+                title_cn = llm_result.get("title_cn", "")
 
-                if self._has_chinese(summary_cn):
+                if self._has_chinese(summary_cn) and self._has_chinese(title_cn):
                     break
 
                 if attempt == 1:
-                    logger.warning(f"⚠️ GPT returned no Chinese summary, retrying once: {news_item.get('title', '')[:60]}")
+                    logger.warning(f"⚠️ GPT returned no Chinese summary/title, retrying once: {news_item.get('title', '')[:60]}")
                     await asyncio.sleep(0.5)
                 else:
                     # 第二次仍无中文，记录告警并用英文兜底，避免空字段
-                    logger.warning(f"⚠️ GPT still missing Chinese summary, fallback to English: {news_item.get('title', '')[:60]}")
-                    if summary_en:
+                    logger.warning(f"⚠️ GPT still missing Chinese content, fallback to English: {news_item.get('title', '')[:60]}")
+                    if summary_en and not self._has_chinese(summary_cn):
                         summary_cn = summary_en
+                    if not self._has_chinese(title_cn):
+                        title_cn = news_item.get('title', '')
                     llm_result["summary_cn"] = summary_cn
+                    llm_result["title_cn"] = title_cn
 
             if llm_result and llm_result.get("is_financial") is False:
                 logger.info(f"🪙 Skipped non-financial item: {news_item.get('title', '')[:60]}...")
                 return
             summary_en = summary_en or llm_result.get("summary_en", "")
             summary_cn = summary_cn or llm_result.get("summary_cn", "")
+            title_cn = title_cn or llm_result.get("title_cn", "")
 
             # 提取字段
             news_id = news_item.get('id', news_item.get('news_id', str(int(time.time() * 1000))))
@@ -735,11 +764,11 @@ Respond ONLY with JSON:
                     return
                 conn.execute("""
                     INSERT OR REPLACE INTO financial_news
-                    (news_id, title, content, summary, summary_cn, source, url,
+                    (news_id, title, title_cn, content, summary, summary_cn, source, url,
                      published_at, symbols, sentiment, impact_level, category, raw_data)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    news_id, title, '', summary_en, summary_cn, source, '',
+                    news_id, title, title_cn, '', summary_en, summary_cn, source, '',
                     published_at, symbols, sentiment, impact_level, category, ''
                 ))
 
@@ -750,6 +779,7 @@ Respond ONLY with JSON:
                 news_with_summary = {
                     'id': news_id,
                     'title': title,
+                    'title_cn': title_cn,
                     'content': '',
                     'summary': summary_en,
                     'summary_cn': summary_cn,
@@ -1036,7 +1066,7 @@ Respond ONLY with JSON:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute("""
-                SELECT news_id, title, content, summary, summary_cn, source, url,
+                SELECT news_id, title, title_cn, content, summary, summary_cn, source, url,
                        published_at, symbols, sentiment, impact_level, category
                 FROM financial_news
                 ORDER BY
@@ -1050,6 +1080,7 @@ Respond ONLY with JSON:
                 news_items.append({
                     'id': row['news_id'],
                     'title': row['title'],
+                    'title_cn': row['title_cn'],
                     'content': row['content'],
                     'summary': row['summary'],
                     'summary_cn': row['summary_cn'],
@@ -1070,11 +1101,11 @@ Respond ONLY with JSON:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute("""
-                SELECT news_id, title, content, summary, summary_cn, source, url,
+                SELECT news_id, title, title_cn, content, summary, summary_cn, source, url,
                        published_at, symbols, sentiment, impact_level
                 FROM financial_news
                 WHERE symbols LIKE ?
-                ORDER BY 
+                ORDER BY
                     CASE WHEN summary IS NOT NULL AND summary != '' THEN 0 ELSE 1 END,
                     published_at DESC
                 LIMIT ?
@@ -1085,6 +1116,7 @@ Respond ONLY with JSON:
                 news_items.append({
                     'id': row['news_id'],
                     'title': row['title'],
+                    'title_cn': row['title_cn'],
                     'content': row['content'],
                     'summary': row['summary'],
                     'summary_cn': row['summary_cn'],
@@ -1118,6 +1150,7 @@ Respond ONLY with JSON:
                 return {
                     'id': row['news_id'],
                     'title': row['title'],
+                    'title_cn': row['title_cn'] if 'title_cn' in row.keys() else '',
                     'content': row['content'],
                     'summary': row['summary'],
                     'summary_cn': row['summary_cn'],
@@ -1165,7 +1198,7 @@ Respond ONLY with JSON:
                     where_parts.append(filter_clause)
                 where_sql = " AND ".join(where_parts)
                 return f"""
-                    SELECT news_id, title, content, summary, summary_cn, source, url,
+                    SELECT news_id, title, title_cn, content, summary, summary_cn, source, url,
                            published_at, symbols, sentiment, impact_level, category
                     FROM financial_news
                     WHERE {where_sql}

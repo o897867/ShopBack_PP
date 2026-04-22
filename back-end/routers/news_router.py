@@ -161,7 +161,7 @@ async def get_news_detail(
 
         conn = get_db_connection()
         cursor = conn.execute("""
-            SELECT news_id, title, content, summary, summary_cn, source, url,
+            SELECT news_id, title, title_cn, content, summary, summary_cn, source, url,
                    published_at, symbols, sentiment, impact_level, raw_data
             FROM financial_news
             WHERE news_id = ?
@@ -176,6 +176,7 @@ async def get_news_detail(
         news_item = {
             'id': row['news_id'],
             'title': row['title'],
+            'title_cn': row['title_cn'],
             'summary': row['summary'],
             'summary_cn': row['summary_cn'],
             'source': row['source'],

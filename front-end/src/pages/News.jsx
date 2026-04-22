@@ -120,6 +120,11 @@ const News = ({ onNavigate }) => {
     return new Date(ts * 1000).toLocaleDateString();
   };
 
+  const getDisplayTitle = (item) => {
+    if (isChinese) return item.title_cn || item.title || '';
+    return item.title || '';
+  };
+
   const getDisplaySummary = (item) => {
     if (isChinese) return item.summary_cn || item.summary || '';
     return item.summary || '';
@@ -238,7 +243,7 @@ const News = ({ onNavigate }) => {
                     </span>
                   )}
                 </div>
-                <h2 className="news-featured__title">{featured.title}</h2>
+                <h2 className="news-featured__title">{getDisplayTitle(featured)}</h2>
                 <p className="news-featured__summary">{getDisplaySummary(featured)}</p>
               </article>
             )}
@@ -254,7 +259,7 @@ const News = ({ onNavigate }) => {
                   <span className="news-item__time">{formatTime(item.published_at)}</span>
                   <div>
                     {item.source && <span className="news-item__src">{item.source}</span>}
-                    <p className="news-item__title">{item.title}</p>
+                    <p className="news-item__title">{getDisplayTitle(item)}</p>
                     <p className="news-item__sum">{getDisplaySummary(item)}</p>
                   </div>
                   <div className="news-item__badges">
