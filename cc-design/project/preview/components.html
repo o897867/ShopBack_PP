@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Components</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { padding: 40px; background: var(--bg); font-family: var(--font-sans); color: var(--text); }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  h1 { font-family: var(--font-serif); font-size: 26px; font-weight: 400; letter-spacing: -0.01em; margin: 0 0 4px; }
+  .sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); margin: 0 0 32px; }
+
+  .group-label { display: flex; align-items: center; gap: 14px; margin: 32px 0 14px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); }
+  .group-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .frame { background: var(--bg-paper); border: 1px solid var(--border); border-radius: 8px; padding: 28px; }
+  .caption { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-tertiary); text-transform: uppercase; margin-top: 10px; }
+
+  /* Buttons */
+  .btn-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .btn {
+    font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+    padding: 10px 18px; border-radius: 6px; cursor: pointer;
+    border: 1px solid transparent; transition: all 120ms ease; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .btn-primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .btn-primary:hover { background: #000; }
+  .btn-secondary { background: var(--bg-paper); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--panel-2); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border-color: transparent; padding: 6px 10px; }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-pill { padding: 6px 14px; border-radius: 999px; font-size: 12px; background: var(--bg-paper); border: 1px solid var(--border); color: var(--text-muted); }
+  .btn-pill.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+  /* Nav */
+  .topnav {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 740px; margin: 0 auto; padding: 14px 20px;
+    border-bottom: 1px solid var(--border); background: var(--bg-paper);
+  }
+  .topnav .brand { font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
+  .topnav .brand .en { font-weight: 300; color: var(--text-muted); margin-left: 8px; font-size: 13px; letter-spacing: 0; }
+  .topnav .links { display: flex; gap: 24px; }
+  .topnav .link { font-family: var(--font-sans); font-size: 13px; color: var(--text-muted); text-decoration: none; position: relative; padding: 4px 0; }
+  .topnav .link.active { color: var(--text); }
+  .topnav .link.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -15px; height: 1px; background: var(--text); }
+  .topnav .link:hover { color: var(--text); }
+
+  /* Section header */
+  .sec-header { display: flex; align-items: center; gap: 14px; max-width: 740px; margin: 0 auto 18px; }
+  .sec-header .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); }
+  .sec-header .rule { flex: 1; height: 1px; background: var(--border); }
+  .sec-header .more { font-family: var(--font-sans); font-size: 11px; color: var(--text-muted); text-decoration: none; }
+  .sec-header .more:hover { color: var(--text); }
+
+  /* Feature card */
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 740px; margin: 0 auto; }
+  .feature { background: var(--bg-paper); border: 1px solid var(--border); border-radius: 8px; padding: 22px 20px; }
+  .feature svg { color: var(--text); margin-bottom: 14px; }
+  .feature h4 { font-family: var(--font-serif); font-size: 15px; font-weight: 500; margin: 0 0 4px; color: var(--text); }
+  .feature p { font-family: var(--font-sans); font-size: 12px; line-height: 1.55; color: var(--text-muted); margin: 0; }
+
+  /* News item */
+  .news-list { max-width: 740px; margin: 0 auto; }
+  .news-item { padding: 20px 0; border-top: 1px solid var(--border); display: grid; grid-template-columns: 60px 1fr auto; gap: 20px; align-items: baseline; }
+  .news-item:last-child { border-bottom: 1px solid var(--border); }
+  .news-time { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.05em; }
+  .news-body .src { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.09em; color: var(--text-tertiary); text-transform: uppercase; }
+  .news-body h4 { font-family: var(--font-serif); font-size: 14px; font-weight: 400; line-height: 1.45; margin: 4px 0 6px; color: var(--text); }
+  .news-body p { font-family: var(--font-sans); font-size: 12px; line-height: 1.65; color: var(--text-muted); margin: 0; max-width: 480px; }
+  .sent-pill {
+    display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .sent-pill.bull { background:#f0fdf4; border-color:#86efac; color:#166534; }
+  .sent-pill.neu { background:#fffbeb; border-color:#fcd34d; color:#92400e; }
+  .sent-pill.bear { background:#fef2f2; border-color:#fca5a5; color:#991b1b; }
+
+  /* Fortune card */
+  .fortune { max-width: 400px; margin: 0 auto; background: var(--bg-paper); border: 1px solid var(--border); border-radius: 12px; padding: 28px; text-align: center; }
+  .fortune .eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); margin: 0 0 20px; }
+  .fortune .gua-ring {
+    width: 112px; height: 112px; border-radius: 999px; border: 1px solid #e5e5e5;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;
+    position: relative;
+  }
+  .fortune .gua-ring::before {
+    content: ''; position: absolute; inset: 8px; border-radius: 999px; border: 1px solid #f0f0f0;
+  }
+  .fortune .gua { font-family: var(--font-gua); font-size: 44px; color: var(--text); line-height: 1; }
+  .fortune h3 { font-family: var(--font-serif); font-size: 20px; font-weight: 600; margin: 0 0 2px; }
+  .fortune .xiang { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.06em; margin: 0 0 16px; }
+  .fortune .verdict { font-family: var(--font-sans); font-size: 13px; color: var(--text); line-height: 1.6; text-align: left; padding-left: 12px; border-left: 2px solid #1a1a1a; margin: 0 0 18px; }
+  .luck-bar { text-align: left; }
+  .luck-bar .lab { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 6px; }
+  .luck-bar .track { height: 6px; border-radius: 999px; background: #f0f0f0; overflow: hidden; }
+  .luck-bar .fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #facc15, #f59e0b); }
+
+  /* CTA */
+  .cta { max-width: 740px; margin: 0 auto; background: #1a1a1a; color: #fff; border-radius: 12px; padding: 36px 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .cta h3 { font-family: var(--font-serif); font-size: 22px; font-weight: 400; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .cta p { font-family: var(--font-sans); font-size: 13px; color: #aaa; margin: 0; }
+  .cta .btn { background: #fff; color: #1a1a1a; border-color: #fff; }
+
+  /* Tag pills row */
+  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--border); color: var(--text-muted); background: var(--bg-paper); }
+  .tag.on { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+  /* Search / select */
+  .inputs { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .input {
+    font-family: var(--font-sans); font-size: 12px; padding: 8px 12px;
+    border: 1px solid var(--border); border-radius: 4px; background: var(--bg-paper); color: var(--text);
+    outline: none; min-width: 180px;
+  }
+  .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+  .select { background: var(--bg-paper); padding-right: 28px; appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' fill='none' stroke='%23999' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat; background-position: right 10px center; }
+
+  /* Live dot */
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: #991b1b; letter-spacing: 0.12em; text-transform: uppercase; }
+  .live .dot { width: 6px; height: 6px; border-radius: 999px; background: #ef4444; animation: blink 2.5s infinite ease; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Components</h1>
+  <p class="sub">Editorial controls · navigation · cards</p>
+
+  <div class="group-label">Buttons</div>
+  <div class="frame">
+    <div class="btn-row">
+      <button class="btn btn-primary">立即开户 →</button>
+      <button class="btn btn-secondary">了解更多</button>
+      <button class="btn btn-ghost">View all →</button>
+      <span style="width:24px"></span>
+      <button class="btn btn-pill active">All</button>
+      <button class="btn btn-pill">Crypto</button>
+      <button class="btn btn-pill">Policy</button>
+      <button class="btn btn-pill">Forex</button>
+    </div>
+    <p class="caption">Dark primary · paper secondary · text-only ghost · pill filter</p>
+  </div>
+
+  <div class="group-label">Inputs · filters</div>
+  <div class="frame">
+    <div class="inputs">
+      <input class="input" type="search" placeholder="搜索新闻 / Search…">
+      <select class="input select"><option>All sentiment</option><option>Bullish</option><option>Neutral</option><option>Bearish</option></select>
+      <select class="input select"><option>Impact · all</option><option>High</option><option>Medium</option><option>Low</option></select>
+      <span class="live"><span class="dot"></span>Live · 实时</span>
+    </div>
+    <p class="caption">Native selects · 4px radius · focus ring uses --primary · animated live indicator</p>
+  </div>
+
+  <div class="group-label">Top nav</div>
+  <div class="frame" style="padding: 0; overflow: hidden;">
+    <nav class="topnav">
+      <div class="brand">临象<span class="en">LinXiang</span></div>
+      <div class="links">
+        <a class="link active" href="#">首页</a>
+        <a class="link" href="#">新闻</a>
+        <a class="link" href="#">每周</a>
+        <a class="link" href="#">每日一卦</a>
+      </div>
+    </nav>
+  </div>
+
+  <div class="group-label">Section header</div>
+  <div class="frame">
+    <div class="sec-header">
+      <span class="lbl">最新新闻 · LATEST</span>
+      <span class="rule"></span>
+      <a class="more" href="#">查看全部 →</a>
+    </div>
+    <div class="sec-header" style="margin-bottom:0;">
+      <span class="lbl">每日一卦 · FORTUNE</span>
+      <span class="rule"></span>
+    </div>
+  </div>
+
+  <div class="group-label">Feature cards · Home</div>
+  <div class="frame">
+    <div class="features">
+      <div class="feature">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <h4>实时资讯</h4>
+        <p>7×24 小时全球市场更新，重要新闻秒级推送。</p>
+      </div>
+      <div class="feature">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+        <h4>深度分析</h4>
+        <p>周度宏观报告 + 技术面解读，帮你看懂趋势。</p>
+      </div>
+      <div class="feature">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
+        <h4>合规券商</h4>
+        <p>全球持牌经纪商对比，点差透明、入金安全。</p>
+      </div>
+    </div>
+    <p class="caption">3-up · Lucide icons · 22 px · stroke 1.5 · centred in 740-px measure</p>
+  </div>
+
+  <div class="group-label">News list item</div>
+  <div class="frame">
+    <div class="news-list">
+      <div class="news-item">
+        <span class="news-time">14:32</span>
+        <div class="news-body">
+          <span class="src">BLOOMBERG · 彭博</span>
+          <h4>美联储会议纪要：官员对 6 月降息意见分歧加剧</h4>
+          <p>多位票委表示通胀顽固度超出预期，市场将降息概率回调至 32%。</p>
+        </div>
+        <span class="sent-pill bear">BEAR · 利空</span>
+      </div>
+      <div class="news-item">
+        <span class="news-time">13:08</span>
+        <div class="news-body">
+          <span class="src">REUTERS · 路透</span>
+          <h4>比特币再破 11 万美元，现货 ETF 单日净流入 8.2 亿</h4>
+          <p>贝莱德 IBIT 继续领跑，市场情绪从 Greed 推向 Extreme Greed。</p>
+        </div>
+        <span class="sent-pill bull">BULL · 利好</span>
+      </div>
+      <div class="news-item">
+        <span class="news-time">11:45</span>
+        <div class="news-body">
+          <span class="src">WSJ · 华尔街日报</span>
+          <h4>英伟达财报前夜：分析师下调 Q2 出货预期</h4>
+          <p>供应链消息称 H200 产能持续紧张，但需求端仍强劲。</p>
+        </div>
+        <span class="sent-pill neu">NEUTRAL · 中性</span>
+      </div>
+    </div>
+    <p class="caption">60-px time gutter · serif title · mono source · hairline separators · right-aligned sentiment pill</p>
+  </div>
+
+  <div class="group-label">Fortune card · I-Ching</div>
+  <div class="frame">
+    <div class="fortune">
+      <p class="eyebrow">每日一卦 · 交易玄机</p>
+      <div class="gua-ring"><span class="gua">䷀</span></div>
+      <h3>乾为天</h3>
+      <p class="xiang">元亨利贞 · 自强不息</p>
+      <p class="verdict">今日宜守不宜攻。行情看似顺风，实则阳极将转；强势震荡后若追高，易成接盘之人。</p>
+      <div class="luck-bar">
+        <div class="lab"><span>财运指数</span><span>68 · 小吉</span></div>
+        <div class="track"><div class="fill" style="width:68%"></div></div>
+      </div>
+    </div>
+    <p class="caption" style="text-align:center">Paper card · double concentric ring · verdict with 2-px left border · gradient luck bar</p>
+  </div>
+
+  <div class="group-label">Tags · sentiment + category</div>
+  <div class="frame">
+    <div class="tag-row" style="margin-bottom: 14px;">
+      <span class="tag on">All</span>
+      <span class="tag">Crypto · 加密</span>
+      <span class="tag">Policy · 政策</span>
+      <span class="tag">Indices · 指数</span>
+      <span class="tag">Forex · 外汇</span>
+      <span class="tag">Commodities · 大宗</span>
+    </div>
+    <div class="tag-row">
+      <span class="sent-pill bull">BULL · 利好</span>
+      <span class="sent-pill neu">NEUTRAL · 中性</span>
+      <span class="sent-pill bear">BEAR · 利空</span>
+    </div>
+    <p class="caption">Category tag: pill, mono caps, dark-fill when active · sentiment: hairline-border pastel</p>
+  </div>
+
+  <div class="group-label">Primary CTA</div>
+  <div class="frame">
+    <div class="cta">
+      <div>
+        <h3>准备好开始交易了吗？</h3>
+        <p>通过合规持牌经纪商入场，点差透明，出入金安全。</p>
+      </div>
+      <button class="btn">立即开户 →</button>
+    </div>
+    <p class="caption">Ink-black surface · serif headline · mono-ish body · paper-white CTA button with arrow</p>
+  </div>
+
+</div>
+</body>
+</html>

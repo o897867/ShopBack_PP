@@ -52,10 +52,14 @@ XAU_DATA_ENABLED = True  # Enable XAU data fetching
 xau_data_manager: XAUDataManager = None
 xau_ws_clients: set = set()  # WebSocket clients for XAU updates
 
+# ============= Financial News 全局变量 =============
+NEWS_ENABLED = True  # Enable financial news feed
+news_client = None  # NewsWebSocketClient instance
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
-    global eth_model_manager, eth_data_manager, xau_data_manager
+    global eth_model_manager, eth_data_manager, xau_data_manager, news_client
 
     # 启动时初始化
     logger.info("🚀 启动 ShopBack CFD Trading Platform")
@@ -103,6 +107,32 @@ async def lifespan(app: FastAPI):
             except Exception as e:
                 logger.error(f"❌ XAU 数据服务初始化失败: {e}")
 
+        # Initialize Financial News service
+        if NEWS_ENABLED:
+            try:
+                from insightsentry_news import NewsWebSocketClient
+                from routers.news_router import broadcast_news_to_clients
+                import os
+
+                # InsightSentry API Key (same as XAU)
+                insightsentry_key = "eyJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoic3V5aW5nY2luQGdtYWlsLmNvbSIsInBsYW4iOiJ1bHRyYSIsIm5ld3NmZWVkX2VuYWJsZWQiOnRydWUsIndlYnNvY2tldF9zeW1ib2xzIjo1LCJ3ZWJzb2NrZXRfY29ubmVjdGlvbnMiOjF9.6aA_ND-9NmZI2-8mILRJeZDLt9Y6skrtsNbzP0FeQVI"
+                openai_key = os.environ.get("OPENAI_API_KEY", "")
+                if not openai_key:
+                    logger.warning("⚠️  OPENAI_API_KEY not set, news summarization will fail")
+
+                news_client = NewsWebSocketClient(
+                    api_key=insightsentry_key,
+                    openai_api_key=openai_key,
+                    db_path=DATABASE_PATH,
+                    news_callback=broadcast_news_to_clients
+                )
+
+                # Start news client in background
+                asyncio.create_task(news_client.start())
+                logger.info("✅ 金融新闻服务已启动 (InsightSentry + ChatGPT)")
+            except Exception as e:
+                logger.error(f"❌ 金融新闻服务初始化失败: {e}")
+
     except Exception as e:
         logger.error(f"❌ 初始化失败: {e}")
         raise
@@ -127,6 +157,14 @@ async def lifespan(app: FastAPI):
             logger.info("✅ XAU 数据服务已停止")
         except Exception as e:
             logger.error(f"❌ XAU 数据服务停止失败: {e}")
+
+    # Cleanup News resources
+    if NEWS_ENABLED and news_client:
+        try:
+            await news_client.stop()
+            logger.info("✅ 金融新闻服务已停止")
+        except Exception as e:
+            logger.error(f"❌ 金融新闻服务停止失败: {e}")
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -166,6 +204,13 @@ app.include_router(
 app.include_router(
     fortune_router,
     tags=["Fortune - 随机抽卦"]
+)
+
+# 金融新闻功能
+from routers.news_router import router as news_router
+app.include_router(
+    news_router,
+    tags=["Financial News"],
 )
 
 # ============= Weekly Mindmap 模块 =============

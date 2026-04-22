@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LinXiangFinance · Mobile UI kit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../../assets/brain.png">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: #e9eaee; color: var(--text); min-height: 100vh; }
+  button, a { font: inherit; color: inherit; }
+  button { background: none; border: none; cursor: pointer; padding: 0; }
+  a { text-decoration: none; color: inherit; }
+
+  /* ── Stage ─────────────────────────────────────────── */
+  .stage {
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+  .stage__head {
+    max-width: 1280px; margin: 0 auto 32px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  }
+  .stage__title { font-family: var(--font-serif); font-size: 24px; font-weight: 400; letter-spacing: -0.01em; margin: 0; }
+  .stage__sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-tertiary); text-transform: uppercase; margin: 2px 0 0; }
+
+  /* Tabs */
+  .view-tabs { display: flex; gap: 4px; background: #fff; border-radius: 999px; padding: 3px; border: 1px solid var(--border); }
+  .view-tab { font-family: var(--font-sans); font-size: 12px; padding: 6px 14px; border-radius: 999px; color: var(--text-muted); transition: all 150ms; }
+  .view-tab.active { background: var(--text); color: #fff; }
+
+  /* Devices */
+  .deck { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 48px 32px; justify-items: center; }
+  .device-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .device-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-tertiary); text-transform: uppercase; }
+
+  /* iPhone frame */
+  .phone {
+    width: 390px; height: 820px;
+    background: #0a0a0a; border-radius: 54px;
+    padding: 12px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.25) inset, 0 30px 70px -20px rgba(20,22,30,0.35);
+    position: relative;
+  }
+  .phone__screen {
+    width: 100%; height: 100%;
+    background: var(--bg-paper);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+  }
+  .phone__notch {
+    position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
+    width: 112px; height: 32px; background: #0a0a0a; border-radius: 999px;
+    z-index: 30;
+  }
+  .phone__status {
+    position: absolute; top: 0; left: 0; right: 0; height: 54px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 30px 0; z-index: 25;
+    font-family: -apple-system, 'SF Pro', system-ui; font-weight: 600; font-size: 15px;
+  }
+  .phone__status--dark { color: #fff; }
+  .phone__status-right { display: flex; align-items: center; gap: 5px; }
+  .phone__home {
+    position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+    width: 134px; height: 5px; background: var(--text); opacity: 0.9; border-radius: 999px; z-index: 35;
+  }
+
+  /* Screen content area (scroll) */
+  .screen-content {
+    position: absolute; inset: 0;
+    padding-top: 54px; padding-bottom: 34px;
+    overflow-y: auto; overflow-x: hidden;
+    background: var(--bg-paper);
+    scrollbar-width: none;
+  }
+  .screen-content::-webkit-scrollbar { display: none; }
+  .screen-content.has-tabbar { padding-bottom: 92px; }
+
+  /* ═══ Shared mobile components ═══ */
+
+  /* Top app bar */
+  .app-bar {
+    position: sticky; top: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--border);
+    z-index: 10;
+  }
+  .app-bar__brand { font-family: var(--font-serif); font-size: 18px; font-weight: 500; letter-spacing: -0.01em; }
+  .app-bar__brand .lt { font-weight: 300; color: var(--text-muted); margin-left: 4px; font-size: 13px; }
+  .app-bar__right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--text); border-radius: 8px; }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  /* Bottom tab bar */
+  .tab-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 92px; padding: 8px 12px 34px;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: saturate(140%) blur(12px);
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    z-index: 20;
+  }
+  .tab-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--text-quiet); transition: color 150ms; padding: 6px 0; }
+  .tab-item svg { width: 20px; height: 20px; }
+  .tab-item__label { font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.01em; }
+  .tab-item.active { color: var(--text); }
+
+  /* Section header (mobile) */
+  .m-sec {
+    display: flex; align-items: center; gap: 10px; padding: 20px 18px 10px;
+  }
+  .m-sec__label { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); white-space: nowrap; }
+  .m-sec__rule { flex: 1; height: 1px; background: var(--border); }
+  .m-sec__more { font-family: var(--font-sans); font-size: 10px; color: var(--text-muted); }
+
+  /* Hero (home) */
+  .m-hero { padding: 28px 18px 16px; }
+  .m-hero__eyebrow { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; color: var(--text-tertiary); text-transform: uppercase; margin: 0 0 12px; }
+  .m-hero__title { font-family: var(--font-serif); font-size: 26px; font-weight: 400; line-height: 1.22; letter-spacing: -0.015em; margin: 0 0 14px; }
+  .m-hero__title em { font-style: italic; color: var(--text-muted); }
+  .m-hero__desc { font-family: var(--font-sans); font-size: 13px; line-height: 1.7; color: var(--text-muted); margin: 0 0 18px; }
+  .m-hero__actions { display: flex; gap: 10px; align-items: center; }
+
+  .m-btn { font-family: var(--font-sans); font-size: 13px; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--text); color: var(--text); transition: all 120ms ease; display: inline-flex; align-items: center; gap: 6px; }
+  .m-btn--dark { background: var(--text); color: #fff; }
+  .m-btn--dark:active { transform: scale(0.97); }
+  .m-btn--link { border: none; padding: 10px 6px; color: var(--text-muted); }
+  .m-btn--block { display: flex; justify-content: center; width: 100%; }
+
+  /* Stats strip mobile */
+  .m-stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 8px 18px 0; border: 1px solid var(--border); border-radius: 10px; }
+  .m-stats__c { padding: 16px 10px; text-align: center; border-right: 1px solid var(--border); }
+  .m-stats__c:last-child { border-right: none; }
+  .m-stats__v { font-family: var(--font-serif); font-size: 17px; font-weight: 500; margin-bottom: 3px; }
+  .m-stats__l { font-family: var(--font-sans); font-size: 10px; color: var(--text-tertiary); }
+
+  /* Features — horizontal swipe */
+  .m-features {
+    display: flex; gap: 10px; padding: 0 18px;
+    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  }
+  .m-features::-webkit-scrollbar { display: none; }
+  .m-feature {
+    flex: 0 0 220px; scroll-snap-align: start;
+    border: 1px solid var(--border); border-radius: 10px; padding: 18px 16px;
+    background: var(--bg-paper);
+  }
+  .m-feature svg { width: 14px; height: 14px; color: var(--text); margin-bottom: 10px; }
+  .m-feature__t { font-family: var(--font-serif); font-size: 14px; font-weight: 500; margin: 0 0 4px; }
+  .m-feature__d { font-family: var(--font-sans); font-size: 12px; line-height: 1.5; color: var(--text-muted); margin: 0; }
+
+  /* News item mobile */
+  .m-news-list { padding: 0 18px; }
+  .m-news-item { padding: 16px 0; border-top: 1px solid var(--border); display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: baseline; }
+  .m-news-item:first-child { border-top: none; }
+  .m-news-item__time { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.02em; padding-top: 3px; }
+  .m-news-item__src { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.09em; color: var(--text-tertiary); text-transform: uppercase; display: block; margin-bottom: 4px; }
+  .m-news-item__t { font-family: var(--font-serif); font-size: 13.5px; font-weight: 500; line-height: 1.4; margin: 0 0 5px; color: var(--text); }
+  .m-news-item__s { font-family: var(--font-sans); font-size: 11.5px; line-height: 1.55; color: var(--text-muted); margin: 0 0 6px; }
+  .m-news-item__meta { display: flex; gap: 5px; flex-wrap: wrap; }
+
+  /* Badge (same visual, slightly smaller) */
+  .m-badge { display: inline-block; padding: 1px 7px; border-radius: 999px; border: 1px solid; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.5; }
+  .m-badge--green { background: var(--tag-green-bg); border-color: var(--tag-green-border); color: var(--tag-green-text); }
+  .m-badge--red   { background: var(--tag-red-bg); border-color: var(--tag-red-border); color: var(--tag-red-text); }
+  .m-badge--amber { background: var(--tag-amber-bg); border-color: var(--tag-amber-border); color: var(--tag-amber-text); }
+  .m-badge--gray  { background: var(--panel-2); border-color: var(--border); color: var(--text-muted); }
+
+  /* Weekly card mobile */
+  .m-weekly { margin: 0 18px; border: 1px solid var(--border); border-radius: 12px; padding: 18px 18px; background: var(--bg-paper); }
+  .m-weekly__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .m-weekly__t { font-family: var(--font-serif); font-size: 14px; font-weight: 500; line-height: 1.35; margin: 0; max-width: 220px; }
+  .m-weekly__w { font-family: var(--font-mono); font-size: 9.5px; color: var(--text-tertiary); letter-spacing: 0.08em; white-space: nowrap; }
+  .m-weekly__div { height: 1px; background: var(--border-soft); margin: 14px 0; }
+  .m-weekly__bullets { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+  .m-weekly__b { display: flex; gap: 10px; font-family: var(--font-sans); font-size: 12px; line-height: 1.5; color: var(--text-muted); }
+  .m-weekly__dot { flex-shrink: 0; width: 4px; height: 4px; border-radius: 999px; background: var(--text); margin-top: 7px; }
+
+  /* Fortune banner (home) */
+  .m-fortune-banner { margin: 0 18px; display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: center; border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--bg-paper); }
+  .m-fortune-banner__gua { font-family: var(--font-gua); font-size: 36px; color: var(--text); line-height: 1; text-align: center; }
+  .m-fortune-banner__top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 3px; }
+  .m-fortune-banner__name { font-family: var(--font-serif); font-size: 14.5px; font-weight: 500; }
+  .m-fortune-banner__verdict { font-family: var(--font-sans); font-size: 11.5px; line-height: 1.5; color: var(--text-muted); margin: 5px 0 0; }
+
+  /* News page */
+  .m-news-mast { padding: 20px 18px 0; }
+  .m-news-mast__eyebrow { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; color: var(--text-tertiary); text-transform: uppercase; margin: 0 0 8px; }
+  .m-news-mast__title { font-family: var(--font-serif); font-size: 24px; font-weight: 400; letter-spacing: -0.015em; margin: 0 0 12px; }
+  .m-news-mast__meta { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .m-news-mast__date { font-family: var(--font-mono); font-size: 10px; color: var(--text); letter-spacing: 0.03em; }
+
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .live { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9.5px; color: #991b1b; letter-spacing: 0.12em; text-transform: uppercase; }
+  .live__dot { width: 5px; height: 5px; border-radius: 999px; background: #ef4444; animation: blink 2.5s infinite ease; }
+
+  .m-cats { display: flex; gap: 14px; padding: 12px 18px; overflow-x: auto; scrollbar-width: none; }
+  .m-cats::-webkit-scrollbar { display: none; }
+  .m-cat { font-family: var(--font-sans); font-size: 12px; color: var(--text-muted); padding: 5px 0; white-space: nowrap; position: relative; }
+  .m-cat.active { color: var(--text); }
+  .m-cat.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: var(--text); }
+
+  .m-featured { padding: 18px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .m-featured__src { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); }
+  .m-featured__t { font-family: var(--font-serif); font-size: 19px; font-weight: 400; line-height: 1.3; letter-spacing: -0.005em; margin: 8px 0 10px; }
+  .m-featured__s { font-family: var(--font-sans); font-size: 12.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 10px; }
+
+  /* ── FORTUNE ── */
+  .m-ft-mast { padding: 24px 18px 0; text-align: center; }
+  .m-ft-mast__eyebrow { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; color: var(--text-tertiary); text-transform: uppercase; margin: 0 0 8px; }
+  .m-ft-mast__sub { font-family: var(--font-serif); font-size: 13px; font-style: italic; color: var(--text-muted); margin: 0; }
+
+  @keyframes ft-spin-in {
+    from { opacity: 0; transform: rotate(-60deg) scale(0.85); }
+    to   { opacity: 1; transform: rotate(0) scale(1); }
+  }
+  .m-shrine {
+    position: relative; width: 120px; height: 120px;
+    margin: 24px auto 18px;
+    border-radius: 999px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .m-shrine::before { content: ''; position: absolute; inset: 8px; border-radius: 999px; border: 1px solid var(--border-soft); }
+  .m-shrine__gua { font-family: var(--font-gua); font-size: 56px; color: var(--text); line-height: 1; opacity: 1; animation: ft-spin-in 700ms ease forwards; }
+
+  .m-gua-card { margin: 0 18px; border: 1px solid var(--border); border-radius: 12px; padding: 22px 20px; background: var(--bg-paper); text-align: center; }
+  .m-gua-card__n { font-family: var(--font-serif); font-size: 20px; font-weight: 600; letter-spacing: -0.005em; margin: 0 0 4px; }
+  .m-gua-card__x { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.09em; color: var(--text-tertiary); margin: 0 0 16px; }
+  .m-gua-card__v { font-family: var(--font-sans); font-size: 13px; line-height: 1.65; color: var(--text); padding-left: 12px; border-left: 2px solid var(--text); text-align: left; margin: 0 0 18px; }
+
+  .m-luck__lab { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 7px; }
+  .m-luck__track { height: 5px; border-radius: 999px; background: var(--panel-2); overflow: hidden; border: 1px solid var(--border-soft); }
+  .m-luck__fill { height: 100%; width: 68%; background: linear-gradient(90deg, var(--luck-xiaoji), var(--luck-ping)); border-radius: 999px; transition: width 700ms ease; }
+  .m-luck { text-align: left; }
+
+  .m-advice { margin: 16px 18px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .m-advice__c { border: 1px solid var(--border); border-radius: 8px; padding: 14px; background: var(--bg-paper); }
+  .m-advice__l { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-tertiary); margin: 0 0 6px; }
+  .m-advice__t { font-family: var(--font-sans); font-size: 12px; line-height: 1.5; color: var(--text); margin: 0; }
+
+  .m-disclaimer { margin: 20px 24px 24px; font-family: var(--font-sans); font-size: 10.5px; line-height: 1.55; color: var(--text-tertiary); font-style: italic; text-align: center; }
+
+  /* ── WEEKLY page ── */
+  .m-weekly-mast { padding: 24px 18px 8px; }
+  .m-weekly-mast__w { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-tertiary); margin: 0 0 8px; }
+  .m-weekly-mast__t { font-family: var(--font-serif); font-size: 22px; font-weight: 400; line-height: 1.3; letter-spacing: -0.01em; margin: 0 0 12px; }
+  .m-weekly-mast__d { font-family: var(--font-sans); font-size: 12.5px; line-height: 1.65; color: var(--text-muted); margin: 0 0 16px; }
+  .m-topics { padding: 0 18px; display: flex; flex-direction: column; gap: 12px; }
+  .m-topic { border: 1px solid var(--border); border-radius: 10px; padding: 16px 16px; background: var(--bg-paper); }
+  .m-topic__n { font-family: var(--font-mono); font-size: 9.5px; color: var(--text-tertiary); letter-spacing: 0.14em; margin: 0 0 6px; }
+  .m-topic__t { font-family: var(--font-serif); font-size: 14.5px; font-weight: 500; margin: 0 0 5px; line-height: 1.35; }
+  .m-topic__s { font-family: var(--font-sans); font-size: 12px; line-height: 1.55; color: var(--text-muted); margin: 0; }
+
+  /* ── Drawer ── */
+  .drawer-scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity 200ms ease; z-index: 40; }
+  .drawer-scrim.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: absolute; top: 0; bottom: 0; right: 0; width: 78%; background: var(--bg-paper);
+    transform: translateX(100%); transition: transform 250ms ease; z-index: 41;
+    padding: 54px 0 34px; display: flex; flex-direction: column;
+    border-left: 1px solid var(--border);
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer__head { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px 16px; border-bottom: 1px solid var(--border); }
+  .drawer__close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+  .drawer__nav { padding: 14px 18px; display: flex; flex-direction: column; }
+  .drawer__item { display: flex; align-items: center; justify-content: space-between; padding: 14px 2px; border-bottom: 1px solid var(--border-soft); font-family: var(--font-serif); font-size: 16px; }
+  .drawer__item.active { color: var(--text); }
+  .drawer__item .en { font-family: var(--font-sans); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0.02em; }
+  .drawer__footer { margin-top: auto; padding: 16px 18px; }
+  .drawer__cta { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: var(--text); color: #fff; border-radius: 8px; font-family: var(--font-sans); font-size: 13px; }
+
+  /* ── Novel variant: Fortune scroll ── */
+  .novel-scroll {
+    margin: 24px 18px 0;
+    background: #fbf8f1;
+    border: 1px solid #e9dfc9;
+    border-radius: 10px;
+    padding: 28px 26px 26px;
+    position: relative;
+    box-shadow: inset 0 0 0 4px #fff;
+  }
+  .novel-scroll::before, .novel-scroll::after {
+    content: ''; position: absolute; left: 10px; right: 10px; height: 10px;
+    background: repeating-linear-gradient(90deg, #c8a96b 0 2px, transparent 2px 6px);
+  }
+  .novel-scroll::before { top: -6px; }
+  .novel-scroll::after { bottom: -6px; }
+  .novel-scroll__gua { font-family: var(--font-gua); font-size: 72px; text-align: center; color: #3b2a18; line-height: 1; }
+  .novel-scroll__name { font-family: var(--font-serif); font-size: 22px; font-weight: 600; text-align: center; color: #3b2a18; margin: 12px 0 3px; }
+  .novel-scroll__x { font-family: var(--font-mono); font-size: 10.5px; text-align: center; letter-spacing: 0.1em; color: #8a6d45; margin: 0 0 16px; }
+  .novel-scroll__v { font-family: var(--font-serif); font-size: 14px; line-height: 1.7; color: #3b2a18; font-style: italic; text-align: center; margin: 0; }
+
+  /* ── Novel variant: News ticker ── */
+  .novel-ticker { padding: 0 18px; }
+  .novel-tick-item { padding: 14px 0; border-top: 1px dashed var(--border); }
+  .novel-tick-item:first-child { border-top: none; }
+  .novel-tick-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .novel-tick-stamp { font-family: var(--font-mono); font-size: 18px; font-weight: 400; color: var(--text); letter-spacing: 0.03em; line-height: 1; }
+  .novel-tick-src { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-tertiary); }
+  .novel-tick-pill { margin-left: auto; }
+  .novel-tick-title { font-family: var(--font-serif); font-size: 13.5px; line-height: 1.45; margin: 0; color: var(--text); }
+
+  /* ── Tweaks panel ── */
+  .tweaks {
+    position: fixed; right: 20px; bottom: 20px; width: 280px; z-index: 100;
+    background: #fff; border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 18px 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    display: none;
+  }
+  .tweaks.open { display: block; }
+  .tweaks__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .tweaks__title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); }
+  .tweaks__close { font-size: 16px; color: var(--text-muted); }
+  .tweaks__group { padding: 10px 0; border-top: 1px solid var(--border-soft); }
+  .tweaks__group:first-of-type { border-top: none; padding-top: 0; }
+  .tweaks__label { font-family: var(--font-sans); font-size: 12px; color: var(--text); margin-bottom: 8px; }
+  .tweaks__seg { display: flex; gap: 2px; background: var(--panel-2); border-radius: 8px; padding: 2px; border: 1px solid var(--border); }
+  .tweaks__seg button { flex: 1; font-family: var(--font-sans); font-size: 11px; padding: 6px 8px; border-radius: 6px; color: var(--text-muted); }
+  .tweaks__seg button.on { background: var(--text); color: #fff; }
+  .tweaks__swatches { display: flex; gap: 8px; }
+  .tweaks__sw { width: 24px; height: 24px; border-radius: 999px; border: 2px solid #fff; outline: 1px solid var(--border); cursor: pointer; }
+  .tweaks__sw.on { outline: 2px solid var(--text); outline-offset: 1px; }
+
+  /* Density variants */
+  [data-density="comfortable"] .m-news-item { padding: 20px 0; }
+  [data-density="comfortable"] .m-news-item__t { font-size: 14.5px; }
+  [data-density="comfortable"] .m-news-item__s { font-size: 12.5px; line-height: 1.65; }
+  [data-density="comfortable"] .m-hero { padding: 36px 18px 20px; }
+  [data-density="comfortable"] .m-hero__title { font-size: 28px; }
+
+  /* Accent color application */
+  [data-accent="blue"]   { --m-accent: #3b82f6; }
+  [data-accent="ink"]    { --m-accent: #1a1a1a; }
+  [data-accent="jade"]   { --m-accent: #166534; }
+  [data-accent="vermilion"] { --m-accent: #b91c1c; }
+  .accent-reveal { color: var(--m-accent); }
+  .cta--accent { background: var(--m-accent) !important; border-color: var(--m-accent) !important; }
+
+  .tweaks-fab {
+    position: fixed; right: 20px; bottom: 20px; z-index: 99;
+    width: 44px; height: 44px; border-radius: 999px; background: var(--text); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .tweaks-fab svg { width: 20px; height: 20px; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="stage__head">
+    <div>
+      <h1 class="stage__title">临象财经 · Mobile</h1>
+      <p class="stage__sub">Responsive website · drawer nav · 390 × 820 iPhone frame</p>
+    </div>
+    <div class="view-tabs" role="tablist">
+      <button class="view-tab active" data-view="home">Home</button>
+      <button class="view-tab" data-view="news">News</button>
+      <button class="view-tab" data-view="fortune">Fortune</button>
+      <button class="view-tab" data-view="weekly">Weekly</button>
+    </div>
+  </div>
+
+  <div class="deck" id="deck"></div>
+</div>
+
+<!-- Tweaks -->
+<button class="tweaks-fab" id="tweaks-fab" aria-label="Toggle tweaks">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 6h10M4 12h7M4 18h13"/><circle cx="17" cy="6" r="2"/><circle cx="14" cy="12" r="2"/><circle cx="20" cy="18" r="2"/></svg>
+</button>
+<div class="tweaks" id="tweaks">
+  <div class="tweaks__head">
+    <span class="tweaks__title">Tweaks</span>
+    <button class="tweaks__close" id="tweaks-close">×</button>
+  </div>
+  <div class="tweaks__group">
+    <div class="tweaks__label">Density</div>
+    <div class="tweaks__seg" data-group="density">
+      <button class="on" data-val="compact">Compact</button>
+      <button data-val="comfortable">Comfortable</button>
+    </div>
+  </div>
+  <div class="tweaks__group">
+    <div class="tweaks__label">Primary nav</div>
+    <div class="tweaks__seg" data-group="nav">
+      <button class="on" data-val="top">Top bar + drawer</button>
+      <button data-val="bottom">Bottom tab bar</button>
+    </div>
+  </div>
+  <div class="tweaks__group">
+    <div class="tweaks__label">Accent</div>
+    <div class="tweaks__swatches" data-group="accent">
+      <button class="tweaks__sw on" data-val="ink" style="background:#1a1a1a"></button>
+      <button class="tweaks__sw" data-val="blue" style="background:#3b82f6"></button>
+      <button class="tweaks__sw" data-val="jade" style="background:#166534"></button>
+      <button class="tweaks__sw" data-val="vermilion" style="background:#b91c1c"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Shared SVGs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M20 20l-3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-news" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 9h10M7 12h10M7 15h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-fortune" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-weekly" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 3v4M16 3v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 16l4-4 4 4 4-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<script>
+  /* ─────────────────── Content data ─────────────────── */
+  const news = [
+    { t: '14:32', src: 'Bloomberg', title: '美联储会议纪要：官员对 6 月降息意见分歧加剧', sum: '多位票委表示通胀顽固度超出预期，市场将降息概率回调至 32%。', sent: 'red', sentL: '消极', impact: 'red', impactL: '高影响' },
+    { t: '13:08', src: 'Reuters', title: '比特币再破 11 万美元，现货 ETF 单日净流入 8.2 亿', sum: '贝莱德 IBIT 领跑，市场情绪推向 Extreme Greed。', sent: 'green', sentL: '积极', impact: 'amber', impactL: '中等影响' },
+    { t: '11:45', src: 'WSJ', title: '英伟达财报前夜：分析师下调 Q2 出货预期', sum: '供应链消息称 H200 产能持续紧张，但需求端仍强劲。', sent: 'amber', sentL: '中性' },
+    { t: '10:22', src: 'FT', title: 'Lagarde：欧元区通胀路径"基本符合预期"', sum: '欧元兑美元短线跳涨 40 点后回吐部分涨幅。', sent: 'amber', sentL: '中性', impact: 'gray', impactL: '低影响' },
+    { t: '09:14', src: 'CNBC', title: '黄金突破 2,480 美元，创历史新高', sum: 'WGC 数据：全球央行 Q1 净购金 290 吨，中国连续 18 个月增持。', sent: 'green', sentL: '积极', impact: 'amber', impactL: '中等影响' },
+    { t: '08:01', src: 'Nikkei', title: '日银 YCC 松绑后首次利率决议，日元波动率暗涨', sum: '1 周 USDJPY ATM 隐含波动率升至 11.2%，为 2024 年初以来最高。', sent: 'amber', sentL: '中性' },
+  ];
+
+  const weeklyBullets = [
+    'PPI 超预期，降息预期快速降温',
+    '英伟达 vs AMD — 产能之争进入第二回合',
+    '比特币现货 ETF 连续 12 日净流入',
+    '美元指数关键 104.20 能否守住',
+  ];
+
+  const topics = [
+    { n: '01 · 宏观', t: '美联储的沉默', s: 'PPI 数据出来了，降息叙事开始松动。本周两位票委发言把 6 月降息概率从 58% 打到 32%。' },
+    { n: '02 · 科技', t: '英伟达 vs AMD', s: '产能是真正的战场。H200 供应紧张到 Q3，MI300X 能分走多少机构订单仍是问号。' },
+    { n: '03 · 加密', t: 'ETF 连续净流入 12 日', s: '机构资金还在排队买。现货溢价、期货基差、资金费率同步给出"过热"信号。' },
+    { n: '04 · 外汇', t: '美元指数 104.20', s: '技术面关键位。跌破意味着日元、欧元的阶段性见底；守住则是多头继续加码的信号。' },
+  ];
+
+  /* ─────────────────── Rendering ─────────────────── */
+
+  const statusBar = (dark) => `
+    <div class="phone__status ${dark ? 'phone__status--dark' : ''}">
+      <span>9:41</span>
+      <div class="phone__status-right">
+        <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="2.8" height="4" rx=".6" fill="currentColor"/><rect x="4.4" y="5" width="2.8" height="6" rx=".6" fill="currentColor"/><rect x="8.8" y="3" width="2.8" height="8" rx=".6" fill="currentColor"/><rect x="13.2" y="0" width="2.8" height="11" rx=".6" fill="currentColor"/></svg>
+        <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 3c2 0 3.8.8 5.2 2.1l1-1A8 8 0 0 0 7.5 1a8 8 0 0 0-6.2 3.1l1 1A7 7 0 0 1 7.5 3z" fill="currentColor"/><circle cx="7.5" cy="9" r="1.3" fill="currentColor"/></svg>
+        <svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="20" height="10" rx="3" stroke="currentColor" stroke-opacity=".35" fill="none"/><rect x="2" y="2" width="17" height="7" rx="1.6" fill="currentColor"/><path d="M22 3.5v4c.7-.2 1.2-.9 1.2-2s-.5-1.8-1.2-2z" fill="currentColor" fill-opacity=".5"/></svg>
+      </div>
+    </div>`;
+
+  const appBar = (title, withDrawerIcon=true) => `
+    <div class="app-bar">
+      <div class="app-bar__brand">${title === 'home' ? '临象<span class="lt">财经</span>' : '临象<span class="lt">财经</span>'}</div>
+      <div class="app-bar__right">
+        <button class="icon-btn" aria-label="Search"><svg><use href="#i-search"/></svg></button>
+        ${withDrawerIcon ? '<button class="icon-btn" aria-label="Menu" data-drawer-open><svg><use href="#i-menu"/></svg></button>' : ''}
+      </div>
+    </div>`;
+
+  const tabBar = (active) => `
+    <div class="tab-bar">
+      <button class="tab-item ${active==='home'?'active':''}" data-nav="home"><svg><use href="#i-home"/></svg><span class="tab-item__label">首页</span></button>
+      <button class="tab-item ${active==='news'?'active':''}" data-nav="news"><svg><use href="#i-news"/></svg><span class="tab-item__label">新闻</span></button>
+      <button class="tab-item ${active==='weekly'?'active':''}" data-nav="weekly"><svg><use href="#i-weekly"/></svg><span class="tab-item__label">周报</span></button>
+      <button class="tab-item ${active==='fortune'?'active':''}" data-nav="fortune"><svg><use href="#i-fortune"/></svg><span class="tab-item__label">每日一卦</span></button>
+    </div>`;
+
+  const drawer = (active) => `
+    <div class="drawer-scrim" data-drawer-close></div>
+    <div class="drawer">
+      <div class="drawer__head">
+        <div class="app-bar__brand">临象<span class="lt">财经</span></div>
+        <button class="drawer__close" data-drawer-close aria-label="Close"><svg width="18" height="18"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="drawer__nav">
+        <a class="drawer__item ${active==='home'?'active':''}" data-nav="home">首页 <span class="en">Home</span></a>
+        <a class="drawer__item ${active==='news'?'active':''}" data-nav="news">金融新闻 <span class="en">News</span></a>
+        <a class="drawer__item ${active==='weekly'?'active':''}" data-nav="weekly">每周周报 <span class="en">Weekly</span></a>
+        <a class="drawer__item ${active==='fortune'?'active':''}" data-nav="fortune">每日一卦 <span class="en">Fortune</span></a>
+        <a class="drawer__item">关于我们 <span class="en">About</span></a>
+      </div>
+      <div class="drawer__footer">
+        <a class="drawer__cta cta--accent">立即开户 · Open account <span>→</span></a>
+      </div>
+    </div>`;
+
+  const newsItemMobile = (n) => `
+    <article class="m-news-item">
+      <span class="m-news-item__time">${n.t}</span>
+      <div>
+        <span class="m-news-item__src">${n.src}</span>
+        <p class="m-news-item__t">${n.title}</p>
+        <p class="m-news-item__s">${n.sum}</p>
+        <div class="m-news-item__meta">
+          ${n.sent ? `<span class="m-badge m-badge--${n.sent}">${n.sentL}</span>` : ''}
+          ${n.impact ? `<span class="m-badge m-badge--${n.impact}">${n.impactL}</span>` : ''}
+        </div>
+      </div>
+    </article>`;
+
+  /* ── Screen renderers ── */
+
+  function screenHome(state) {
+    const hasBottom = state.nav === 'bottom';
+    return `
+      <div class="screen-content ${hasBottom ? 'has-tabbar' : ''}" data-screen="home">
+        ${appBar('home', !hasBottom)}
+        <section class="m-hero">
+          <p class="m-hero__eyebrow">面向散户 · Retail intelligence</p>
+          <h1 class="m-hero__title">万象皆声，<em>唯静者能听</em></h1>
+          <p class="m-hero__desc">简洁、及时、不废话的市场资讯。AI 摘要精华，帮你在噪音中找到信号。</p>
+          <div class="m-hero__actions">
+            <a class="m-btn m-btn--dark cta--accent">立即开户</a>
+            <a class="m-btn m-btn--link">了解更多 →</a>
+          </div>
+        </section>
+        <div class="m-stats">
+          <div class="m-stats__c"><div class="m-stats__v">实时</div><div class="m-stats__l">Real-time</div></div>
+          <div class="m-stats__c"><div class="m-stats__v">AI</div><div class="m-stats__l">摘要</div></div>
+          <div class="m-stats__c"><div class="m-stats__v">周报</div><div class="m-stats__l">Weekly</div></div>
+        </div>
+        <div class="m-sec"><span class="m-sec__label">关于我们 · ABOUT</span><span class="m-sec__rule"></span></div>
+        <div class="m-features">
+          <div class="m-feature"><svg><use href="#i-clock"/></svg><h3 class="m-feature__t">实时资讯</h3><p class="m-feature__d">聚合全球主流财经媒体，AI 自动摘要。</p></div>
+          <div class="m-feature"><svg><use href="#i-chart"/></svg><h3 class="m-feature__t">专业分析</h3><p class="m-feature__d">每周深度复盘，宏观 + 技术面并举。</p></div>
+          <div class="m-feature"><svg><use href="#i-shield"/></svg><h3 class="m-feature__t">合规经营</h3><p class="m-feature__d">持牌运营，资金安全，透明费率。</p></div>
+        </div>
+        <div class="m-sec"><span class="m-sec__label">最新新闻 · LATEST</span><span class="m-sec__rule"></span><a class="m-sec__more" data-nav="news">查看全部 →</a></div>
+        <div class="m-news-list">
+          ${news.slice(0, 3).map(newsItemMobile).join('')}
+        </div>
+        <div class="m-sec"><span class="m-sec__label">本周周报 · WEEKLY</span><span class="m-sec__rule"></span></div>
+        <div class="m-weekly">
+          <div class="m-weekly__head"><h3 class="m-weekly__t">美联储的沉默 · 科技股的分化</h3><span class="m-weekly__w">2026 W16</span></div>
+          <div class="m-weekly__div"></div>
+          <ul class="m-weekly__bullets">
+            ${weeklyBullets.map(b => `<li class="m-weekly__b"><span class="m-weekly__dot"></span><p>${b}</p></li>`).join('')}
+          </ul>
+          <div class="m-weekly__div"></div>
+          <a class="m-btn m-btn--link" style="padding-left:0" data-nav="weekly">阅读完整周报 →</a>
+        </div>
+        <div class="m-sec"><span class="m-sec__label">今日一卦 · FORTUNE</span><span class="m-sec__rule"></span></div>
+        <div class="m-fortune-banner">
+          <div class="m-fortune-banner__gua">䷀</div>
+          <div>
+            <div class="m-fortune-banner__top">
+              <span class="m-fortune-banner__name">乾为天</span>
+              <span class="m-badge m-badge--amber">小吉</span>
+            </div>
+            <p class="m-fortune-banner__verdict">今日宜守不宜攻；阳极将转，追高易接盘。</p>
+          </div>
+        </div>
+        <div style="padding: 20px 18px 28px;">
+          <a class="m-btn m-btn--block cta--accent" style="background:var(--text); color:#fff; border:none;" data-nav="fortune">查看详情 →</a>
+        </div>
+        ${hasBottom ? tabBar('home') : ''}
+        ${!hasBottom ? drawer('home') : ''}
+      </div>`;
+  }
+
+  function screenNews(state, variant='a') {
+    const hasBottom = state.nav === 'bottom';
+    if (variant === 'b') {
+      // Novel ticker-tape variant
+      return `
+        <div class="screen-content ${hasBottom?'has-tabbar':''}">
+          ${appBar('news', !hasBottom)}
+          <section class="m-news-mast">
+            <p class="m-news-mast__eyebrow">实时资讯 · LIVE TICKER</p>
+            <h1 class="m-news-mast__title">市场速览</h1>
+            <div class="m-news-mast__meta">
+              <span class="m-news-mast__date">2026·04·22</span>
+              <span class="m-news-mast__date" id="clock-b">14:32:07</span>
+              <span class="live"><span class="live__dot"></span>LIVE</span>
+            </div>
+          </section>
+          <div class="novel-ticker">
+            ${news.map(n => `
+              <div class="novel-tick-item">
+                <div class="novel-tick-head">
+                  <span class="novel-tick-stamp">${n.t}</span>
+                  <span class="novel-tick-src">${n.src}</span>
+                  <span class="novel-tick-pill">${n.sent ? `<span class="m-badge m-badge--${n.sent}">${n.sentL}</span>` : ''}</span>
+                </div>
+                <p class="novel-tick-title">${n.title}</p>
+              </div>`).join('')}
+          </div>
+          <div style="height:28px;"></div>
+          ${hasBottom ? tabBar('news') : ''}
+          ${!hasBottom ? drawer('news') : ''}
+        </div>`;
+    }
+    // Default: masthead + categories + featured + list
+    return `
+      <div class="screen-content ${hasBottom?'has-tabbar':''}">
+        ${appBar('news', !hasBottom)}
+        <section class="m-news-mast">
+          <p class="m-news-mast__eyebrow">最新资讯 · Real-time</p>
+          <h1 class="m-news-mast__title">市场速览</h1>
+          <div class="m-news-mast__meta">
+            <span class="m-news-mast__date">2026·04·22 · 周三</span>
+            <span class="m-news-mast__date" id="clock-a">14:32:07</span>
+            <span class="live"><span class="live__dot"></span>LIVE</span>
+          </div>
+        </section>
+        <nav class="m-cats">
+          <a class="m-cat active">全部</a><a class="m-cat">加密</a><a class="m-cat">政策</a><a class="m-cat">指数</a><a class="m-cat">外汇</a><a class="m-cat">大宗</a>
+        </nav>
+        <article class="m-featured">
+          <span class="m-featured__src">BLOOMBERG · 彭博</span>
+          <h2 class="m-featured__t">美联储会议纪要：官员对 6 月降息意见分歧加剧，点阵图或再度上移</h2>
+          <p class="m-featured__s">多位票委表示通胀顽固度超出预期。市场将 6 月降息概率从 58% 回调至 32%，两年期美债收益率突破 4.80%。</p>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <span class="m-badge m-badge--red">消极</span><span class="m-badge m-badge--red">高影响</span><span class="m-badge m-badge--gray">FOMC</span>
+          </div>
+        </article>
+        <div class="m-news-list">
+          ${news.slice(1).map(newsItemMobile).join('')}
+        </div>
+        <div style="height:28px;"></div>
+        ${hasBottom ? tabBar('news') : ''}
+        ${!hasBottom ? drawer('news') : ''}
+      </div>`;
+  }
+
+  function screenFortune(state, variant='a') {
+    const hasBottom = state.nav === 'bottom';
+    if (variant === 'b') {
+      return `
+        <div class="screen-content ${hasBottom?'has-tabbar':''}">
+          ${appBar('fortune', !hasBottom)}
+          <section class="m-ft-mast">
+            <p class="m-ft-mast__eyebrow">每日一卦 · 交易玄机</p>
+            <p class="m-ft-mast__sub">四月廿二 · 壬辰日</p>
+          </section>
+          <div class="novel-scroll">
+            <div class="novel-scroll__gua">䷀</div>
+            <h2 class="novel-scroll__name">乾为天</h2>
+            <p class="novel-scroll__x">元亨利贞 · 自强不息</p>
+            <p class="novel-scroll__v">"阳极将转，强而不骄；今日之守，明日之攻。"</p>
+          </div>
+          <div class="m-advice">
+            <div class="m-advice__c"><p class="m-advice__l">Action</p><p class="m-advice__t">观望为上。已有仓位可持，无仓位不宜盲动。</p></div>
+            <div class="m-advice__c"><p class="m-advice__l">Position</p><p class="m-advice__t">半仓以内。留足子弹应对午后急跌。</p></div>
+            <div class="m-advice__c"><p class="m-advice__l">Stop</p><p class="m-advice__t">以日线 MA20 为界。破位即出。</p></div>
+            <div class="m-advice__c"><p class="m-advice__l">吉时</p><p class="m-advice__t">巳时 09–11。午后申酉宜观不宜动。</p></div>
+          </div>
+          <p class="m-disclaimer">本卦象纯属娱乐，亏损概不负责，盈利请记得烧香还愿。</p>
+          ${hasBottom ? tabBar('fortune') : ''}
+          ${!hasBottom ? drawer('fortune') : ''}
+        </div>`;
+    }
+    return `
+      <div class="screen-content ${hasBottom?'has-tabbar':''}">
+        ${appBar('fortune', !hasBottom)}
+        <section class="m-ft-mast">
+          <p class="m-ft-mast__eyebrow">每日一卦 · 交易玄机</p>
+          <p class="m-ft-mast__sub">四月廿二 · 壬辰日</p>
+        </section>
+        <div class="m-shrine"><span class="m-shrine__gua">䷀</span></div>
+        <div class="m-gua-card">
+          <h2 class="m-gua-card__n">乾为天</h2>
+          <p class="m-gua-card__x">元亨利贞 · 自强不息</p>
+          <p class="m-gua-card__v">今日宜守不宜攻。行情看似顺风，实则阳极将转；强势震荡后若追高，易成接盘之人。守住既有仓位，便是今日最大的智慧。</p>
+          <div class="m-luck">
+            <div class="m-luck__lab"><span>财运指数</span><span>68 · 小吉</span></div>
+            <div class="m-luck__track"><div class="m-luck__fill"></div></div>
+          </div>
+        </div>
+        <div class="m-advice">
+          <div class="m-advice__c"><p class="m-advice__l">今日操作</p><p class="m-advice__t">观望为上。已有仓位可持，无仓位不宜盲动。</p></div>
+          <div class="m-advice__c"><p class="m-advice__l">仓位建议</p><p class="m-advice__t">半仓以内。留足子弹应对午后急跌。</p></div>
+          <div class="m-advice__c"><p class="m-advice__l">止损心法</p><p class="m-advice__t">以日线 MA20 为界；破位即出。</p></div>
+          <div class="m-advice__c"><p class="m-advice__l">吉时</p><p class="m-advice__t">巳时（09–11）。午后申酉宜观不宜动。</p></div>
+        </div>
+        <p class="m-disclaimer">本卦象纯属娱乐，亏损概不负责，盈利请记得烧香还愿。<br>Entertainment only — profits remember the incense.</p>
+        ${hasBottom ? tabBar('fortune') : ''}
+        ${!hasBottom ? drawer('fortune') : ''}
+      </div>`;
+  }
+
+  function screenWeekly(state) {
+    const hasBottom = state.nav === 'bottom';
+    return `
+      <div class="screen-content ${hasBottom?'has-tabbar':''}">
+        ${appBar('weekly', !hasBottom)}
+        <section class="m-weekly-mast">
+          <p class="m-weekly-mast__w">2026 W16 · 04·15 — 04·21</p>
+          <h1 class="m-weekly-mast__t">美联储的沉默<br>科技股的分化</h1>
+          <p class="m-weekly-mast__d">本周的主线是"降息叙事的快速降温"。PPI 超预期 + 两位票委的鹰派发言把市场对 6 月降息的定价从 58% 打到 32%。同时科技股内部分化加剧——英伟达受产能制约，AMD 接住部分订单溢出。</p>
+        </section>
+        <div class="m-sec"><span class="m-sec__label">本周主题 · TOPICS</span><span class="m-sec__rule"></span></div>
+        <div class="m-topics">
+          ${topics.map(x => `<div class="m-topic"><p class="m-topic__n">${x.n}</p><h3 class="m-topic__t">${x.t}</h3><p class="m-topic__s">${x.s}</p></div>`).join('')}
+        </div>
+        <div style="padding: 20px 18px 28px;">
+          <a class="m-btn m-btn--block cta--accent" style="background:var(--text);color:#fff;border:none;">打开脑图视图 →</a>
+        </div>
+        ${hasBottom ? tabBar('weekly') : ''}
+        ${!hasBottom ? drawer('weekly') : ''}
+      </div>`;
+  }
+
+  /* ─────────────────── State + wiring ─────────────────── */
+
+  const state = {
+    view: 'home',
+    density: 'compact',
+    nav: 'top',
+    accent: 'ink',
+  };
+  try { Object.assign(state, JSON.parse(localStorage.getItem('lxm-state') || '{}')); } catch(e) {}
+
+  function persist() { try { localStorage.setItem('lxm-state', JSON.stringify(state)); } catch(e) {} }
+
+  function phone(label, dark, contentHTML) {
+    return `
+      <div class="device-wrap">
+        <div class="phone">
+          <div class="phone__screen">
+            ${statusBar(dark)}
+            ${contentHTML}
+            <div class="phone__home"></div>
+          </div>
+          <div class="phone__notch"></div>
+        </div>
+        <div class="device-label">${label}</div>
+      </div>`;
+  }
+
+  function render() {
+    document.body.dataset.density = state.density;
+    document.body.dataset.accent = state.accent;
+
+    // Update view-tab active
+    document.querySelectorAll('.view-tab').forEach(t =>
+      t.classList.toggle('active', t.dataset.view === state.view));
+
+    // Update tweak seg indicators
+    document.querySelectorAll('.tweaks__seg').forEach(seg => {
+      const g = seg.dataset.group;
+      seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', state[g] === b.dataset.val));
+    });
+    document.querySelectorAll('.tweaks__swatches').forEach(group => {
+      group.querySelectorAll('.tweaks__sw').forEach(b => b.classList.toggle('on', state.accent === b.dataset.val));
+    });
+
+    const deck = document.getElementById('deck');
+    let cards = '';
+    if (state.view === 'home') {
+      cards = phone('A · Clean editorial', false, screenHome(state));
+    } else if (state.view === 'news') {
+      cards = phone('A · Classic masthead + list', false, screenNews(state, 'a'))
+            + phone('B · Ticker-tape · timestamp-led', false, screenNews(state, 'b'));
+    } else if (state.view === 'fortune') {
+      cards = phone('A · Shrine ring (primary)', false, screenFortune(state, 'a'))
+            + phone('B · Bamboo scroll (novel)', false, screenFortune(state, 'b'));
+    } else if (state.view === 'weekly') {
+      cards = phone('A · Topics list', false, screenWeekly(state));
+    }
+    deck.innerHTML = cards;
+    afterRender();
+  }
+
+  function afterRender() {
+    // Clock ticks
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function tick() {
+      const d = new Date();
+      const t = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      ['clock-a','clock-b'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t; });
+    }
+    tick();
+    if (window.__clockInt) clearInterval(window.__clockInt);
+    window.__clockInt = setInterval(tick, 1000);
+
+    // Nav: tab-bar or drawer items
+    document.querySelectorAll('[data-nav]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = el.dataset.nav;
+        state.view = target;
+        persist();
+        render();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    // Drawer open/close
+    document.querySelectorAll('[data-drawer-open]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const phone = btn.closest('.screen-content');
+        phone.querySelector('.drawer')?.classList.add('open');
+        phone.querySelector('.drawer-scrim')?.classList.add('open');
+      });
+    });
+    document.querySelectorAll('[data-drawer-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const phone = btn.closest('.screen-content');
+        phone.querySelector('.drawer')?.classList.remove('open');
+        phone.querySelector('.drawer-scrim')?.classList.remove('open');
+      });
+    });
+  }
+
+  // View tab clicks
+  document.querySelectorAll('.view-tab').forEach(t => t.addEventListener('click', () => {
+    state.view = t.dataset.view; persist(); render();
+  }));
+
+  // Tweaks UI
+  const tweaks = document.getElementById('tweaks');
+  const fab = document.getElementById('tweaks-fab');
+  fab.addEventListener('click', () => { tweaks.classList.toggle('open'); fab.style.display = tweaks.classList.contains('open') ? 'none' : 'flex'; });
+  document.getElementById('tweaks-close').addEventListener('click', () => { tweaks.classList.remove('open'); fab.style.display='flex'; });
+  document.querySelectorAll('.tweaks__seg button').forEach(b => {
+    b.addEventListener('click', () => {
+      const g = b.parentElement.dataset.group; state[g] = b.dataset.val; persist(); render();
+    });
+  });
+  document.querySelectorAll('.tweaks__sw').forEach(b => {
+    b.addEventListener('click', () => { state.accent = b.dataset.val; persist(); render(); });
+  });
+
+  // Initial
+  render();
+</script>
+
+</body>
+</html>

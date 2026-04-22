@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Type — Lora + DM Sans + DM Mono</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { padding: 44px 48px; background: var(--bg-paper); font-family: var(--font-sans); color: var(--text); }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .header { margin-bottom: 40px; }
+  .header h1 { font-family: var(--font-serif); font-size: 28px; font-weight: 400; letter-spacing: -0.01em; margin: 0 0 4px; }
+  .header .sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); margin: 0; }
+
+  .row { display: grid; grid-template-columns: 130px 1fr; gap: 32px; padding: 22px 0; border-top: 1px solid var(--border); align-items: baseline; }
+  .row:last-child { border-bottom: 1px solid var(--border); }
+  .tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text-tertiary); padding-top: 6px; }
+  .tag .spec { display: block; margin-top: 4px; color: var(--text-muted); letter-spacing: 0.05em; text-transform: none; }
+  .sample { min-width: 0; }
+
+  .section-label {
+    display: flex; align-items: center; gap: 14px; margin: 40px 0 8px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-tertiary);
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Actual samples */
+  .s-display { font-family: var(--font-serif); font-size: 32px; font-weight: 400; line-height: 1.25; letter-spacing: -0.01em; margin: 0; }
+  .s-display em { font-style: italic; color: var(--text-muted); }
+  .s-h1 { font-family: var(--font-serif); font-size: 26px; font-weight: 400; letter-spacing: -0.01em; margin: 0; }
+  .s-h2 { font-family: var(--font-serif); font-size: 20px; font-weight: 500; line-height: 1.35; margin: 0; }
+  .s-h3 { font-family: var(--font-serif); font-size: 15px; font-weight: 500; line-height: 1.35; margin: 0; }
+  .s-body { font-family: var(--font-sans); font-size: 13px; line-height: 1.75; color: var(--text-muted); margin: 0; max-width: 520px; }
+  .s-body-lg { font-family: var(--font-sans); font-size: 14px; line-height: 1.65; color: var(--text); margin: 0; max-width: 520px; }
+  .s-small { font-family: var(--font-sans); font-size: 12px; line-height: 1.55; color: var(--text-muted); margin: 0; }
+  .s-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary); }
+  .s-meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; color: var(--text-tertiary); }
+  .s-source { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.09em; color: var(--text-tertiary); text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>Typography</h1>
+    <p class="sub">Lora (serif) · DM Sans (sans) · DM Mono (mono)</p>
+  </div>
+
+  <div class="section-label">Display & headings · Lora</div>
+
+  <div class="row">
+    <div class="tag">Hero<br><span class="spec">Lora 32/1.25 · italic hybrid</span></div>
+    <div class="sample"><p class="s-display">万象皆声，<em>唯静者能听</em></p></div>
+  </div>
+
+  <div class="row">
+    <div class="tag">H1 · masthead<br><span class="spec">Lora 26/1.25</span></div>
+    <div class="sample"><p class="s-h1">临象财经 · News</p></div>
+  </div>
+
+  <div class="row">
+    <div class="tag">H2 · section<br><span class="spec">Lora 20/1.35 · 500</span></div>
+    <div class="sample"><p class="s-h2">本周宏观：美联储的沉默</p></div>
+  </div>
+
+  <div class="row">
+    <div class="tag">H3 · card<br><span class="spec">Lora 15/1.35 · 500</span></div>
+    <div class="sample"><p class="s-h3">英镑兑美元跌破关键支撑位</p></div>
+  </div>
+
+  <div class="section-label">Body & UI · DM Sans</div>
+
+  <div class="row">
+    <div class="tag">Body<br><span class="spec">DM Sans 13/1.75 · muted</span></div>
+    <div class="sample"><p class="s-body">我们为普通投资者提供简洁、及时、不废话的市场资讯与交易参考。每天两次更新，AI 帮你过滤噪音，只留下该看的那几条。</p></div>
+  </div>
+
+  <div class="row">
+    <div class="tag">Body · emph<br><span class="spec">DM Sans 14/1.65</span></div>
+    <div class="sample"><p class="s-body-lg">We give ordinary investors concise, timely, no-bullshit market intel. Updated twice daily.</p></div>
+  </div>
+
+  <div class="row">
+    <div class="tag">Small<br><span class="spec">DM Sans 12/1.55</span></div>
+    <div class="sample"><p class="s-small">Secondary descriptions, form helper text, captions under cards.</p></div>
+  </div>
+
+  <div class="section-label">Meta · DM Mono</div>
+
+  <div class="row">
+    <div class="tag">Eyebrow<br><span class="spec">DM Mono 10 · tracking 0.14em</span></div>
+    <div class="sample"><p class="s-eyebrow">面向散户的金融资讯平台</p></div>
+  </div>
+
+  <div class="row">
+    <div class="tag">Meta<br><span class="spec">DM Mono 11 · tracking 0.05em</span></div>
+    <div class="sample"><p class="s-meta">2026年4月22日 · 星期三 · 14:32:07</p></div>
+  </div>
+
+  <div class="row">
+    <div class="tag">Source<br><span class="spec">DM Mono 10 · tracking 0.09em · UPPER</span></div>
+    <div class="sample"><p class="s-source">BLOOMBERG · REUTERS · WSJ</p></div>
+  </div>
+
+</div>
+</body>
+</html>

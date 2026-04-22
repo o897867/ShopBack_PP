@@ -1,13 +1,13 @@
 /* ── Shared Top Navigation Bar ────────────────────────────── */
 .topnav {
-  border-bottom: 1px solid var(--border, #e5e7eb);
-  background: var(--bg, #f4f5f8);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-paper, #fff);
 }
 
 .topnav__inner {
   max-width: 740px;
   margin: 0 auto;
-  padding: 16px 20px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,55 +20,71 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  font-family: 'Lora', 'Noto Serif SC', serif;
-  font-size: 1.15rem;
+  font-family: var(--font-serif);
+  font-size: 20px;
   font-weight: 500;
-  color: var(--text, #1f2933);
+  color: var(--text);
   letter-spacing: -0.01em;
 }
 
 .topnav__brand-light {
-  font-weight: 400;
-  color: var(--text-muted, #6b7280);
+  font-weight: 300;
+  color: var(--text-muted);
+  margin-left: 6px;
 }
 
 .topnav__links {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
   flex-wrap: wrap;
 }
 
 .topnav__link {
   background: none;
   border: none;
-  padding: 0;
-  font-family: var(--font-sans, system-ui, sans-serif);
-  font-size: 12px;
-  color: var(--text-muted, #6b7280);
+  padding: 4px 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
   cursor: pointer;
-  letter-spacing: 0.04em;
-  transition: color 150ms;
+  transition: color var(--t-base) var(--easing);
+  position: relative;
 }
 
 .topnav__link:hover {
-  color: var(--text, #1f2933);
+  color: var(--text);
+}
+
+.topnav__link--active {
+  color: var(--text);
+}
+
+.topnav__link--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -19px;
+  height: 1px;
+  background: var(--text);
 }
 
 .topnav__cta {
-  font-size: 11px;
-  color: var(--text, #1f2933);
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 4px;
-  padding: 6px 14px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text);
+  border: 1px solid var(--text);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
   text-decoration: none;
-  letter-spacing: 0.04em;
-  transition: all 150ms;
+  transition: all var(--t-fast) var(--easing);
   white-space: nowrap;
 }
 
 .topnav__cta:hover {
-  background: var(--panel-2, #f8f9fb);
+  background: var(--text);
+  color: #fff;
 }
 
 .topnav__toggles {
@@ -87,7 +103,7 @@
   }
 
   .topnav__links {
-    gap: 12px;
+    gap: 14px;
     width: 100%;
   }
 }

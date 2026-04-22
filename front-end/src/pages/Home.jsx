@@ -1,9 +1,11 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import './Home.css';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import LanguageSelector from '../components/LanguageSelector.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
+
+const OPEN_ACCOUNT_URL = 'https://portal.cnfxhero.com/register?node=MjE4MzQw&language=zh-Hans';
 
 const Home = ({ onNavigate }) => {
   const { currentLanguage } = useLanguage();
@@ -53,7 +55,6 @@ const Home = ({ onNavigate }) => {
         const reports = await res.json();
         if (!cancelled && reports.length > 0) {
           const latest = reports[0];
-          // Fetch full report detail for nodes
           const detailRes = await fetch(`${apiBase}/api/weekly/reports/${latest.id}`);
           if (detailRes.ok) {
             const detail = await detailRes.json();
@@ -154,14 +155,6 @@ const Home = ({ onNavigate }) => {
     return item.summary || item.title;
   };
 
-  // Weekly report date formatting
-  const getWeekLabel = () => {
-    if (!weekly) return '';
-    const d = new Date(weekly.date);
-    const weekNum = Math.ceil((d.getDate() + new Date(d.getFullYear(), d.getMonth(), 1).getDay()) / 7);
-    return `${d.getFullYear()} W${String(d.getMonth() * 4 + weekNum).padStart(2, '0')}`;
-  };
-
   return (
     <div className="hp">
       <div className="hp-inner">
@@ -176,6 +169,9 @@ const Home = ({ onNavigate }) => {
             )}
           </div>
           <div className="hp-nav__links">
+            <button className="hp-nav__link hp-nav__link--active" onClick={() => handleNavigate('home')}>
+              {isChinese ? '首页' : 'Home'}
+            </button>
             <button className="hp-nav__link" onClick={() => handleNavigate('news')}>
               {isChinese ? '金融新闻' : 'News'}
             </button>
@@ -189,7 +185,7 @@ const Home = ({ onNavigate }) => {
               {isChinese ? '关于我们' : 'About'}
             </button>
             <a
-              href="https://portal.cnfxhero.com/register?node=MjE4MzQw&language=zh-Hans"
+              href={OPEN_ACCOUNT_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="hp-nav__cta"
@@ -206,7 +202,7 @@ const Home = ({ onNavigate }) => {
         {/* Hero */}
         <section className="hp-hero">
           <p className="hp-hero__eyebrow">
-            {isChinese ? '面向散户的金融资讯平台' : 'Financial intelligence for retail investors'}
+            {isChinese ? '面向散户的金融资讯平台 · Retail intelligence' : 'Financial intelligence for retail investors'}
           </p>
           <h1 className="hp-hero__title">
             {isChinese ? (
@@ -217,12 +213,12 @@ const Home = ({ onNavigate }) => {
           </h1>
           <p className="hp-hero__desc">
             {isChinese
-              ? '我们为普通投资者提供简洁、及时、不废话的市场资讯与交易参考。AI摘要精华，每日更新，帮你在噪音中找到信号。'
+              ? '我们为普通投资者提供简洁、及时、不废话的市场资讯与交易参考。AI 摘要精华，每日更新，帮你在噪音中找到信号。'
               : 'We provide concise, timely market intelligence for everyday investors. AI-powered summaries, daily updates — find the signal in the noise.'}
           </p>
           <div className="hp-hero__actions">
             <a
-              href="https://portal.cnfxhero.com/register?node=MjE4MzQw&language=zh-Hans"
+              href={OPEN_ACCOUNT_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="hp-btn hp-btn--outline"
@@ -250,9 +246,9 @@ const Home = ({ onNavigate }) => {
         </div>
 
         {/* About / Features */}
-        <section className="hp-section">
+        <section>
           <div className="hp-section-header">
-            <span className="hp-section-header__label">{isChinese ? '关于我们' : 'About us'}</span>
+            <span className="hp-section-header__label">{isChinese ? '关于我们 · About' : 'About us'}</span>
             <span className="hp-section-header__line" />
           </div>
           <div className="hp-features">
@@ -266,7 +262,7 @@ const Home = ({ onNavigate }) => {
                 ),
                 title: isChinese ? '实时资讯' : 'Real-time news',
                 desc: isChinese
-                  ? '聚合全球主流财经媒体，AI自动摘要，第一时间掌握市场动态。'
+                  ? '聚合全球主流财经媒体，AI 自动摘要，第一时间掌握市场动态。'
                   : 'Aggregated from top financial media, auto-summarized by AI.',
               },
               {
@@ -306,8 +302,8 @@ const Home = ({ onNavigate }) => {
 
           {/* News column */}
           <div>
-            <div className="hp-section-header">
-              <span className="hp-section-header__label">{isChinese ? '最新新闻' : 'Latest news'}</span>
+            <div className="hp-section-header" style={{ marginTop: 0 }}>
+              <span className="hp-section-header__label">{isChinese ? '最新新闻 · LATEST' : 'Latest news'}</span>
               <span className="hp-section-header__line" />
               <button className="hp-link" onClick={() => handleNavigate('news')}>
                 {isChinese ? '查看全部 →' : 'View all →'}
@@ -350,8 +346,8 @@ const Home = ({ onNavigate }) => {
 
           {/* Weekly column */}
           <div>
-            <div className="hp-section-header">
-              <span className="hp-section-header__label">{isChinese ? '本周周报' : 'This week'}</span>
+            <div className="hp-section-header" style={{ marginTop: 0 }}>
+              <span className="hp-section-header__label">{isChinese ? '本周周报 · WEEKLY' : 'This week'}</span>
               <span className="hp-section-header__line" />
             </div>
             {weekly ? (
@@ -387,9 +383,9 @@ const Home = ({ onNavigate }) => {
 
         {/* Fortune card */}
         {gua && (
-          <section className="hp-section">
+          <section style={{ marginTop: 8 }}>
             <div className="hp-section-header">
-              <span className="hp-section-header__label">{isChinese ? '今日一卦' : "Today's fortune"}</span>
+              <span className="hp-section-header__label">{isChinese ? '今日一卦 · FORTUNE' : "Today's fortune"}</span>
               <span className="hp-section-header__line" />
             </div>
             <div className="hp-fortune-banner">
@@ -417,12 +413,12 @@ const Home = ({ onNavigate }) => {
             </h3>
             <p className="hp-cta__desc">
               {isChinese
-                ? '开户流程简单，最快5分钟完成，即可访问全球市场'
+                ? '开户流程简单，最快 5 分钟完成，即可访问全球市场'
                 : 'Simple signup, as fast as 5 minutes, access global markets'}
             </p>
           </div>
           <a
-            href="https://portal.cnfxhero.com/register?node=MjE4MzQw&language=zh-Hans"
+            href={OPEN_ACCOUNT_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="hp-btn hp-btn--outline hp-btn--sm"

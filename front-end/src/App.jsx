@@ -17,6 +17,7 @@ const MobileTopicView = lazy(() => import('./weekly/mobile/MobileTopicView.tsx')
 const MobileErrorBoundary = lazy(() => import('./weekly/mobile/components/MobileErrorBoundary.tsx').then(m => ({ default: m.MobileErrorBoundary })));
 import Home from './pages/Home.jsx';
 const Fortune = lazy(() => import('./pages/Fortune.jsx'));
+const News = lazy(() => import('./pages/News.jsx'));
 const LeverageCalculator = lazy(() => import('./pages/LeverageCalculator.jsx'));
 const Guide = lazy(() => import('./pages/Guide.jsx'));
 import { LanguageProvider } from './hooks/useLanguage.jsx';
@@ -52,7 +53,7 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['home','fortune','leverage-calculator','guide'];
+      const known = ['home','news','fortune','leverage-calculator','guide'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
@@ -147,6 +148,10 @@ const HashApp = ({ currentPage, setCurrentPage }) => {
 
       {currentPage === 'home' ? (
         <Home onNavigate={setCurrentPage} />
+      ) : currentPage === 'news' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <News onNavigate={setCurrentPage} />
+        </Suspense>
       ) : currentPage === 'fortune' ? (
         <Suspense fallback={<div className="muted">Loading…</div>}>
           <Fortune onNavigate={setCurrentPage} />

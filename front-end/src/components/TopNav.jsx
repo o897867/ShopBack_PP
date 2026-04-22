@@ -6,7 +6,7 @@ import './TopNav.css';
 
 const OPEN_ACCOUNT_URL = 'https://portal.cnfxhero.com/register?node=MjE4MzQw&language=zh-Hans';
 
-const TopNav = ({ onNavigate }) => {
+const TopNav = ({ onNavigate, activePage }) => {
   const { currentLanguage } = useLanguage();
   const isChinese = currentLanguage === 'zh-CN';
 
@@ -23,6 +23,9 @@ const TopNav = ({ onNavigate }) => {
     onNavigate(target);
   };
 
+  const linkClass = (page) =>
+    `topnav__link${activePage === page ? ' topnav__link--active' : ''}`;
+
   return (
     <nav className="topnav">
       <div className="topnav__inner">
@@ -34,16 +37,16 @@ const TopNav = ({ onNavigate }) => {
           )}
         </button>
         <div className="topnav__links">
-          <button className="topnav__link" onClick={() => handleNav('news')}>
+          <button className={linkClass('news')} onClick={() => handleNav('news')}>
             {isChinese ? '金融新闻' : 'News'}
           </button>
-          <button className="topnav__link" onClick={() => handleNav('fortune')}>
+          <button className={linkClass('fortune')} onClick={() => handleNav('fortune')}>
             {isChinese ? '每日一卦' : 'Fortune'}
           </button>
-          <button className="topnav__link" onClick={() => handleNav('weekly-mindmap')}>
+          <button className={linkClass('weekly-mindmap')} onClick={() => handleNav('weekly-mindmap')}>
             {isChinese ? '周报' : 'Weekly'}
           </button>
-          <button className="topnav__link" onClick={() => handleNav('guide')}>
+          <button className={linkClass('guide')} onClick={() => handleNav('guide')}>
             {isChinese ? '关于我们' : 'About'}
           </button>
           <a
