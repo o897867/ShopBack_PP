@@ -1,94 +1,91 @@
-/* ── Fortune — 每日择卦 shrine style ─────────────────────────── */
+/* ── Fortune — 每日择卦 · Design System aligned ──────────────── */
 
 .fortune-wrapper {
   min-height: 100vh;
-  background: var(--bg, #f4f5f8);
+  background: var(--bg);
 }
 
 .fortune-page {
-  max-width: 520px;
+  max-width: var(--measure-narrow);
   margin: 0 auto;
   padding: 48px 24px 64px;
   text-align: center;
-  font-family: 'Lora', 'Noto Serif SC', serif;
-  color: var(--text, #1a1a1a);
+  font-family: var(--font-serif);
+  color: var(--text);
 }
 
-/* ── 顶部标签 ────────────────────────────────────────────────── */
+/* ── Eyebrow ────────────────────────────────────────────────── */
 .fortune-eyebrow {
-  font-family: 'DM Mono', 'Menlo', monospace;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  color: #c0c0c0;
-  margin-bottom: 24px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0 0 12px;
 }
 
-/* ── 卦象图标 ────────────────────────────────────────────────── */
+/* ── Shrine ─────────────────────────────────────────────────── */
 .fortune-shrine {
   position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 28px;
+  width: 156px;
+  height: 156px;
+  margin: 36px auto 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
 }
 
 .fortune-shrine__ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px solid #e5e5e5;
+  display: none;
 }
 
 .fortune-shrine__ring--inner {
   position: absolute;
-  width: 88px;
-  height: 88px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1px solid #f0f0f0;
+  inset: 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-soft);
 }
 
 .fortune-shrine__char {
   position: relative;
   z-index: 1;
-  font-family: 'Lora', 'Noto Serif SC', serif;
-  font-size: 3rem;
-  color: #333;
-  transition: all 0.3s ease;
+  font-family: var(--font-gua);
+  font-size: 72px;
+  color: var(--text);
+  line-height: 1;
+  transition: all var(--t-slow) var(--easing);
 }
 
 .fortune-shrine__char--spinning {
-  animation: fortune-spin-in 0.5s ease-out;
+  animation: fortune-spin-in 700ms ease;
 }
 
 @keyframes fortune-spin-in {
-  0%   { opacity: 0; transform: rotateY(90deg) scale(0.5); }
-  60%  { opacity: 1; transform: rotateY(-10deg) scale(1.05); }
-  100% { opacity: 1; transform: rotateY(0deg) scale(1); }
+  from { opacity: 0; transform: rotate(-60deg) scale(0.85); }
+  to { opacity: 1; transform: rotate(0) scale(1); }
 }
 
-/* ── 日期 ─────────────────────────────────────────────────── */
+/* ── Date ─────────────────────────────────────────────────── */
 .fortune-date {
-  font-family: 'DM Mono', 'Menlo', monospace;
-  font-size: 13px;
-  color: #c0c0c0;
-  letter-spacing: 0.06em;
-  margin-bottom: 32px;
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 0 0 32px;
 }
 
-/* ── 卦象卡片 ─────────────────────────────────────────────── */
+/* ── Gua Card ─────────────────────────────────────────────── */
 .fortune-gua-card {
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  text-align: left;
-  transition: all 0.3s ease;
+  max-width: 540px;
+  margin: 0 auto 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  background: var(--bg-paper);
+  text-align: center;
+  transition: all var(--t-slow) var(--easing);
   opacity: 0;
   transform: translateY(8px);
   pointer-events: none;
@@ -100,151 +97,163 @@
   pointer-events: auto;
 }
 
-/* 卦名 + tag */
+/* Gua name + tag */
 .fortune-gua-header {
   display: flex;
   align-items: baseline;
+  justify-content: center;
   gap: 10px;
-  margin-bottom: 12px;
-}
-
-.fortune-gua-name {
-  font-family: 'Lora', 'Noto Serif SC', serif;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.fortune-gua-tag {
-  font-family: 'DM Mono', 'Menlo', monospace;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  padding: 3px 10px;
-  border-radius: 999px;
-  border: 1px solid;
-}
-
-/* Tag color variants */
-.fortune-gua-tag[data-tag="大吉"] { border-color: #86efac; color: #166534; background: #f0fdf4; }
-.fortune-gua-tag[data-tag="吉"]   { border-color: #86efac; color: #166534; background: #f0fdf4; }
-.fortune-gua-tag[data-tag="小吉"] { border-color: #fde68a; color: #854d0e; background: #fefce8; }
-.fortune-gua-tag[data-tag="平"]   { border-color: #fcd34d; color: #92400e; background: #fffbeb; }
-.fortune-gua-tag[data-tag="险"]   { border-color: #fdba74; color: #9a3412; background: #fff7ed; }
-.fortune-gua-tag[data-tag="凶"]   { border-color: #fca5a5; color: #991b1b; background: #fef2f2; }
-.fortune-gua-tag[data-tag="大凶"] { border-color: #f87171; color: #7f1d1d; background: #fef2f2; }
-
-/* 象辞 */
-.fortune-gua-sub {
-  font-family: 'DM Mono', 'Menlo', monospace;
-  font-size: 13px;
-  color: #aaa;
-  letter-spacing: 0.04em;
-  margin-bottom: 14px;
-  font-style: italic;
-}
-
-/* 交易解读 */
-.fortune-gua-verdict {
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.7;
-  margin-bottom: 18px;
-  padding-left: 14px;
-  border-left: 2px solid #e5e5e5;
-}
-
-/* 四格建议 */
-.fortune-gua-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
   margin-bottom: 4px;
 }
 
-.fortune-gua-cell {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  padding: 14px;
+.fortune-gua-name {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--text);
 }
 
-.fortune-gua-cell__label {
-  font-family: 'DM Mono', 'Menlo', monospace;
+.fortune-gua-tag {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: 0.08em;
+  padding: 1px 7px;
+  border-radius: var(--radius-xs);
+}
+
+/* Tag color variants */
+.fortune-gua-tag[data-tag="大吉"] { background: var(--tag-green-bg); color: var(--tag-green-text); }
+.fortune-gua-tag[data-tag="吉"]   { background: var(--tag-green-bg); color: var(--tag-green-text); }
+.fortune-gua-tag[data-tag="小吉"] { background: #fffbeb; color: #92400e; }
+.fortune-gua-tag[data-tag="平"]   { background: var(--panel-2); color: var(--text-muted); }
+.fortune-gua-tag[data-tag="险"]   { background: #fff7ed; color: #9a3412; }
+.fortune-gua-tag[data-tag="凶"]   { background: var(--tag-red-bg); color: var(--tag-red-text); }
+.fortune-gua-tag[data-tag="大凶"] { background: var(--tag-red-bg); color: #7f1d1d; }
+
+/* Xiang (象辞) */
+.fortune-gua-sub {
+  font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.1em;
-  color: #c0c0c0;
-  margin-bottom: 6px;
+  letter-spacing: 0.09em;
+  color: var(--text-tertiary);
+  margin: 0 0 22px;
 }
 
-.fortune-gua-cell__value {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #444;
+/* Verdict (交易解读) */
+.fortune-gua-verdict {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  padding-left: 14px;
+  border-left: 2px solid var(--text);
+  text-align: left;
+  margin: 0 0 22px;
 }
 
-/* ── 财运指数条 ────────────────────────────────────────────── */
+/* ── Luck bar ────────────────────────────────────────────── */
 .fortune-luck-bar {
+  text-align: left;
   margin-top: 16px;
 }
 
 .fortune-luck-bar__header {
   display: flex;
   justify-content: space-between;
-  font-family: 'DM Mono', 'Menlo', monospace;
-  font-size: 12px;
-  color: #c0c0c0;
-  margin-bottom: 6px;
-  letter-spacing: 0.06em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
 }
 
 .fortune-luck-bar__track {
-  height: 4px;
-  background: #f0f0f0;
-  border-radius: 999px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--panel-2);
   overflow: hidden;
+  border: 1px solid var(--border-soft);
 }
 
 .fortune-luck-bar__fill {
   height: 100%;
-  border-radius: 999px;
-  transition: width 0.7s ease-out;
+  border-radius: var(--radius-pill);
+  transition: width 700ms ease;
 }
 
 /* Bar color by tag */
-.fortune-luck-bar__fill[data-tag="大吉"] { background: #22c55e; }
-.fortune-luck-bar__fill[data-tag="吉"]   { background: #4ade80; }
-.fortune-luck-bar__fill[data-tag="小吉"] { background: #facc15; }
-.fortune-luck-bar__fill[data-tag="平"]   { background: #f59e0b; }
-.fortune-luck-bar__fill[data-tag="险"]   { background: #f97316; }
-.fortune-luck-bar__fill[data-tag="凶"]   { background: #ef4444; }
-.fortune-luck-bar__fill[data-tag="大凶"] { background: #dc2626; }
+.fortune-luck-bar__fill[data-tag="大吉"] { background: var(--luck-daji); }
+.fortune-luck-bar__fill[data-tag="吉"]   { background: var(--luck-ji); }
+.fortune-luck-bar__fill[data-tag="小吉"] { background: linear-gradient(90deg, var(--luck-xiaoji), var(--luck-ping)); }
+.fortune-luck-bar__fill[data-tag="平"]   { background: var(--luck-ping); }
+.fortune-luck-bar__fill[data-tag="险"]   { background: var(--luck-xian); }
+.fortune-luck-bar__fill[data-tag="凶"]   { background: var(--luck-xiong); }
+.fortune-luck-bar__fill[data-tag="大凶"] { background: var(--luck-daxiong); }
 
-/* ── 免责声明 ─────────────────────────────────────────────── */
-.fortune-disclaimer {
-  font-family: 'DM Mono', 'Menlo', monospace;
-  font-size: 11px;
-  color: #d4d4d4;
-  letter-spacing: 0.06em;
-  margin-bottom: 24px;
+/* ── Advice grid ─────────────────────────────────────────── */
+.fortune-gua-grid {
+  max-width: 540px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  text-align: left;
 }
 
-/* ── 主按钮 ───────────────────────────────────────────────── */
-.fortune-cast-btn {
-  font-family: 'Lora', 'Noto Serif SC', serif;
-  font-size: 1rem;
-  color: #666;
-  background: none;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  padding: 12px 32px;
+.fortune-gua-cell {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  background: var(--bg-paper);
+}
+
+.fortune-gua-cell__label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
   letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.fortune-gua-cell__value {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  color: var(--text);
+}
+
+/* ── Disclaimer ──────────────────────────────────────────── */
+.fortune-disclaimer {
+  max-width: 540px;
+  margin: 32px auto 24px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* ── Cast button ─────────────────────────────────────────── */
+.fortune-cast-btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--text);
+  border-radius: var(--radius-sm);
+  padding: 10px 28px;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--t-fast);
 }
 
 .fortune-cast-btn:hover {
-  background: #fafafa;
-  color: #333;
+  background: var(--text);
+  color: #fff;
 }
 
 .fortune-cast-btn:active {
@@ -256,7 +265,7 @@
   cursor: not-allowed;
 }
 
-/* ── 副按钮组 ─────────────────────────────────────────────── */
+/* ── Secondary actions ───────────────────────────────────── */
 .fortune-secondary-actions {
   display: flex;
   justify-content: center;
@@ -265,120 +274,102 @@
 }
 
 .fortune-secondary-btn {
-  font-family: 'DM Mono', 'Menlo', monospace;
-  font-size: 12px;
-  color: #c0c0c0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--text-muted);
   background: none;
-  border: 1px solid #f0f0f0;
-  border-radius: 999px;
-  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
   cursor: pointer;
   letter-spacing: 0.06em;
-  transition: all 0.2s;
+  transition: all var(--t-base);
 }
 
 .fortune-secondary-btn:hover {
-  color: #666;
-  border-color: #ddd;
+  color: var(--text);
+  border-color: var(--text-muted);
 }
 
 /* ── Dark mode ────────────────────────────────────────────── */
-[data-theme="dark"] .fortune-page {
-  color: #e0e0e0;
-}
-
-[data-theme="dark"] .fortune-shrine__ring {
-  border-color: #333;
-}
-
-[data-theme="dark"] .fortune-shrine__ring--inner {
-  border-color: #2a2a2a;
-}
-
-[data-theme="dark"] .fortune-shrine__char {
-  color: #ddd;
-}
-
-[data-theme="dark"] .fortune-eyebrow,
-[data-theme="dark"] .fortune-date {
-  color: #555;
-}
-
-[data-theme="dark"] .fortune-gua-card {
-  background: #1a1a1a;
-  border-color: #2a2a2a;
-}
-
-[data-theme="dark"] .fortune-gua-name {
-  color: #e0e0e0;
-}
-
-[data-theme="dark"] .fortune-gua-sub {
-  color: #666;
-}
-
 [data-theme="dark"] .fortune-gua-verdict {
-  color: #999;
-  border-left-color: #333;
+  border-left-color: var(--text);
 }
 
-[data-theme="dark"] .fortune-gua-cell {
-  background: #111;
-  border-color: #2a2a2a;
-}
-
-[data-theme="dark"] .fortune-gua-cell__label {
-  color: #555;
-}
-
-[data-theme="dark"] .fortune-gua-cell__value {
-  color: #bbb;
-}
-
-[data-theme="dark"] .fortune-luck-bar__track {
-  background: #222;
-}
-
-[data-theme="dark"] .fortune-luck-bar__header {
-  color: #555;
-}
-
-[data-theme="dark"] .fortune-disclaimer {
-  color: #333;
-}
-
-[data-theme="dark"] .fortune-cast-btn {
-  color: #999;
-  border-color: #333;
-}
-
-[data-theme="dark"] .fortune-cast-btn:hover {
-  background: #1a1a1a;
-  color: #ddd;
-}
-
-[data-theme="dark"] .fortune-secondary-btn {
-  color: #555;
-  border-color: #2a2a2a;
-}
-
-[data-theme="dark"] .fortune-secondary-btn:hover {
-  color: #999;
-  border-color: #444;
-}
-
-/* ── Responsive ───────────────────────────────────────────── */
-@media (max-width: 480px) {
+/* ══════════════════════════════════════════════════════════
+   Mobile — <=768px
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
   .fortune-page {
-    padding: 32px 16px 48px;
+    padding: 24px 18px 48px;
+  }
+
+  .fortune-eyebrow {
+    font-size: 9.5px;
+    margin-bottom: 8px;
+  }
+
+  .fortune-date {
+    font-size: 13px;
+  }
+
+  .fortune-shrine {
+    width: 120px;
+    height: 120px;
+    margin: 24px auto 18px;
+  }
+
+  .fortune-shrine__char {
+    font-size: 56px;
+  }
+
+  .fortune-gua-card {
+    padding: 22px 20px;
+  }
+
+  .fortune-gua-name {
+    font-size: 20px;
+  }
+
+  .fortune-gua-sub {
+    font-size: 10px;
+    margin-bottom: 16px;
+  }
+
+  .fortune-gua-verdict {
+    font-size: 13px;
+    padding-left: 12px;
+    margin-bottom: 18px;
+  }
+
+  .fortune-luck-bar__header {
+    font-size: 9.5px;
+    margin-bottom: 7px;
+  }
+
+  .fortune-luck-bar__track {
+    height: 5px;
   }
 
   .fortune-gua-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    gap: 10px;
   }
 
   .fortune-gua-cell {
-    padding: 10px;
+    padding: 14px;
+  }
+
+  .fortune-gua-cell__label {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+
+  .fortune-gua-cell__value {
+    font-size: 12px;
+  }
+
+  .fortune-disclaimer {
+    font-size: 10.5px;
+    margin: 20px auto 24px;
   }
 }

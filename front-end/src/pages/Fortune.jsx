@@ -14,8 +14,8 @@ function LuckBar({ luck, tag }) {
   return (
     <div className="fortune-luck-bar">
       <div className="fortune-luck-bar__header">
-        <span>财运指数</span>
-        <span>{luck}%</span>
+        <span>财运指数 · Fortune Index</span>
+        <span>{luck} · {tag}</span>
       </div>
       <div className="fortune-luck-bar__track">
         <div
@@ -32,32 +32,36 @@ function LuckBar({ luck, tag }) {
 
 function GuaCard({ gua, visible }) {
   return (
-    <div className={`fortune-gua-card ${visible ? 'fortune-gua-card--visible' : ''}`}>
-      <div className="fortune-gua-header">
-        <span className="fortune-gua-name">{gua.name}</span>
-        <span className="fortune-gua-tag" data-tag={gua.tag}>{gua.tag}</span>
+    <>
+      <div className={`fortune-gua-card ${visible ? 'fortune-gua-card--visible' : ''}`}>
+        <div className="fortune-gua-header">
+          <span className="fortune-gua-name">{gua.name}</span>
+          <span className="fortune-gua-tag" data-tag={gua.tag}>{gua.tag}</span>
+        </div>
+
+        <p className="fortune-gua-sub">{gua.sub}</p>
+
+        <p className="fortune-gua-verdict">{gua.verdict}</p>
+
+        <LuckBar luck={gua.luck} tag={gua.tag} />
       </div>
 
-      <p className="fortune-gua-sub">{gua.sub}</p>
-
-      <p className="fortune-gua-verdict">{gua.verdict}</p>
-
-      <div className="fortune-gua-grid">
-        {[
-          { label: '今日操作', value: gua.action },
-          { label: '仓位建议', value: gua.position },
-          { label: '止损心法', value: gua.stoploss },
-          { label: '吉时', value: gua.time },
-        ].map(({ label, value }) => (
-          <div key={label} className="fortune-gua-cell">
-            <div className="fortune-gua-cell__label">{label}</div>
-            <div className="fortune-gua-cell__value">{value}</div>
-          </div>
-        ))}
-      </div>
-
-      <LuckBar luck={gua.luck} tag={gua.tag} />
-    </div>
+      {visible && (
+        <div className="fortune-gua-grid">
+          {[
+            { label: '今日操作 · Action', value: gua.action },
+            { label: '仓位建议 · Position', value: gua.position },
+            { label: '止损心法 · Stop loss', value: gua.stoploss },
+            { label: '吉时 · Auspicious hour', value: gua.time },
+          ].map(({ label, value }) => (
+            <div key={label} className="fortune-gua-cell">
+              <div className="fortune-gua-cell__label">{label}</div>
+              <div className="fortune-gua-cell__value">{value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -116,47 +120,48 @@ const Fortune = ({ onNavigate }) => {
 
   return (
     <div className="fortune-wrapper">
-      <TopNav onNavigate={onNavigate} />
+      <TopNav onNavigate={onNavigate} activePage="fortune" />
       <div className="fortune-page">
-      <p className="fortune-eyebrow">每日一卦 · 交易玄机</p>
+        <p className="fortune-eyebrow">每日一卦 · 交易玄机</p>
 
-      {/* Shrine icon */}
-      <div className="fortune-shrine">
-        <div className="fortune-shrine__ring" />
-        <div className="fortune-shrine__ring--inner" />
-        <span
-          className={`fortune-shrine__char ${spinning ? 'fortune-shrine__char--spinning' : ''}`}
-        >
-          {gua?.char ?? '卦'}
-        </span>
-      </div>
-
-      <p className="fortune-date">{date}</p>
-
-      {gua && <GuaCard gua={gua} visible={visible} />}
-
-      <p className="fortune-disclaimer">
-        本卦象纯属娱乐，亏损概不负责，盈利请记得烧香还愿
-      </p>
-
-      <button
-        className="fortune-cast-btn"
-        onClick={() => fetchGua(castCount > 0)}
-        disabled={loading}
-      >
-        {loading ? '天机涌动…' : castCount === 0 ? '起卦问财' : '再问一卦'}
-      </button>
-
-      {gua && visible && (
-        <div className="fortune-secondary-actions">
-          <button className="fortune-secondary-btn" onClick={copyFortune}>
-            {copied ? '已复制！' : '复制签文'}
-          </button>
-          <button className="fortune-secondary-btn" onClick={() => fetchGua(false)}>
-            查看今日卦
-          </button>
+        {/* Shrine icon */}
+        <div className="fortune-shrine">
+          <div className="fortune-shrine__ring--inner" />
+          <span
+            className={`fortune-shrine__char ${spinning ? 'fortune-shrine__char--spinning' : ''}`}
+          >
+            {gua?.char ?? '卦'}
+          </span>
         </div>
-      )}
+
+        <p className="fortune-date">{date}</p>
+
+        {gua && <GuaCard gua={gua} visible={visible} />}
+
+        <p className="fortune-disclaimer">
+          本卦象纯属娱乐，亏损概不负责，盈利请记得烧香还愿。
+          <br />
+          For entertainment only. Losses are not our concern; profits — remember the incense.
+        </p>
+
+        <button
+          className="fortune-cast-btn"
+          onClick={() => fetchGua(castCount > 0)}
+          disabled={loading}
+        >
+          {loading ? '天机涌动…' : castCount === 0 ? '起卦问财' : '再问一卦'}
+        </button>
+
+        {gua && visible && (
+          <div className="fortune-secondary-actions">
+            <button className="fortune-secondary-btn" onClick={copyFortune}>
+              {copied ? '已复制！' : '复制签文'}
+            </button>
+            <button className="fortune-secondary-btn" onClick={() => fetchGua(false)}>
+              查看今日卦
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
