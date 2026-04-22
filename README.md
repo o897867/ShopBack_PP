@@ -1,429 +1,185 @@
-# ShopBack Cashback Management Platform
+# ShopBack PP — CFD Trading Platform
 
-> In a Nutshell
->
-> AI-powered cashback monitoring platform using Bayesian prediction to help you catch the highest cashback rates at the optimal time.
+一体化 CFD 经纪商对比与交易工具平台，涵盖实时行情、交易计算器、金融新闻、社区论坛、周报思维导图等功能。
 
 ---
 
-## Table of Contents
-
-1. [Core Highlights](#core-highlights)
-2. [Project Overview](#project-overview)
-3. [System Architecture](#system-architecture)
-4. [Features](#features)
-5. [Technology Stack](#technology-stack)
-6. [Data Engineering](#data-engineering)
-7. [Installation Guide](#installation-guide)
-8. [API Documentation](#api-documentation)
-9. [User Guide](#user-guide)
-10. [Configuration](#configuration)
-11. [Troubleshooting](#troubleshooting)
-12. [Project Structure](#project-structure)
-13. [Adding New Features](#adding-new-features)
-14. [License](#license)
-15. [Contributing](#contributing)
-16. [Support](#support)
-
-## Core Highlights
-
-- AI Prediction Engine: Self-adaptive Bayesian model that analyzes historical patterns to predict optimal timing.
-- Smart Analytics: Real-time multi-platform analysis with anomaly and trend detection.
-- Automated Operations: Auto-updating and training models; no manual intervention needed.
-- Precision Alerts: Probability-based alerts that ensure you never miss upsized cashback.
-- Multi-Platform Integration: Supports ShopBack and CashRewards in one unified workflow.
-
-## Project Overview
-
-The ShopBack Cashback Management Platform is a comprehensive cashback monitoring and management system that supports multi-platform data scraping (ShopBack and CashRewards). The platform provides real-time monitoring, price alerts, platform comparison, and trading charts.
-
-## System Architecture
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                         User Interface (UI)                      │
-│            React + Vite + TradingView Charts + Recharts          │
-└──────────────────────────┬───────────────────────────────────────┘
-                           │ HTTP / WebSocket
-┌──────────────────────────▼───────────────────────────────────────┐
-│                           API Gateway                            │
-│                        FastAPI + CORS                            │
-├──────────────────────────────────────────────────────────────────┤
-│                           Core Services                           │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
-│  │ Bayesian Model  │  │ Smart Alerts    │  │ Platform Compare│  │
-│  │ Prediction      │  │ + Email         │  │ (SB vs CR)      │  │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
-├──────────────────────────────────────────────────────────────────┤
-│                      Data & Storage (SQLite)                      │
-│  Stores, Cashback History, Rate Statistics, Alerts, Metrics       │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-## Features
-
-- Multi-platform support: ShopBack and CashRewards
-- Real-time data scraping: Asynchronous batch collection of cashback data
-- Platform comparison: Compare the same store rates across platforms
-- Price alerts: Email notifications for rate changes
-- Data visualization: Historical trends and statistics
-- Trading charts: TradingView integration
-- Data management: Store management and historical queries
-
-## Technology Stack
-
-### Frontend
-- React 19.1.0 – UI framework
-- Vite – Modern build tool
-- Recharts 3.1.0 – Data visualization
-- TradingView – Trading charts
-- React Hooks – State management
-
-### Backend
-- FastAPI – High-performance async API framework
-- Pydantic – Data validation
-- aiohttp – Asynchronous HTTP client
-- BeautifulSoup4 – HTML parsing
-- SQLite – Lightweight database
-- smtplib – Email sending
-
-### AI & Machine Learning
-- Bayesian statistics – Probabilistic prediction modeling
-- NumPy – Scientific computing
-- SciPy – Advanced mathematical algorithms
-- Adaptive learning – Self-optimizing models
-- Posterior distribution – Dynamic parameter updates
-
-### Data Processing
-- Async scraping engine – High-concurrency data collection
-- APScheduler / schedule – Task scheduling
-- JSON – Model persistence
-- Logging – Log management
-
-## Data Engineering
-
-This project includes a production-grade ingestion, transformation, storage, and orchestration layer that demonstrates practical data engineering skills. The components below are implemented and runnable locally.
-
-### Pipeline Overview
-- Web scraping ingestion: Asynchronous, concurrent collectors for ShopBack and CashRewards with robust HTML parsing and platform-specific logic. See `back-end/sb_scrap.py:45`, `back-end/sb_scrap.py:185`, and `back-end/sb_scrap.py:903`.
-- Batch CSV ingestion: Deterministic importers for broker regulations and ratings to seed and enrich the warehouse. See `back-end/add_brokers_from_csv.py:129` and `back-end/import_broker_ratings.py:100`.
-- Derived metrics: After ingestion, statistics like current/high/low cashback rates are computed and maintained incrementally. See `back-end/sb_scrap.py:812` and `back-end/sb_scrap.py:865`.
-- Streaming updates: Real‑time ETH model updates over WebSocket for analytics UX, demonstrating streaming ingestion + fan‑out. See `back-end/fapi.py:264` and `back-end/fapi.py:393`.
-
-### Storage & Data Modeling
-- Engine: SQLite for local development with strict row factories, indexes, and uniqueness constraints. Core init: `back-end/database.py:19`.
-- Operational tables (CFD/Forum/Auth): Created in `back-end/database.py` (e.g., `cfd_brokers`, `cfd_broker_news`, `leverage_*`).
-- Analytics tables (cashback): Created and managed in `back-end/sb_scrap.py` (`stores`, `cashback_history`, `rate_statistics`, `price_alerts`, `performance_metrics`). Example DDL with a CHECK constraint: `back-end/sb_scrap.py:302`.
-- Platform-aware modeling: Backfilled and maintained `platform` column across related tables for multi-source attribution. Migration utility: `back-end/sb_scrap.py:413`.
-
-### Transformations & Business Logic
-- Normalization: Consistent numeric extraction for percent/currency rates with resilient parsing. `back-end/sb_scrap.py:475`.
-- Incremental stats: Rolling high/low/current statistics per store/category updated in-place. `back-end/sb_scrap.py:812` and `back-end/sb_scrap.py:865`.
-- Cross-source comparison: Compare the same merchant across platforms (ShopBack vs CashRewards). `back-end/sb_scrap.py:515`.
-- Ratings enrichment: Weighted scoring and JSON-structured breakdowns applied during import. `back-end/import_broker_ratings.py:61` and `back-end/import_broker_ratings.py:80`.
-
-### Orchestration & Scheduling
-- Lightweight scheduler: Recurring jobs for data checks, low-confidence retraining, full retrains, cleanup, and validation using `schedule`. See `back-end/model_scheduler.py:33`, `back-end/model_scheduler.py:76`, `back-end/model_scheduler.py:174`, and `back-end/model_scheduler.py:205`.
-- Operational metrics: Scheduler exposes status, update counts, error tracking, and next run times. `back-end/model_scheduler.py:289`.
-
-### Observability & Performance
-- Persistence of ingestion and alert pipeline metrics (p95, min/max, successes/failures, concurrency, daily deltas). `back-end/sb_scrap.py:361`.
-- Targeted indexing on hot paths for query speed (IDs, timestamps, platform, composite keys). See index creation in `back-end/sb_scrap.py` and `back-end/database.py`.
-- Defensive parsing with structured logging for successful and failed extractions.
-
-### Data Quality & Governance
-- Schema constraints: Uniqueness on `(name, url, platform)` and validated `threshold_type` via CHECK constraint. `back-end/sb_scrap.py:302`.
-- Safe migrations: In-place schema evolution for multi-platform support with idempotent checks. `back-end/sb_scrap.py:413`.
-- Post‑load verification: Importers include verification passes and sample outputs for quick sanity checks. `back-end/import_broker_ratings.py:173`.
-
-### Reproducible Local Runs (Quickstart)
-1) Initialize environment and backend (creates DB schema on startup):
-   - `python3 -m venv .venv && source .venv/bin/activate`
-   - `pip install -r back-end/requirements.txt`
-   - `python back-end/fapi.py` (once) to initialize core tables
-
-2) Seed and enrich analytics data:
-   - Import broker entities and regulators: `python back-end/add_brokers_from_csv.py`
-   - Import ratings with weighted breakdowns: `python back-end/import_broker_ratings.py`
-
-3) Run scheduled model/data maintenance (optional):
-   - `cd back-end && python model_scheduler.py` (keeps periodic jobs running; Ctrl+C to stop)
-
-4) Run ingestion (scraping) ad‑hoc or from your services:
-   - Use `ShopBackSQLiteScraper` programmatically to scrape URLs and persist results. Entrypoints: `back-end/sb_scrap.py:185` and `back-end/sb_scrap.py:903`.
-
-### Source Data Artifacts
-- Regulatory and rating sources: `Brokers_Regulation_WithNewAdds.csv`, `Broker_Scoring.csv` (root directory).
-- Example generator scripts for rebate workflows: `generate_rebate_csv.py`, `generate_rebate_template.py` (root).
-
-### Notes on Scaling
-- The current design cleanly separates ingestion, transformation, storage, and orchestration, making it straightforward to swap SQLite for PostgreSQL and to lift jobs into Prefect/Airflow or containers. The schema migration utilities and explicit indexes are intended to support this evolution path without code churn.
-
-## Installation Guide
-
-### Prerequisites
-- Python 3.8+
-- Node.js 16+
-- npm or yarn
-
-### Backend Installation
-
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-cd back-end
-pip install -r requirements.txt
-
-# Start backend server
-python fapi.py
-```
-
-### Frontend Installation
-
-```bash
-# Install frontend dependencies
-cd front-end/shopback-frontend
-npm install
-
-# Start development server
-npm start
-```
-
-### Access Application
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8001
-- API Docs (OpenAPI): http://localhost:8001/docs
-
-## API Documentation
-
-### Core Endpoints (Cashback)
-
-Dashboard Data
-```http
-GET /api/dashboard
-```
-
-Response Example:
-```json
-{
-  "total_stores": 25,
-  "total_records": 1250,
-  "recent_scrapes": 45,
-  "upsized_stores": 3,
-  "avg_cashback_rate": 4.2
-}
-```
-
-Store Management
-```http
-GET /api/stores?limit=50&offset=0&search=amazon
-
-POST /api/add-store
-Content-Type: application/json
-{
-  "url": "https://www.shopback.com.au/amazon-australia"
-}
-```
-
-Platform Comparison
-```http
-GET /api/compare/{store_name}
-GET /api/compare-all
-```
-
-Price Alerts
-```http
-POST /api/alerts
-Content-Type: application/json
-{
-  "user_email": "user@example.com",
-  "store_url": "https://www.shopback.com.au/amazon-australia",
-  "threshold_type": "above_current",
-  "threshold_value": 5.0
-}
-
-GET /api/alerts?email=user@example.com
-```
-
-Data Scraping
-```http
-POST /api/rescrape-all
-POST /api/scrape
-Content-Type: application/json
-{
-  "url": "https://www.shopback.com.au/amazon-australia"
-}
-```
-
-### ETH Streaming (Analytics)
-```http
-GET  /api/eth/current-price
-GET  /api/eth/predictions
-GET  /api/eth/candles-3m
-GET  /api/eth/model/metrics
-WS   /ws/eth/kalman-updates
-```
-
-## User Guide
-
-### Dashboard Features
-1. Statistics Overview: View total stores, records, recent scrapes, and upsized stores
-2. Average Rate: Display average cashback rate across all stores
-3. Upsized Stores: View stores with current special offers
-4. Platform Comparison: Compare rates for the same store across platforms
-
-### Store Management
-
-Adding New Stores
-1. Find the “Add New Store” form in the store list section
-2. Enter a valid ShopBack or CashRewards store URL
-3. Click “Add”
-4. The system will automatically scrape the data
-
-Viewing Store Details
-1. Click on any store item
-2. View detailed cashback history
-3. View historical high/low data
-4. View rates for different categories
-
-### Price Alerts
-
-Setting Up Alerts
-1. Click “Price Alert Management”
-2. Enter your email address
-3. Fill in the store URL and alert conditions
-4. Select alert type:
-   - Above Current: Alert when rate exceeds specified value
-   - Fixed Value: Alert when rate reaches specified value
-   - Percentage Increase: Alert when rate increase reaches specified percentage
-
-### Trading Charts
-1. Click the “TradingView” tab
-2. Select trading pairs (BTC/USDT, forex, gold, etc.)
-3. Choose theme (dark/light)
-4. Use quick switch buttons to change charts rapidly
-
-## Configuration
-
-### Email Configuration
-Configure email settings in `fapi.py`:
-
-```python
-smtp_server = "smtp.gmail.com"
-smtp_port = 587
-sender_email = "your-email@gmail.com"
-sender_password = "your-app-password"
-```
-
-### Database Configuration
-The system uses SQLite. Default file: `shopback_data.db`.
-
-Tables include:
-- `stores` – store information
-- `cashback_history` – cashback history
-- `rate_statistics` – rate statistics
-- `price_alerts` – price alerts
-
-### CORS Configuration
-
-```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
-
-## Troubleshooting
-
-### 1) Frontend cannot connect to backend
-- Confirm backend server is running (http://localhost:8001)
-- Check CORS configuration
-- Verify `API_BASE_URL` is set correctly
-
-### 2) Data scraping fails
-- Check network connection
-- Verify URL format is correct
-- Check if target website has anti-scraping measures
-- Review log files for detailed errors
-
-### 3) Email sending fails
-- Confirm SMTP settings are correct
-- Check app password (Gmail requires app-specific password)
-- Verify recipient email address format
-- Check firewall settings
-
-### 4) Database errors
-- Confirm database file permissions
-- Check disk space
-- Backup and recreate database
-- Run database migration
-
-## Project Structure
+## 功能概览
+
+| 模块 | 说明 | 前端路由 |
+|------|------|----------|
+| 首页仪表盘 | 平台总览与快速入口 | `#home` |
+| 实时行情 | XAU/ETH 实时价格 + WebSocket 推送 | `#orderbook` |
+| 交易计算器 | 杠杆 / 保证金 / 盈亏计算 | `#leverage-calculator` |
+| 金融新闻 | InsightSentry 实时新闻流 + AI 摘要 | `#news` |
+| 社区论坛 | 帖子发布、评论、审核 | `#forum` |
+| 每周思维导图 | 周报结构化 → 思维导图可视化 | `/weekly-mindmap` |
+| 玄学分析 | 趣味占卜功能 | `#fortune` |
+| 健康模块 | 体重 / K线匹配分析 | `#health` |
+| 出金汇率 | 每日经纪商出金汇率对比 | `#withdrawal-rate` |
+| 流动性危机地图 | 全球流动性可视化 | `#liquidity-crisis` |
+| 开户指南 | 经纪商开户步骤图文教程 | `#guide` |
+| TradingView | 嵌入式图表 (BTC/forex/黄金等) | `#trading` |
+
+## 技术栈
+
+### 后端
+- **FastAPI** + Uvicorn — 异步 API 框架
+- **SQLAlchemy** + **SQLite** — 数据存储
+- **WebSocket** — XAU/ETH/新闻实时推送
+- **InsightSentry API** — 黄金行情 + 金融新闻源
+- **Binance WebSocket** — ETH 实时行情
+- **Argon2 + JWT** — 用户认证
+
+### 前端
+- **React 19** + **Vite** — SPA 框架
+- **React Router v7** — 路由（Weekly 模块用 path 路由，其他用 hash 路由）
+- **Chart.js** + **react-chartjs-2** — 数据可视化
+- **@xyflow/react** (React Flow) — 思维导图画布
+- **Zustand** — 状态管理（Weekly 模块）
+- **Ant Design** — UI 组件库
+- **Framer Motion** — 动画
+- **i18n** — 中英文切换
+
+### 基础设施
+- **AWS EC2** — 生产部署
+- **Nginx** — 反向代理 + 静态资源
+- **Docker** — 容器化支持
+
+## 项目结构
 
 ```
 ShopBack_PP/
 ├── back-end/
-│   ├── fapi.py                 # FastAPI application
-│   ├── database.py             # DB init and health checks
-│   ├── model_scheduler.py      # Scheduled jobs (data/model maintenance)
-│   ├── sb_scrap.py             # Async scraping & analytics tables
-│   ├── add_brokers_from_csv.py # CSV ingestion (regulations)
-│   ├── import_broker_ratings.py# CSV ingestion (ratings)
-│   ├── fix_missing_ratings.py  # Targeted data fixes
-│   ├── services/               # Business services
-│   ├── routers/                # API routers
-│   └── models/                 # Model/state files
+│   ├── fapi.py                    # FastAPI 主应用入口
+│   ├── config.py                  # 环境变量 & 应用配置
+│   ├── database.py                # 数据库初始化 & 健康检查
+│   ├── auth.py / auth_router.py   # JWT 认证
+│   ├── forum_api.py               # 论坛 API
+│   ├── insightsentry_xau_data.py  # XAU 行情采集 (InsightSentry)
+│   ├── insightsentry_news.py      # 金融新闻 WebSocket 客户端
+│   ├── binance_eth_data.py        # ETH 行情采集 (Binance)
+│   ├── eth_kalman_model.py        # ETH Kalman 滤波模型
+│   ├── indicators.py              # 技术指标计算
+│   ├── indicator_validity.py      # 指标有效性分析
+│   ├── routers/
+│   │   ├── calculator_router.py   # 交易计算器
+│   │   ├── health_router.py       # 健康模块
+│   │   ├── fortune_router.py      # 玄学分析
+│   │   ├── news_router.py         # 金融新闻
+│   │   └── withdrawal_rate_router.py  # 出金汇率
+│   ├── models/
+│   │   └── calculator_models.py   # 计算器数据模型
+│   ├── services/
+│   │   └── calculator_service.py  # 计算器业务逻辑
+│   ├── weekly/                    # 周报思维导图模块（独立）
+│   │   ├── router.py / crud.py / models.py / schemas.py
+│   │   ├── import_service.py      # JSON 导入服务
+│   │   └── database.py            # Weekly 独立数据库
+│   ├── tests/                     # pytest 测试套件
+│   ├── shopback_data.db           # 主数据库（gitignore）
+│   └── requirements.txt
 ├── front-end/
-│   ├── index.html              # HTML entry
-│   ├── src/                    # React app
-│   ├── vite.config.js          # Vite config
-│   └── shopback-frontend/      # Frontend app folder
-├── Brokers_Regulation_WithNewAdds.csv
-├── Broker_Scoring.csv
-├── generate_rebate_csv.py
-├── generate_rebate_template.py
+│   ├── src/
+│   │   ├── App.jsx                # 主应用 + 路由
+│   │   ├── main.jsx               # 入口
+│   │   ├── pages/                 # 页面组件
+│   │   ├── components/            # 通用组件
+│   │   ├── hooks/                 # 自定义 Hooks
+│   │   ├── services/              # API 调用层
+│   │   ├── translations/          # i18n 翻译
+│   │   ├── utils/                 # 工具函数
+│   │   └── weekly/                # 周报思维导图前端（独立模块）
+│   ├── public/                    # 静态资源 & 经纪商 logo
+│   ├── index.html
+│   ├── vite.config.js
+│   └── package.json
+├── docker-compose.yml
 └── README.md
 ```
 
-## Adding New Features
+## 快速开始
 
-1) Backend new endpoints
-- Add new API routes in `fapi.py` or under `routers/`
-- Define Pydantic models
-- Implement business logic
-- Add error handling
+### 环境要求
+- Python 3.10+
+- Node.js 18+
+- npm
 
-2) Frontend new components
-- Create new components in `components/`
-- Add API call functions
-- Update the main app component
-- Implement responsive design
+### 后端
+
+```bash
+cd back-end
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env，填入 InsightSentry API Key 等
+
+# 启动
+python fapi.py
+# API 文档: http://localhost:8001/docs
+```
+
+### 前端
+
+```bash
+cd front-end
+npm install
+npm run dev
+# 访问: http://localhost:5173
+```
+
+## API 端点
+
+启动后端后访问 `http://localhost:8001/docs` 查看完整的 OpenAPI 文档。主要端点：
+
+| 分类 | 端点 | 说明 |
+|------|------|------|
+| 行情 | `GET /api/xau/current` | 当前黄金价格 |
+| 行情 | `WS /ws/xau` | XAU 实时推送 |
+| 行情 | `GET /api/eth/current-price` | 当前 ETH 价格 |
+| 行情 | `WS /ws/eth/kalman-updates` | ETH 实时推送 |
+| 计算器 | `POST /api/leverage/calculate` | 杠杆 / 保证金计算 |
+| 新闻 | `GET /api/news` | 金融新闻列表 |
+| 新闻 | `WS /ws/news` | 新闻实时推送 |
+| 论坛 | `GET /api/forum/posts` | 帖子列表 |
+| 认证 | `POST /api/auth/login` | 登录 |
+| 出金汇率 | `GET /api/withdrawal-rates` | 汇率查询 |
+| 周报 | `GET /api/weekly/reports` | 周报列表 |
+| 周报 | `POST /api/weekly/import` | 导入周报 JSON |
+
+## 周报思维导图模块
+
+独立的子模块，将金融博主的每周周报结构化为思维导图。详见 `CLAUDE.md`。
+
+- 前端: `/weekly-mindmap` 路由，支持桌面端 React Flow 画布 + 移动端自适应
+- 后端: `/api/weekly` 前缀，独立 SQLite 数据库
+- 工作流: 用户在外部 Claude 对话中生成 JSON → 粘贴导入
+
+## 环境变量
+
+后端 `.env` 主要配置项：
+
+```env
+DATABASE_PATH=./shopback_data.db
+DEBUG=true
+PORT=8001
+
+# InsightSentry (行情 + 新闻)
+INSIGHTSENTRY_API_KEY=
+
+# 认证
+JWT_SECRET_KEY=
+
+# Weekly 模块管理员
+WEEKLY_ADMIN_TOKEN=
+
+# OpenAI (新闻摘要)
+OPENAI_API_KEY=
+```
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please:
-1. Fork the project
-2. Create a feature branch
-3. Commit your changes
-4. Open a Pull Request
-
-## Support
-
-If you encounter issues or need help:
-1. Check the Troubleshooting section
-2. Review GitHub Issues
-3. Open a new Issue with details
-
----
-
-Last Updated: Oct 2025
+MIT
