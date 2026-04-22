@@ -1,9 +1,16 @@
-# 忽略整个 frontend/shopback-frontend 文件夹下的所有内容
-front-end/shopback-frontend/*
+# 部署脚本 — 不进 git
+deploy.sh
+deploy-frontend.sh
+docker-scripts.sh
+upload_broker_logos.sh
+watch-and-deploy.sh
+back-end/restart_service.sh
 
-# 但是保留 src 目录及其所有内容
-!front-end/shopback-frontend/src/
-!front-end/shopback-frontend/src/**
+# 项目文档（README 除外）— 不进 git
+CLAUDE.md
+NEWS_ETL.md
+NEWS_SETUP.md
+TESTING_GUIDE.md
 
 # 日志文件
 *.log
