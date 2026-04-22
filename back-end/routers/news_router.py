@@ -19,8 +19,7 @@ news_ws_clients: set = set()
 
 @router.get("/latest")
 async def get_latest_news(
-    important_limit: int = Query(20, ge=0, le=100, description="重要新闻（有摘要）数量"),
-    others_limit: int = Query(20, ge=0, le=100, description="其他新闻（仅标题）数量"),
+    limit: int = Query(50, ge=1, le=100, description="返回有摘要的新闻数量"),
     lang: Optional[str] = Query(None, description="语言偏好 (en/cn)"),
     search: Optional[str] = Query(None, description="关键词搜索（标题/内容/摘要）"),
     symbol: Optional[str] = Query(None, description="按标的物过滤，例如 BTC、ETH、XAU"),
@@ -29,10 +28,9 @@ async def get_latest_news(
     impact: Optional[str] = Query(None, description="按影响级别过滤 (high/medium/low)")
 ):
     """
-    获取最新金融新闻（分组：重要=有摘要，其他=仅标题）
+    获取最新金融新闻（仅返回有摘要的新闻）
 
-    - **important_limit**: 有摘要的新闻数量（0-100）
-    - **others_limit**: 仅标题的新闻数量（0-100）
+    - **limit**: 返回的新闻数量（1-100）
     - **lang**: 语言偏好，'en' 返回英文总结，'cn' 返回中文总结
     - **search**: 关键词搜索
     - **symbol**: 标的物筛选（如 BTC、ETH、XAU）
@@ -43,9 +41,8 @@ async def get_latest_news(
         from insightsentry_news import NewsWebSocketClient
         from config import DATABASE_PATH
 
-        # 创建临时客户端来读取数据库
         temp_client = NewsWebSocketClient(
-            api_key="temp",  # 只用于数据库查询，不连接 WebSocket
+            api_key="temp",
             openai_api_key="temp",
             db_path=DATABASE_PATH
         )
@@ -69,7 +66,6 @@ async def get_latest_news(
                 raise HTTPException(status_code=400, detail="Invalid impact filter")
             sanitized_impact = impact_lower
 
-        # 参数清洗 - 分类
         sanitized_category = None
         if category:
             category_lower = category.lower()
@@ -79,32 +75,26 @@ async def get_latest_news(
             sanitized_category = category_lower
 
         grouped = temp_client.get_split_news(
-            important_limit,
-            others_limit,
+            limit,
+            0,  # others_limit=0, 不再返回无摘要新闻
             search=search.strip() if search else None,
             symbol=sanitized_symbol,
             category=sanitized_category,
             sentiment=sanitized_sentiment,
             impact=sanitized_impact,
         )
-        important = grouped.get("important", [])
-        others = grouped.get("others", [])
+        news_items = grouped.get("important", [])
 
         # 根据语言偏好调整返回
         if lang == "cn":
-            for item in important:
-                if item.get('summary_cn'):
-                    item['summary'] = item['summary_cn']
-            for item in others:
+            for item in news_items:
                 if item.get('summary_cn'):
                     item['summary'] = item['summary_cn']
 
         return {
             "success": True,
-            "important_count": len(important),
-            "others_count": len(others),
-            "important": important,
-            "others": others
+            "count": len(news_items),
+            "news": news_items
         }
 
     except Exception as e:

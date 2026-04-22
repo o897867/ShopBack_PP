@@ -34,6 +34,28 @@ def list_tags(db: Session) -> list[Tag]:
     return db.query(Tag).order_by(Tag.slug).all()
 
 
+def get_link_index(db: Session) -> dict:
+    """Aggregate all links into a frontend-consumable index."""
+    all_links = db.query(Link).all()
+
+    node_link_count: dict[str, int] = {}
+    node_to_links: dict[str, list[str]] = {}
+    links_by_id: dict[str, Link] = {}
+
+    for link in all_links:
+        links_by_id[link.id] = link
+        node_link_count[link.from_node_id] = node_link_count.get(link.from_node_id, 0) + 1
+        node_to_links.setdefault(link.from_node_id, []).append(link.id)
+        node_link_count[link.to_node_id] = node_link_count.get(link.to_node_id, 0) + 1
+        node_to_links.setdefault(link.to_node_id, []).append(link.id)
+
+    return {
+        "node_link_count": node_link_count,
+        "node_to_links": node_to_links,
+        "links_by_id": links_by_id,
+    }
+
+
 def get_tag_timeline(db: Session, slug: str) -> list[Node]:
     nodes = (
         db.query(Node)

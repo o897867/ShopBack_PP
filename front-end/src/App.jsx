@@ -16,13 +16,9 @@ const MobileNodeDetail = lazy(() => import('./weekly/mobile/MobileNodeDetail.tsx
 const MobileTopicView = lazy(() => import('./weekly/mobile/MobileTopicView.tsx'));
 const MobileErrorBoundary = lazy(() => import('./weekly/mobile/components/MobileErrorBoundary.tsx').then(m => ({ default: m.MobileErrorBoundary })));
 import TradingViewPage from './pages/trading.jsx';
-import BrokerHub from './pages/BrokerHub.jsx';
 import Home from './pages/Home.jsx';
 const Forum = lazy(() => import('./pages/Forum.jsx'));
 const ForumModeration = lazy(() => import('./pages/ForumModeration.jsx'));
-const BrokerAnalytics = lazy(() => import('./pages/BrokerAnalytics.jsx'));
-// ETH Prediction disabled
-const IndicatorTesting = lazy(() => import('./pages/IndicatorTesting.jsx'));
 const OrderBook = lazy(() => import('./pages/OrderBook.jsx'));
 const Health = lazy(() => import('./pages/Health.jsx'));
 const HealthToken = lazy(() => import('./pages/HealthToken.jsx'));
@@ -39,6 +35,7 @@ import { LanguageProvider, useLanguage } from './hooks/useLanguage.jsx';
 import { t} from './translations/index';
 import LanguageSelector from './components/LanguageSelector.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
+import TopNav from './components/TopNav.jsx';
 
 
 /** Thin wrapper so weekly routes also show the hamburger nav. */
@@ -78,7 +75,7 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['home','broker-hub','analytics','forum','forum-mod','predictions','indicators','news','health','health-token','health-match','trading','orderbook','fortune','leverage-calculator','guide','login','register','withdrawal-rate','liquidity-crisis'];
+      const known = ['home','forum','forum-mod','predictions','news','health','health-token','health-match','trading','orderbook','fortune','leverage-calculator','guide','login','register','withdrawal-rate','liquidity-crisis'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
@@ -99,8 +96,18 @@ const App = () => {
     } catch (e) { /* ignore */ }
   }, [currentPage]);
 
-
-
+  // Listen for external hash changes (e.g. TopNav without onNavigate)
+  useEffect(() => {
+    const known = ['home','forum','forum-mod','predictions','news','health','health-token','health-match','trading','orderbook','fortune','leverage-calculator','guide','login','register','withdrawal-rate','liquidity-crisis'];
+    const onHashChange = () => {
+      const hash = (window.location.hash || '').replace('#', '').split('?')[0];
+      if (hash && known.includes(hash) && hash !== currentPage) {
+        setCurrentPage(hash);
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, [currentPage]);
 
 
 
@@ -109,30 +116,35 @@ const App = () => {
       {/* Weekly mindmap module — isolated routes, mobile/desktop dispatch */}
       <Route path="/weekly-mindmap" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TopNav />
           <WeeklyNav />
           <WeeklyEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/nodes/:id" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TopNav />
           <WeeklyNav />
           <WeeklyNodeEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/topics" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TopNav />
           <WeeklyNav />
           <WeeklyTopicEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/topics/:slug" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TopNav />
           <WeeklyNav />
           <WeeklyTopicEntry />
         </Suspense>
       } />
       <Route path="/weekly-mindmap/graph" element={
         <Suspense fallback={<div className="muted">Loading…</div>}>
+          <TopNav />
           <WeeklyNav />
           <GraphView />
         </Suspense>
@@ -160,12 +172,6 @@ const HashApp = ({ currentPage, setCurrentPage, pausedPages, translate }) => {
 
       {currentPage === 'home' ? (
         <Home onNavigate={setCurrentPage} />
-      ) : currentPage === 'broker-hub' ? (
-        <BrokerHub onNavigate={setCurrentPage} />
-      ) : currentPage === 'indicators' ? (
-        <Suspense fallback={<div className="muted">Loading…</div>}>
-          <IndicatorTesting />
-        </Suspense>
       ) : currentPage === 'orderbook' ? (
         <Suspense fallback={<div className="muted">Loading…</div>}>
           <OrderBook />
@@ -208,6 +214,10 @@ const HashApp = ({ currentPage, setCurrentPage, pausedPages, translate }) => {
         <Suspense fallback={<div className="muted">Loading…</div>}>
           <LiquidityCrisisMap />
         </Suspense>
+      ) : currentPage === 'fortune' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <Fortune onNavigate={setCurrentPage} />
+        </Suspense>
       ) : (
         <div className="container">
           <div className="page-header">
@@ -222,10 +232,8 @@ const HashApp = ({ currentPage, setCurrentPage, pausedPages, translate }) => {
             <h1 className="title" style={{ fontSize: '2rem', margin: 0 }}>
               {currentPage === 'forum' ? translate('forum.title') :
                currentPage === 'forum-mod' ? 'Forum Moderation' :
-               currentPage === 'analytics' ? translate('nav.analytics') :
                currentPage === 'login' ? translate('auth.login.title') :
                currentPage === 'register' ? translate('auth.register.title') :
-               currentPage === 'fortune' ? translate('home.fortune.title') :
                pausedPages[currentPage] ? pausedPages[currentPage].title :
                translate('nav.trading')}
             </h1>
@@ -241,10 +249,6 @@ const HashApp = ({ currentPage, setCurrentPage, pausedPages, translate }) => {
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <ForumModeration />
           </Suspense>
-        ) : currentPage === 'analytics' ? (
-          <Suspense fallback={<div className="muted">Loading…</div>}>
-            <BrokerAnalytics />
-          </Suspense>
         ) : currentPage === 'login' ? (
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <Login onSuccess={() => setCurrentPage('forum')} />
@@ -252,10 +256,6 @@ const HashApp = ({ currentPage, setCurrentPage, pausedPages, translate }) => {
         ) : currentPage === 'register' ? (
           <Suspense fallback={<div className="muted">Loading…</div>}>
             <Register onSuccess={() => setCurrentPage('login')} />
-          </Suspense>
-        ) : currentPage === 'fortune' ? (
-          <Suspense fallback={<div className="muted">Loading…</div>}>
-            <Fortune onNavigate={setCurrentPage} />
           </Suspense>
         ) : pausedPages[currentPage] ? (
           <div className="card card-padded" style={{ textAlign: 'center' }}>

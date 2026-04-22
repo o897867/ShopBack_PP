@@ -63,6 +63,13 @@ class ReportSummary(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class LinkIndexResponse(BaseModel):
+    """Pre-aggregated link index for frontend caching."""
+    node_link_count: dict[str, int]
+    node_to_links: dict[str, list[str]]
+    links_by_id: dict[str, LinkDetail]
+
+
 class ReportDetail(BaseModel):
     id: str
     date: str

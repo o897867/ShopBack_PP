@@ -13,8 +13,7 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
       items: [
         { id: 'home', label: translate('nav.home'), badge: 'recommended' },
         { id: 'guide', label: translate('nav.guide'), badge: 'new' },
-        { id: 'fortune', label: translate('nav.fortune'), badge: 'new' },
-        { id: 'broker-hub', label: translate('nav.brokerHub') }
+        { id: 'fortune', label: translate('nav.fortune'), badge: 'new' }
       ]
     },
     // 健康相关功能暂时隐藏
@@ -30,7 +29,6 @@ const Navigation = ({ currentPage, setCurrentPage, currentUser, onLogout }) => {
       title: translate('nav.groups.community'),
       items: [
         { id: 'orderbook', label: translate('orderbook.hero.badge') },
-        { id: 'indicators', label: translate('nav.indicators') },
         { id: 'leverage-calculator', label: translate('nav.leverage') },
         { id: 'news', label: translate('nav.news'), badge: 'new' },
         { id: 'weekly-mindmap', label: currentLanguage === 'cn' ? '周报导图' : 'Weekly Mindmap', badge: 'new' },

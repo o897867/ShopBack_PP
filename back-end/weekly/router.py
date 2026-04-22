@@ -5,6 +5,7 @@ from weekly import crud
 from weekly.database import get_db
 from weekly.schemas import (
     LinkDetail,
+    LinkIndexResponse,
     NodeDetail,
     ReportDetail,
     ReportSummary,
@@ -52,6 +53,11 @@ def get_node(node_id: str, db: Session = Depends(get_db)):
     if node is None:
         raise HTTPException(status_code=404, detail="Node not found")
     return node
+
+
+@router.get("/links/index", response_model=LinkIndexResponse)
+def link_index(db: Session = Depends(get_db)):
+    return crud.get_link_index(db)
 
 
 @router.get("/links", response_model=list[LinkDetail])
