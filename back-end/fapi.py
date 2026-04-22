@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ShopBack CFD Trading Platform - 核心应用
-重构后的简化版本，专注于核心功能：BrokerHub、计算器、论坛、用户认证
+专注于：实时行情、交易计算器、随机抽卦、周报思维导图、开户指南
 """
 
 import logging
@@ -21,7 +21,6 @@ from binance_eth_data import BinanceDataManager
 
 # XAU (Gold) data imports
 from insightsentry_xau_data import XAUDataManager
-import time
 
 # 导入配置
 from config import (
@@ -34,13 +33,7 @@ from database import init_database, init_legacy_tables, check_database_health, g
 
 # 导入核心路由
 from routers.calculator_router import router as calculator_router
-from routers.health_router import router as health_router
 from routers.fortune_router import router as fortune_router
-
-# 导入现有的论坛和认证功能
-from forum_api import get_forum_router
-from auth_router import get_auth_router
-from auth import ensure_auth_tables
 
 # 配置日志
 logging.basicConfig(level=logging.INFO if not DEBUG else logging.DEBUG)
@@ -59,14 +52,10 @@ XAU_DATA_ENABLED = True  # Enable XAU data fetching
 xau_data_manager: XAUDataManager = None
 xau_ws_clients: set = set()  # WebSocket clients for XAU updates
 
-# ============= Financial News 全局变量 =============
-NEWS_ENABLED = True  # Enable financial news feed
-news_client = None  # NewsWebSocketClient instance
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
-    global eth_model_manager, eth_data_manager, xau_data_manager, news_client
+    global eth_model_manager, eth_data_manager, xau_data_manager
 
     # 启动时初始化
     logger.info("🚀 启动 ShopBack CFD Trading Platform")
@@ -75,10 +64,6 @@ async def lifespan(app: FastAPI):
         # 初始化核心数据库表
         init_database()
         logger.info("✅ 核心数据库初始化完成")
-
-        # 初始化认证表
-        ensure_auth_tables(get_db_connection)
-        logger.info("✅ 认证系统初始化完成")
 
         # 可选：初始化Legacy功能表
         if ENABLE_LEGACY_FEATURES:
@@ -118,35 +103,6 @@ async def lifespan(app: FastAPI):
             except Exception as e:
                 logger.error(f"❌ XAU 数据服务初始化失败: {e}")
 
-        # Initialize Financial News WebSocket
-        if NEWS_ENABLED:
-            try:
-                logger.info("📰 初始化金融新闻服务 (InsightSentry News Feed)...")
-                from insightsentry_news import NewsWebSocketClient
-                from routers.news_router import broadcast_news_to_clients
-                import os
-
-                # InsightSentry API Key (same as XAU)
-                insightsentry_key = "eyJhbGciOiJIUzI1NiJ9.eyJ1dWlkIjoic3V5aW5nY2luQGdtYWlsLmNvbSIsInBsYW4iOiJ1bHRyYSIsIm5ld3NmZWVkX2VuYWJsZWQiOnRydWUsIndlYnNvY2tldF9zeW1ib2xzIjo1LCJ3ZWJzb2NrZXRfY29ubmVjdGlvbnMiOjF9.6aA_ND-9NmZI2-8mILRJeZDLt9Y6skrtsNbzP0FeQVI"
-
-                # OpenAI API Key (from environment or config)
-                openai_key = os.getenv("OPENAI_API_KEY", "")
-                if not openai_key:
-                    logger.warning("⚠️  OPENAI_API_KEY not set, news summarization will fail")
-
-                news_client = NewsWebSocketClient(
-                    api_key=insightsentry_key,
-                    openai_api_key=openai_key,
-                    db_path=DATABASE_PATH,
-                    news_callback=broadcast_news_to_clients
-                )
-
-                # Start news client in background
-                asyncio.create_task(news_client.start())
-                logger.info("✅ 金融新闻服务已启动 (InsightSentry + ChatGPT)")
-            except Exception as e:
-                logger.error(f"❌ 金融新闻服务初始化失败: {e}")
-
     except Exception as e:
         logger.error(f"❌ 初始化失败: {e}")
         raise
@@ -171,14 +127,6 @@ async def lifespan(app: FastAPI):
             logger.info("✅ XAU 数据服务已停止")
         except Exception as e:
             logger.error(f"❌ XAU 数据服务停止失败: {e}")
-
-    # Cleanup News resources
-    if NEWS_ENABLED and news_client:
-        try:
-            await news_client.stop()
-            logger.info("✅ 金融新闻服务已停止")
-        except Exception as e:
-            logger.error(f"❌ 金融新闻服务停止失败: {e}")
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -214,47 +162,10 @@ app.include_router(
     tags=["Trading Calculator"],
 )
 
-# 健康模块功能
-app.include_router(
-    health_router,
-    tags=["Health"],
-)
-
-# 玄学分析功能
+# 随机抽卦功能
 app.include_router(
     fortune_router,
-    tags=["Fortune - 玄学分析"]
-)
-
-# 金融新闻功能
-from routers.news_router import router as news_router
-app.include_router(
-    news_router,
-    tags=["Financial News"],
-)
-
-# 每日出金汇率功能
-from routers.withdrawal_rate_router import router as withdrawal_rate_router
-app.include_router(
-    withdrawal_rate_router,
-    prefix="/api",
-    tags=["Withdrawal Rate"],
-)
-
-# 论坛功能 (现有)
-from auth import get_current_user_dependency
-forum_router = get_forum_router(get_db_connection=get_db_connection, get_current_user=get_current_user_dependency(get_db_connection))
-app.include_router(
-    forum_router,
-    tags=["Forum"],
-)
-
-# 用户认证功能 (现有)
-auth_router = get_auth_router(get_db_connection=get_db_connection)
-app.include_router(
-    auth_router,
-    prefix="/api",
-    tags=["Authentication"],
+    tags=["Fortune - 随机抽卦"]
 )
 
 # ============= Weekly Mindmap 模块 =============
@@ -282,17 +193,18 @@ async def root():
         "version": VERSION,
         "status": "running",
         "core_features": [
-            "CFD Brokers Comparison",
+            "Real-time Quotes (XAU/ETH)",
             "Trading Calculator",
-            "Forum & Community",
-            "User Authentication"
+            "Fortune Divination",
+            "Weekly Mindmap",
+            "Broker Guide"
         ],
-        "legacy_features_enabled": ENABLE_LEGACY_FEATURES,
         "endpoints": {
-            "brokers": "/api/cfd/brokers",
+            "xau": "/api/xau/current-price",
+            "eth": "/api/eth/current-price",
             "calculator": "/api/leverage/calculate",
-            "forum": "/api/forum/threads",
-            "auth": "/api/auth/login"
+            "fortune": "/api/fortune",
+            "weekly": "/api/weekly/reports"
         }
     }
 
@@ -308,7 +220,7 @@ async def health_check():
             "version": VERSION,
             "database": db_health,
             "features": {
-                "core_features": ["brokers", "calculator", "forum", "auth"],
+                "core_features": ["xau", "eth", "calculator", "fortune", "weekly"],
                 "legacy_enabled": ENABLE_LEGACY_FEATURES
             }
         }
@@ -330,26 +242,22 @@ async def app_info():
         "debug": DEBUG,
         "features": {
             "core": {
-                "cfd_brokers": {
-                    "description": "CFD经纪商对比和评分系统",
-                    "endpoints": ["/api/cfd/brokers", "/api/cfd/brokers/compare"]
+                "realtime_quotes": {
+                    "description": "XAU/ETH 实时行情与 WebSocket 推送",
+                    "endpoints": ["/api/xau/current-price", "/api/eth/current-price", "/ws/xau/price-updates"]
                 },
                 "trading_calculator": {
                     "description": "杠杆交易计算器和风险分析",
-                    "endpoints": ["/api/leverage/calculate", "/api/leverage/position"]
+                    "endpoints": ["/api/leverage/calculate"]
                 },
-                "forum": {
-                    "description": "社区论坛和讨论",
-                    "endpoints": ["/api/forum/threads", "/api/forum/posts"]
+                "fortune": {
+                    "description": "随机抽卦",
+                    "endpoints": ["/api/fortune"]
                 },
-                "authentication": {
-                    "description": "用户认证和授权",
-                    "endpoints": ["/api/auth/login", "/api/auth/register"]
+                "weekly_mindmap": {
+                    "description": "周报思维导图",
+                    "endpoints": ["/api/weekly/reports"]
                 }
-            },
-            "legacy": {
-                "enabled": ENABLE_LEGACY_FEATURES,
-                "note": "Legacy功能包括ShopBack返现、ETH预测等，默认禁用"
             }
         },
         "configuration": {
