@@ -676,80 +676,174 @@
   color: var(--text);
 }
 
-/* ── Responsive ───────────────────────────────────────────── */
-@media (max-width: 720px) {
+/* ══════════════════════════════════════════════════════════
+   Mobile — <=768px
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .hp-inner {
+    padding: 0 18px 48px;
+  }
+
+  /* Hero */
+  .hp-hero {
+    padding: 28px 0 16px;
+  }
+
+  .hp-hero__eyebrow {
+    font-size: 9.5px;
+    margin-bottom: 12px;
+  }
+
+  .hp-hero__title {
+    font-size: 26px;
+    margin-bottom: 14px;
+  }
+
+  .hp-hero__desc {
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+
+  .hp-hero__actions {
+    gap: 10px;
+  }
+
+  /* Stats strip */
+  .hp-stats__item {
+    padding: 16px 10px;
+  }
+
+  .hp-stats__val {
+    font-size: 17px;
+  }
+
+  .hp-stats__label {
+    font-size: 10px;
+  }
+
+  /* Section headers */
+  .hp-section-header {
+    gap: 10px;
+    margin: 20px 0 10px;
+  }
+
+  .hp-section-header__label {
+    font-size: 9.5px;
+  }
+
+  /* Features — horizontal swipe */
+  .hp-features {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .hp-features::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hp-feature-card {
+    flex: 0 0 220px;
+    scroll-snap-align: start;
+    padding: 18px 16px;
+  }
+
+  .hp-feature-card__title {
+    font-size: 14px;
+  }
+
+  /* Two-column → single column */
   .hp-two-col {
     grid-template-columns: 1fr;
     gap: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .hp-features {
-    grid-template-columns: 1fr;
+    margin-top: 0;
   }
 
+  /* News items — time + content grid */
+  .hp-news-item {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+
+  .hp-news-item__title {
+    font-size: 13.5px;
+  }
+
+  .hp-news-item__summary {
+    font-size: 11.5px;
+  }
+
+  .hp-news-item__time {
+    padding-top: 3px;
+  }
+
+  /* Weekly card */
+  .hp-weekly-card {
+    padding: 18px;
+  }
+
+  .hp-weekly-card__title {
+    font-size: 14px;
+  }
+
+  .hp-weekly-card__week {
+    font-size: 9.5px;
+  }
+
+  /* Fortune banner */
   .hp-fortune-banner {
-    grid-template-columns: 56px 1fr;
+    grid-template-columns: 52px 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .hp-fortune-banner__shrine {
+    font-size: 36px;
+  }
+
+  .hp-fortune-banner__name {
+    font-size: 14.5px;
+  }
+
+  .hp-fortune-banner__sub {
+    font-size: 10px;
+  }
+
+  .hp-fortune-banner__verdict {
+    font-size: 11.5px;
   }
 
   .hp-fortune-banner .hp-btn {
     grid-column: 1 / -1;
   }
-}
 
-@media (max-width: 480px) {
-  .hp-inner {
-    padding: 0 16px 48px;
-  }
-
-  .hp-nav {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .hp-nav__links {
-    gap: 14px;
-    width: 100%;
-  }
-
-  .hp-hero {
-    padding: 32px 0 28px;
-  }
-
-  .hp-hero__title {
-    font-size: 1.5rem;
-  }
-
-  .hp-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .hp-stats__item {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .hp-stats__item:last-child {
-    border-bottom: none;
-  }
-
-  .hp-fortune-banner {
-    grid-template-columns: 56px 1fr;
-    padding: 16px;
-  }
-
-  .hp-footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
+  /* CTA — stack vertically */
   .hp-cta {
     padding: 20px;
     flex-direction: column;
     text-align: center;
     align-items: stretch;
+  }
+
+  .hp-cta__title {
+    font-size: 16px;
+  }
+
+  /* Footer */
+  .hp-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 32px;
+  }
+
+  /* Badge sizes */
+  .hp-badge {
+    font-size: 8.5px;
   }
 }

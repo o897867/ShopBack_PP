@@ -344,44 +344,123 @@
   color: var(--text);
 }
 
-/* ── Responsive ──────────────────────────────────────────── */
-@media (max-width: 600px) {
-  .news-item {
-    grid-template-columns: 1fr;
-    gap: 8px;
+/* ══════════════════════════════════════════════════════════
+   Mobile — <=768px
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .news-page__inner {
+    padding: 0 18px 48px;
   }
 
-  .news-item__time {
-    font-size: 10px;
+  /* Masthead */
+  .news-mast {
+    padding: 20px 0 0;
   }
 
-  .news-item__badges {
-    flex-direction: row;
-    align-items: center;
+  .news-mast__eyebrow {
+    font-size: 9.5px;
+    margin-bottom: 8px;
   }
 
+  .news-mast__title {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .news-mast__meta-bar {
+    gap: 10px;
+    padding: 8px 0;
+  }
+
+  /* Categories */
+  .news-cats {
+    gap: 14px;
+    padding: 12px 0 0;
+  }
+
+  .news-cats__item {
+    font-size: 12px;
+    padding: 5px 0;
+  }
+
+  /* Filters */
   .news-filters {
     flex-direction: column;
     align-items: stretch;
+    padding: 10px 0;
   }
 
   .news-search {
     min-width: 0;
   }
 
+  /* Featured article */
+  .news-featured {
+    padding: 18px 0;
+  }
+
+  .news-featured__src {
+    font-size: 9.5px;
+  }
+
   .news-featured__title {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .news-page__inner {
-    padding: 0 16px 48px;
+    font-size: 19px;
   }
 
+  .news-featured__summary {
+    font-size: 12.5px;
+  }
+
+  /* News list items */
+  .news-item {
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+    padding: 16px 0;
+  }
+
+  .news-item__time {
+    font-size: 10px;
+  }
+
+  .news-item__src {
+    font-size: 9px;
+  }
+
+  .news-item__title {
+    font-size: 13.5px;
+  }
+
+  .news-item__sum {
+    font-size: 11.5px;
+  }
+
+  .news-item__badges {
+    display: none;
+  }
+
+  /* Badges — smaller on mobile */
+  .news-badge {
+    font-size: 8.5px;
+    padding: 1px 7px;
+  }
+
+  /* Footer */
   .news-footer {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .news-item {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .news-item__badges {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
   }
 }

@@ -18,6 +18,7 @@ const MobileErrorBoundary = lazy(() => import('./weekly/mobile/components/Mobile
 import Home from './pages/Home.jsx';
 const Fortune = lazy(() => import('./pages/Fortune.jsx'));
 const News = lazy(() => import('./pages/News.jsx'));
+const OrderBook = lazy(() => import('./pages/OrderBook.jsx'));
 const LeverageCalculator = lazy(() => import('./pages/LeverageCalculator.jsx'));
 const Guide = lazy(() => import('./pages/Guide.jsx'));
 import { LanguageProvider } from './hooks/useLanguage.jsx';
@@ -159,6 +160,10 @@ const HashApp = ({ currentPage, setCurrentPage }) => {
       ) : currentPage === 'leverage-calculator' ? (
         <Suspense fallback={<div className="muted">Loading…</div>}>
           <LeverageCalculator />
+        </Suspense>
+      ) : currentPage === 'orderbook' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <OrderBook />
         </Suspense>
       ) : currentPage === 'guide' ? (
         <Suspense fallback={<div className="muted">Loading…</div>}>

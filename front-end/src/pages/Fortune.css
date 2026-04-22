@@ -296,16 +296,27 @@
   border-left-color: var(--text);
 }
 
-/* ── Responsive ───────────────────────────────────────────── */
-@media (max-width: 480px) {
+/* ══════════════════════════════════════════════════════════
+   Mobile — <=768px
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
   .fortune-page {
-    padding: 32px 16px 48px;
+    padding: 24px 18px 48px;
+  }
+
+  .fortune-eyebrow {
+    font-size: 9.5px;
+    margin-bottom: 8px;
+  }
+
+  .fortune-date {
+    font-size: 13px;
   }
 
   .fortune-shrine {
     width: 120px;
     height: 120px;
-    margin: 24px auto 24px;
+    margin: 24px auto 18px;
   }
 
   .fortune-shrine__char {
@@ -313,18 +324,52 @@
   }
 
   .fortune-gua-card {
-    padding: 24px 20px;
+    padding: 22px 20px;
   }
 
   .fortune-gua-name {
     font-size: 20px;
   }
 
+  .fortune-gua-sub {
+    font-size: 10px;
+    margin-bottom: 16px;
+  }
+
+  .fortune-gua-verdict {
+    font-size: 13px;
+    padding-left: 12px;
+    margin-bottom: 18px;
+  }
+
+  .fortune-luck-bar__header {
+    font-size: 9.5px;
+    margin-bottom: 7px;
+  }
+
+  .fortune-luck-bar__track {
+    height: 5px;
+  }
+
   .fortune-gua-grid {
-    gap: 8px;
+    gap: 10px;
   }
 
   .fortune-gua-cell {
     padding: 14px;
+  }
+
+  .fortune-gua-cell__label {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+
+  .fortune-gua-cell__value {
+    font-size: 12px;
+  }
+
+  .fortune-disclaimer {
+    font-size: 10.5px;
+    margin: 20px auto 24px;
   }
 }

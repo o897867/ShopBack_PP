@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import './Home.css';
-import ThemeToggle from '../components/ThemeToggle.jsx';
-import LanguageSelector from '../components/LanguageSelector.jsx';
+import TopNav from '../components/TopNav.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { t } from '../translations/index';
 
@@ -159,45 +158,7 @@ const Home = ({ onNavigate }) => {
     <div className="hp">
       <div className="hp-inner">
 
-        {/* Nav */}
-        <nav className="hp-nav">
-          <div className="hp-brand">
-            {isChinese ? (
-              <>临象<span className="hp-brand__light">财经</span></>
-            ) : (
-              <>LinXiang<span className="hp-brand__light">Finance</span></>
-            )}
-          </div>
-          <div className="hp-nav__links">
-            <button className="hp-nav__link hp-nav__link--active" onClick={() => handleNavigate('home')}>
-              {isChinese ? '首页' : 'Home'}
-            </button>
-            <button className="hp-nav__link" onClick={() => handleNavigate('news')}>
-              {isChinese ? '金融新闻' : 'News'}
-            </button>
-            <button className="hp-nav__link" onClick={() => handleNavigate('fortune')}>
-              {isChinese ? '每日一卦' : 'Fortune'}
-            </button>
-            <button className="hp-nav__link" onClick={() => handleNavigate('weekly-mindmap')}>
-              {isChinese ? '周报' : 'Weekly'}
-            </button>
-            <button className="hp-nav__link" onClick={() => handleNavigate('guide')}>
-              {isChinese ? '关于我们' : 'About'}
-            </button>
-            <a
-              href={OPEN_ACCOUNT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hp-nav__cta"
-            >
-              {isChinese ? '立即开户 →' : 'Open account →'}
-            </a>
-            <div className="hp-nav__toggles">
-              <ThemeToggle />
-              <LanguageSelector />
-            </div>
-          </div>
-        </nav>
+        <TopNav onNavigate={onNavigate} activePage="home" />
 
         {/* Hero */}
         <section className="hp-hero">
