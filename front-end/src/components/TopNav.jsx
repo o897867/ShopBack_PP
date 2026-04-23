@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { key: 'news', cn: '金融新闻', en: 'News' },
   { key: 'fortune', cn: '每日一卦', en: 'Fortune' },
   { key: 'weekly-mindmap', cn: '每周周报', en: 'Weekly' },
+  { key: 'analytics', cn: '数据分析', en: 'Analytics' },
   { key: 'guide', cn: '关于我们', en: 'About' },
 ];
 

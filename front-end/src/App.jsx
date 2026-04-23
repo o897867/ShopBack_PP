@@ -172,7 +172,7 @@ const HashApp = ({ currentPage, setCurrentPage }) => {
         </Suspense>
       ) : currentPage === 'analytics' ? (
         <Suspense fallback={<div className="muted">Loading…</div>}>
-          <Analytics />
+          <Analytics onNavigate={setCurrentPage} />
         </Suspense>
       ) : null}
     </div>
