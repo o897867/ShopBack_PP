@@ -2,10 +2,8 @@
 
 A full-stack data platform that ingests real-time gold (XAU/USD) prices and financial news, pipelines them through a batch analytics layer on AWS, and serves computed insights via API. Also ships a CFD trading toolkit frontend for end-user consumption.
 
-```
 <img width="2360" height="1640" alt="readme" src="https://github.com/user-attachments/assets/6a594478-03b9-4003-95b0-c89b227976dc" />
 
-```
 
 ## Architecture
 
