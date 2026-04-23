@@ -6,11 +6,11 @@ import './News.css';
 const CATEGORIES = [
   { key: '', label_cn: '全部', label_en: 'All' },
   { key: 'crypto', label_cn: '加密 Crypto', label_en: 'Crypto' },
-  { key: 'policy', label_cn: '政策 Policy', label_en: 'Policy' },
-  { key: 'indices', label_cn: '指数 Indices', label_en: 'Indices' },
+  { key: 'monetary_policy', label_cn: '政策 Policy', label_en: 'Policy' },
+  { key: 'market_indices', label_cn: '指数 Indices', label_en: 'Indices' },
   { key: 'forex', label_cn: '外汇 Forex', label_en: 'Forex' },
-  { key: 'commodities', label_cn: '大宗 Commodities', label_en: 'Commodities' },
-  { key: 'equities', label_cn: '个股 Equities', label_en: 'Equities' },
+  { key: 'precious_metals', label_cn: '大宗 Commodities', label_en: 'Commodities' },
+  { key: 'tech_stocks', label_cn: '个股 Equities', label_en: 'Equities' },
 ];
 
 function getApiBase() {
@@ -121,13 +121,11 @@ const News = ({ onNavigate }) => {
   };
 
   const getDisplayTitle = (item) => {
-    if (isChinese) return item.title_cn || item.title || '';
-    return item.title || '';
+    return item.title_cn || item.title || '';
   };
 
   const getDisplaySummary = (item) => {
-    if (isChinese) return item.summary_cn || item.summary || '';
-    return item.summary || '';
+    return item.summary_cn || item.summary || '';
   };
 
   // Date string
