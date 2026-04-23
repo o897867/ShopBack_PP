@@ -14,11 +14,7 @@ const CATEGORIES = [
 ];
 
 function getApiBase() {
-  const envApiBase = import.meta.env.VITE_API_URL;
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  return isLocal
-    ? envApiBase || 'http://localhost:8001'
-    : envApiBase || `${window.location.origin.replace(/\/$/, '')}`;
+  return import.meta.env.VITE_API_URL || '';
 }
 
 const News = ({ onNavigate }) => {

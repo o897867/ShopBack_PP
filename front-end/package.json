@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "deploy": "vite build && aws s3 sync build/ s3://shopback-pp-frontend --delete && aws cloudfront create-invalidation --distribution-id E117W89QSILHBS --paths '/*'",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"

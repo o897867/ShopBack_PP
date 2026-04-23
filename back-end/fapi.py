@@ -213,6 +213,10 @@ app.include_router(
     tags=["Financial News"],
 )
 
+# ============= Analytics 数据分析 =============
+from routers.analytics_router import router as analytics_router
+app.include_router(analytics_router, tags=["Analytics"])
+
 # ============= Weekly Mindmap 模块 =============
 from weekly.router import router as weekly_router
 app.include_router(weekly_router)

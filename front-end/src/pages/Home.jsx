@@ -21,11 +21,7 @@ const Home = ({ onNavigate }) => {
     let cancelled = false;
     (async () => {
       try {
-        const envApiBase = import.meta.env.VITE_API_URL;
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const apiBase = isLocal
-          ? envApiBase || 'http://localhost:8001'
-          : envApiBase || `${window.location.origin.replace(/\/$/, '')}`;
+        const apiBase = import.meta.env.VITE_API_URL || '';
         const res = await fetch(`${apiBase}/api/news/latest?limit=5`);
         if (!res.ok) throw new Error('Failed');
         const data = await res.json();
@@ -44,11 +40,7 @@ const Home = ({ onNavigate }) => {
     let cancelled = false;
     (async () => {
       try {
-        const envApiBase = import.meta.env.VITE_API_URL;
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const apiBase = isLocal
-          ? envApiBase || 'http://localhost:8001'
-          : envApiBase || `${window.location.origin.replace(/\/$/, '')}`;
+        const apiBase = import.meta.env.VITE_API_URL || '';
         const res = await fetch(`${apiBase}/api/weekly/reports`);
         if (!res.ok) throw new Error('Failed');
         const reports = await res.json();
@@ -72,7 +64,8 @@ const Home = ({ onNavigate }) => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/api/fortune');
+        const apiBase = import.meta.env.VITE_API_URL || '';
+        const res = await fetch(`${apiBase}/api/fortune`);
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled && data?.gua) setGua(data.gua);

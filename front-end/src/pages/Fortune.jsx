@@ -97,7 +97,8 @@ const Fortune = ({ onNavigate }) => {
     setSpinning(false);
 
     try {
-      const url = reroll ? '/api/fortune?reroll=1' : '/api/fortune';
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      const url = reroll ? `${apiBase}/api/fortune?reroll=1` : `${apiBase}/api/fortune`;
       const res = await fetch(url);
       const data = await res.json();
       setGua(data.gua);

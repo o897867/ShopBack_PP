@@ -114,7 +114,8 @@ const LeverageCalculator = () => {
     const fetchGoldPrice = async () => {
       setGoldPriceLoading(true);
       try {
-        const response = await fetch('/api/xau/current-price');
+        const apiBase = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiBase}/api/xau/current-price`);
         if (response.ok) {
           const data = await response.json();
           if (data.current_price) {

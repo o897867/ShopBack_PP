@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../config/api';
 
 export const useXauQuoteHistory = (pollIntervalMs = 4000) => {
   const [history, setHistory] = useState([]);
@@ -10,7 +9,7 @@ export const useXauQuoteHistory = (pollIntervalMs = 4000) => {
 
   const fetchHistory = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/xau/quote/history?limit=120`);
+      const res = await fetch(`${API_BASE_URL}/api/xau/quote/history?limit=120`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setHistory(data.quotes || []);

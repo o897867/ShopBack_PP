@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-
-const API_BASE_URL = '/api';
+import { API_BASE_URL } from '../config/api';
 
 export const useXauQuote = (pollIntervalMs = 2000) => {
   const [quote, setQuote] = useState(null);
@@ -10,7 +9,7 @@ export const useXauQuote = (pollIntervalMs = 2000) => {
 
   const fetchQuote = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/xau/quote`);
+      const res = await fetch(`${API_BASE_URL}/api/xau/quote`);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }

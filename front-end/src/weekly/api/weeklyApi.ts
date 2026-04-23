@@ -7,7 +7,7 @@ import type {
   Tag,
 } from "../types";
 
-const BASE = import.meta.env.VITE_API_BASE ?? "";
+const BASE = import.meta.env.VITE_API_URL ?? "";
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);

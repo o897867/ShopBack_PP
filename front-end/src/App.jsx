@@ -21,6 +21,7 @@ const News = lazy(() => import('./pages/News.jsx'));
 const OrderBook = lazy(() => import('./pages/OrderBook.jsx'));
 const LeverageCalculator = lazy(() => import('./pages/LeverageCalculator.jsx'));
 const Guide = lazy(() => import('./pages/Guide.jsx'));
+const Analytics = lazy(() => import('./pages/Analytics.jsx'));
 import { LanguageProvider } from './hooks/useLanguage.jsx';
 import TopNav from './components/TopNav.jsx';
 
@@ -54,7 +55,7 @@ const App = () => {
     try {
       const raw = (window.location.hash || '').replace('#', '').trim();
       const hash = raw.split('?')[0];
-      const known = ['home','news','fortune','leverage-calculator','guide'];
+      const known = ['home','news','fortune','leverage-calculator','guide','analytics'];
       if (hash && known.includes(hash)) return hash;
       const saved = localStorage.getItem('currentPage');
       if (saved && known.includes(saved)) return saved;
@@ -168,6 +169,10 @@ const HashApp = ({ currentPage, setCurrentPage }) => {
       ) : currentPage === 'guide' ? (
         <Suspense fallback={<div className="muted">Loading…</div>}>
           <Guide onNavigate={setCurrentPage} />
+        </Suspense>
+      ) : currentPage === 'analytics' ? (
+        <Suspense fallback={<div className="muted">Loading…</div>}>
+          <Analytics />
         </Suspense>
       ) : null}
     </div>
