@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap');
 
 .orderbook-container {
   width: 100%;
@@ -11,8 +11,8 @@
 
   /* Typography - matching indicators */
   --font-headline: "Cinzel", "Noto Serif SC", "Times New Roman", serif;
-  --font-sans: "Manrope", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+  --font-sans: "Inter", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
 
   /* Color palette - matching indicators */
   --bg: ##ffffff;

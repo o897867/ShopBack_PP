@@ -7,8 +7,8 @@
   /* ── Type families ───────────────────────────────────────── */
   --font-serif:   'Lora', 'Noto Serif SC', 'Noto Sans Symbols 2', 'Times New Roman', serif;
   --font-gua:     'Noto Sans Symbols 2', 'Noto Serif SC', 'Lora', serif;
-  --font-sans:    'DM Sans', 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono:    'DM Mono', 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  --font-sans:    'Inter', 'Noto Sans SC', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:    'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
   --font-display: 'Lora', 'Noto Serif SC', serif;
 
   /* ── Type scale (compact editorial — body ~13px) ─────────── */
