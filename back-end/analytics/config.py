@@ -8,3 +8,6 @@ RAW_XAU_PREFIX = "raw/xau/candles_1m"
 RAW_NEWS_PREFIX = "raw/news"
 ANALYSIS_PREFIX = "analysis"
 METADATA_KEY = "metadata/last_export.json"
+
+# Lambda (triggered separately by EventBridge rule fxlab-analytics-daily at 05:15 UTC)
+LAMBDA_FUNCTION_NAME = os.getenv("ANALYTICS_LAMBDA_NAME", "analytics-pipeline")

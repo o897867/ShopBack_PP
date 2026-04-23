@@ -18,7 +18,7 @@ import pyarrow.parquet as pq
 # 允许作为模块运行 (python -m analytics.export_to_s3)
 sys.path.insert(0, "/root/shopback/ShopBack_PP/back-end")
 from database import get_db_connection
-from analytics.config import S3_BUCKET, S3_REGION, RAW_XAU_PREFIX, RAW_NEWS_PREFIX, METADATA_KEY
+from analytics.config import S3_BUCKET, S3_REGION, RAW_XAU_PREFIX, RAW_NEWS_PREFIX, METADATA_KEY, LAMBDA_FUNCTION_NAME
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -167,6 +167,23 @@ def main():
 
     save_watermark(watermark)
     logger.info("导出完成")
+
+    # Export 成功后触发 Lambda 分析
+    trigger_lambda()
+
+
+def trigger_lambda():
+    """导出完成后自动触发分析 Lambda"""
+    try:
+        client = boto3.client("lambda", region_name=S3_REGION)
+        resp = client.invoke(
+            FunctionName=LAMBDA_FUNCTION_NAME,
+            InvocationType="Event",  # 异步，不等结果
+            Payload=json.dumps({"analysis": "all", "trigger": "export_to_s3"}),
+        )
+        logger.info(f"Lambda '{LAMBDA_FUNCTION_NAME}' triggered, status={resp['StatusCode']}")
+    except Exception as e:
+        logger.error(f"Lambda 触发失败: {e}")
 
 
 if __name__ == "__main__":
