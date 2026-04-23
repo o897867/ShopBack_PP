@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import TopNav from '../components/TopNav.jsx';
 import './Analytics.css';
@@ -6,45 +6,23 @@ import './Analytics.css';
 const API = import.meta.env.VITE_API_URL || '';
 
 /* ═══════════════════════════════════════════════════════════════════
- * Data — watchlist tickers, sector map, market snapshot
+ * Data fetching
  * ═══════════════════════════════════════════════════════════════════ */
 
-const WATCHLIST = [
-  { sym: 'NVDA', name: '英伟达 · NVIDIA Corp.', exchange: 'NASDAQ', spark: [10,9,11,7,8,5,6,3,4,1] },
-  { sym: 'AAPL', name: '苹果 · Apple Inc.',     exchange: 'NASDAQ', spark: [5,6,4,5,7,6,8,7,9,8] },
-  { sym: 'TSLA', name: '特斯拉 · Tesla Inc.',   exchange: 'NASDAQ', spark: [4,7,5,9,7,10,8,11,9,12] },
-  { sym: 'BTC',  name: '比特币 · Bitcoin',       exchange: 'CRYPTO', spark: [11,8,10,5,6,3,5,2,4,1] },
-  { sym: 'SPX',  name: '标普500 · S&P 500',     exchange: 'INDEX',  spark: [7,6,8,6,7,5,6,5,6,4] },
-  { sym: 'GLD',  name: '黄金ETF · Gold ETF',    exchange: 'NYSE',   spark: [10,9,10,8,7,6,5,4,3,2] },
-  { sym: 'DXY',  name: '美元指数 · Dollar Index',exchange: 'INDEX',  spark: [6,5,7,6,8,7,9,8,10,9] },
-];
-
-const TIME_WINDOWS = ['1D', '5D', '1M', '3M', 'YTD', '1Y', '5Y', 'MAX'];
-
-const SECTORS = [
-  { sym: 'XLK', name: 'Technology',         delta: '+1.82%', cls: 'an-hg-4', size: 'an-heat__cell--xl' },
-  { sym: 'XLC', name: 'Comms',              delta: '+1.14%', cls: 'an-hg-3' },
-  { sym: 'XLY', name: 'Discretionary',      delta: '+0.58%', cls: 'an-hg-2' },
-  { sym: 'XLF', name: 'Financials',         delta: '+0.22%', cls: 'an-hg-1' },
-  { sym: 'XLI', name: 'Industrials',        delta: '+0.04%', cls: 'an-hg-0' },
-  { sym: 'XLV', name: 'Health',             delta: '\u22120.31%', cls: 'an-hr-1' },
-  { sym: 'XLP', name: 'Staples',            delta: '\u22120.64%', cls: 'an-hr-2' },
-  { sym: 'XLE \u00b7 XLU', name: 'Energy & Utilities', delta: '\u22121.12%  \u22121.40%', cls: 'an-hr-3', size: 'an-heat__cell--lg' },
-  { sym: 'XLRE', name: 'Real Estate',       delta: '\u22122.08%', cls: 'an-hr-4', size: 'an-heat__cell--lg' },
-];
-
-const MARKET_ROWS = [
-  { sym:'NVDA', name:'NVIDIA',        last:142.08, chg:+3.42, pct:+2.47, vol:'248.1M', cap:'3.49T', up:true,  spark:[8,9,7,10,7,8,6,7,5,6,4,5,3,4,2,3,2,3,1,2] },
-  { sym:'AAPL', name:'Apple',         last:217.84, chg:-0.92, pct:-0.42, vol:'54.2M',  cap:'3.31T', up:false, spark:[4,5,4,6,5,7,6,8,7,8,7,9,8,9,8,9,10,9,10,9] },
-  { sym:'TSLA', name:'Tesla',         last:189.12, chg:+4.88, pct:+2.65, vol:'108.7M', cap:'603B',  up:true,  spark:[6,8,5,9,7,10,7,8,6,7,5,7,4,6,3,5,4,5,2,3] },
-  { sym:'BTC',  name:'Bitcoin',       last:110842,  chg:+1924, pct:+1.77, vol:'$48.2B', cap:'2.18T', up:true,  spark:[10,9,10,8,7,8,5,6,4,5,3,4,2,3,1,2,1,2,1,1] },
-  { sym:'META', name:'Meta',          last:598.40, chg:+9.22, pct:+1.57, vol:'22.1M',  cap:'1.52T', up:true,  spark:[8,7,8,6,7,5,6,4,5,4,5,3,4,3,4,2,3,2,3,1] },
-  { sym:'GOOGL',name:'Alphabet',      last:175.64, chg:+1.11, pct:+0.64, vol:'31.8M',  cap:'2.16T', up:true,  spark:[7,8,6,7,7,6,7,5,6,6,5,6,4,5,4,5,3,4,4,3] },
-  { sym:'AMZN', name:'Amazon',        last:185.90, chg:-0.45, pct:-0.24, vol:'27.4M',  cap:'1.95T', up:false, spark:[5,6,5,7,6,8,7,8,7,9,8,9,10,8,9,10,9,10,9,10] },
-  { sym:'SPX',  name:'S&P 500',       last:5821.4, chg:+32.8, pct:+0.57, vol:'2.1B',   cap:'\u2014',up:true,  spark:[7,7,6,7,6,6,5,6,5,5,4,5,4,4,3,4,3,3,2,3] },
-  { sym:'DXY',  name:'Dollar Index',  last:104.22, chg:-0.14, pct:-0.13, vol:'\u2014',  cap:'\u2014',up:false, spark:[5,5,6,5,6,7,6,7,6,7,8,7,8,7,8,8,9,8,9,8] },
-  { sym:'GLD',  name:'Gold ETF',      last:248.41, chg:+1.02, pct:+0.41, vol:'7.9M',   cap:'83.8B', up:true,  spark:[10,9,10,8,9,8,7,8,6,7,6,5,6,4,5,3,4,3,2,2] },
-];
+function useFetch(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API}${url}`)
+      .then(r => r.json())
+      .then(d => { if (!cancelled) setData(d); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [url]);
+  return { data, loading };
+}
 
 /* ═══════════════════════════════════════════════════════════════════
  * Helpers
@@ -53,13 +31,46 @@ const MARKET_ROWS = [
 function pad(n) { return String(n).padStart(2, '0'); }
 
 function fmt(n, dig = 2) {
+  if (n == null) return '\u2014';
   return typeof n === 'number'
     ? n.toLocaleString('en-US', { minimumFractionDigits: dig, maximumFractionDigits: dig })
     : n;
 }
 
-/** Tiny sparkline SVG for ticker tabs */
-function Sparkline({ points, width = 44, height = 14 }) {
+function pctClass(v) { return v >= 0 ? 'an-up' : 'an-down'; }
+function pctSign(v) { return v >= 0 ? '+' : ''; }
+
+/* ── SVG chart helpers ── */
+
+/** Map value to SVG y coordinate */
+function scaleY(val, min, max, top, bottom) {
+  if (max === min) return (top + bottom) / 2;
+  return bottom - ((val - min) / (max - min)) * (bottom - top);
+}
+
+/** Build SVG polyline path from series */
+function buildLinePath(series, xStart, xEnd, yTop, yBot, getValue) {
+  if (!series.length) return '';
+  const vals = series.map(getValue);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const step = (xEnd - xStart) / Math.max(series.length - 1, 1);
+  return vals.map((v, i) => {
+    const x = (xStart + i * step).toFixed(1);
+    const y = scaleY(v, min, max, yTop, yBot).toFixed(1);
+    return `${i === 0 ? 'M' : 'L'} ${x},${y}`;
+  }).join(' ');
+}
+
+/** Build SVG area path (line + close to bottom) */
+function buildAreaPath(linePath, xStart, xEnd, yBot) {
+  if (!linePath) return '';
+  return `${linePath} L ${xEnd},${yBot} L ${xStart},${yBot} Z`;
+}
+
+/** Simple inline sparkline */
+function Sparkline({ points, up, width = 44, height = 14 }) {
+  if (!points || points.length < 2) return null;
   const max = Math.max(...points);
   const min = Math.min(...points);
   const range = max - min || 1;
@@ -67,200 +78,486 @@ function Sparkline({ points, width = 44, height = 14 }) {
   const pts = points.map((v, i) =>
     `${(i * step).toFixed(1)},${((1 - (v - min) / range) * (height - 2) + 1).toFixed(1)}`
   ).join(' ');
-  return (
-    <svg className="an-tkr-tab__spark" width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-/** Table sparkline */
-function TableSpark({ points, up, width = 60, height = 14 }) {
-  const max = Math.max(...points);
-  const min = Math.min(...points);
-  const range = max - min || 1;
-  const step = width / (points.length - 1);
-  const d = points.map((v, i) =>
-    `${i === 0 ? 'M' : 'L'} ${(i * step).toFixed(1)},${((v - min) / range * (height - 2) + 1).toFixed(1)}`
-  ).join(' ');
   const col = up ? '#166534' : '#991b1b';
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <path d={d} fill="none" stroke={col} strokeWidth="1.2" />
+      <polyline points={pts} fill="none" stroke={col} strokeWidth="1.2" />
     </svg>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════
- * Candle + Volume chart builder (deterministic pseudo-random)
+ * XAU Tab
  * ═══════════════════════════════════════════════════════════════════ */
 
-function useCandleData() {
-  return useMemo(() => {
-    const N = 78, W = 5, GAP = 3;
-    let price = 136, prng = 0.42;
-    const r = () => { prng = (prng * 9301 + 49297) % 233280; return prng / 233280; };
-    const rows = [];
-    for (let i = 0; i < N; i++) {
-      const open = price;
-      const drift = Math.sin(i / 9) * 1.2 + 0.04;
-      const close = open + drift + (r() - 0.5) * 2.2;
-      const hi = Math.max(open, close) + r() * 1.2;
-      const lo = Math.min(open, close) - r() * 1.2;
-      rows.push({ open, close, hi, lo, vol: 0.3 + r() * 0.9 });
-      price = close;
-    }
-    const allP = rows.flatMap(c => [c.hi, c.lo]);
-    const pMin = Math.min(...allP) - 1, pMax = Math.max(...allP) + 1;
-    const TOP = 10, BOT = 170;
-    const y = (p) => BOT - ((p - pMin) / (pMax - pMin)) * (BOT - TOP);
-    const vMax = Math.max(...rows.map(c => c.vol));
-    return { rows, y, vMax, N, W, GAP };
-  }, []);
-}
+function XauTab({ isChinese, days, setDays }) {
+  const { data: daily, loading: l1 } = useFetch(`/api/analytics/xau/daily-stats?days=${days}`);
+  const { data: vol, loading: l2 } = useFetch(`/api/analytics/xau/volatility?days=${days}`);
+  const { data: sess } = useFetch('/api/analytics/xau/sessions');
+  const { data: weekly } = useFetch('/api/analytics/xau/weekly');
 
-/* ═══════════════════════════════════════════════════════════════════
- * Sub-components
- * ═══════════════════════════════════════════════════════════════════ */
+  if (l1 || l2) return <div className="an-loading">{isChinese ? '加载中...' : 'Loading...'}</div>;
 
-function CandleChart({ data }) {
-  const { rows, y, vMax, N, W, GAP } = data;
+  const ds = daily?.results || [];
+  if (!ds.length) return <div className="an-loading">{isChinese ? '暂无数据' : 'No data available'}</div>;
+
+  const latest = ds[ds.length - 1];
+  const prev = ds.length > 1 ? ds[ds.length - 2] : null;
+  const changePct = latest.change_pct ?? 0;
+  const changeAbs = prev ? (latest.close - prev.close) : 0;
+  const isUp = changePct >= 0;
+
+  // Price chart data
+  const closes = ds.map(d => d.close);
+  const highs = ds.map(d => d.high);
+  const lows = ds.map(d => d.low);
+  const allPrices = [...closes];
+  const pMin = Math.min(...allPrices);
+  const pMax = Math.max(...allPrices);
+  const chartW = 940, chartH = 300;
+  const xStart = 50, xEnd = 920, yTop = 30, yBot = 270;
+  const step = (xEnd - xStart) / Math.max(ds.length - 1, 1);
+
+  const linePath = buildLinePath(ds, xStart, xEnd, yTop, yBot, d => d.close);
+  const areaPath = buildAreaPath(linePath, xStart, xEnd, yBot);
+
+  // Y axis labels
+  const yRange = pMax - pMin || 1;
+  const yLabels = Array.from({ length: 5 }, (_, i) => {
+    const val = pMax - (yRange * i / 4);
+    const y = scaleY(val, pMin, pMax, yTop, yBot);
+    return { val: val.toFixed(0), y: y + 4 };
+  });
+
+  // X axis labels (evenly spaced)
+  const xCount = Math.min(6, ds.length);
+  const xLabels = Array.from({ length: xCount }, (_, i) => {
+    const idx = Math.round(i * (ds.length - 1) / Math.max(xCount - 1, 1));
+    const d = ds[idx];
+    return { label: d.date.slice(5), x: xStart + idx * step };
+  });
+
+  // Volatility data
+  const volSeries = vol?.results?.series || [];
+  const volCurrent = vol?.results?.current_vol_20d;
+  const volPercentile = vol?.results?.vol_percentile;
+  const volRegime = vol?.results?.current_regime;
+
+  // Build vol line paths
+  const vol20d = volSeries.filter(v => v.vol_20d != null);
+  const atr14 = volSeries.filter(v => v.atr_14 != null);
+
+  const volLinePath = vol20d.length > 1
+    ? buildLinePath(vol20d, 0, 900, 15, 125, d => d.vol_20d * 100)
+    : '';
+  const atrLinePath = atr14.length > 1
+    ? buildLinePath(atr14, 0, 900, 15, 125, d => d.atr_14)
+    : '';
+
+  // Sessions
+  const sessions = sess?.results || {};
+  const sessKeys = Object.keys(sessions);
+  const sessNames = { asian: isChinese ? '亚洲' : 'Asian', london: isChinese ? '伦敦' : 'London', newyork: isChinese ? '纽约' : 'New York' };
+
+  // Weekly
+  const weeklyData = weekly?.results || [];
+  const recentWeeks = weeklyData.slice(-8);
+
   return (
     <>
-      <svg className="an-candles-svg" viewBox="0 0 620 180" preserveAspectRatio="none">
-        <line className="an-grid-line" x1="0" y1="30" x2="620" y2="30" />
-        <line className="an-grid-line" x1="0" y1="70" x2="620" y2="70" />
-        <line className="an-grid-line" x1="0" y1="110" x2="620" y2="110" />
-        <line className="an-grid-line" x1="0" y1="150" x2="620" y2="150" />
-        {rows.map((c, i) => {
-          const x = 8 + i * (W + GAP);
-          const up = c.close >= c.open;
-          const cls = up ? 'an-cd-up' : 'an-cd-dn';
-          const yTop = y(Math.max(c.open, c.close));
-          const yBot = y(Math.min(c.open, c.close));
-          const h = Math.max(1, yBot - yTop);
-          return (
-            <g key={i}>
-              <line className={`an-cd-wick ${cls}`} x1={x + W / 2} y1={y(c.hi)} x2={x + W / 2} y2={y(c.lo)} />
-              <rect className={cls} x={x} y={yTop} width={W} height={h} />
-            </g>
-          );
-        })}
-      </svg>
-      <svg className="an-vol-svg" viewBox="0 0 620 70" preserveAspectRatio="none">
-        {rows.map((c, i) => {
-          const x = 8 + i * (W + GAP);
-          const h = (c.vol / vMax) * 60;
-          const up = c.close >= c.open;
-          return <rect key={i} className={`an-vol-bar ${up ? 'an-vol-bar--up' : 'an-vol-bar--dn'}`} x={x} y={66 - h} width={W} height={h} />;
-        })}
-        <line className="an-grid-line" x1="0" y1="68" x2="620" y2="68" />
-      </svg>
+      {/* ── Asset picker + quote ── */}
+      <div className="an-asset-row">
+        <div className="an-asset">
+          <div className="an-asset__ticker">XAU</div>
+          <div>
+            <div className="an-asset__name">{isChinese ? '黄金现货 · Gold Spot' : 'Gold Spot · XAUUSD'}</div>
+            <div><span className="an-asset__ex">COMEX</span></div>
+          </div>
+        </div>
+        <div className="an-quote">
+          <div className="an-quote__price">{fmt(latest.close, 2)}</div>
+          <div className={`an-quote__delta ${pctClass(changePct)}`}>
+            {isUp ? '▲' : '▼'} {pctSign(changeAbs)}{fmt(changeAbs, 2)} &nbsp; {pctSign(changePct)}{fmt(changePct, 2)}% &nbsp;·&nbsp; {isChinese ? '今日' : 'today'}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Time window tabs ── */}
+      <div className="an-controls-row">
+        <div className="an-window-tabs">
+          {[30, 60, 90, 180, 365].map(d => (
+            <button key={d} className={`an-wtab${d === days ? ' active' : ''}`} onClick={() => setDays(d)}>
+              {d}D
+            </button>
+          ))}
+        </div>
+        <div className="an-range-label">
+          {ds.length > 0 && `${ds[0].date.slice(5).replace('-', '\u00b7')} \u2014 ${latest.date.slice(5).replace('-', '\u00b7')} \u00a0·\u00a0 ${ds.length} SESSIONS`}
+        </div>
+      </div>
+
+      {/* ── Main price chart ── */}
+      <div className="an-chart-card">
+        <svg className="an-chart-svg" viewBox={`0 0 ${chartW} ${chartH}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#D4AF37" stopOpacity="0.00" />
+            </linearGradient>
+          </defs>
+          {/* Grid lines */}
+          {yLabels.map((l, i) => (
+            <line key={i} className="an-grid-line" x1={xStart} y1={l.y - 4} x2={xEnd} y2={l.y - 4} />
+          ))}
+          {/* Y labels */}
+          <g className="an-chart-axis-y">
+            {yLabels.map((l, i) => (
+              <text key={i} x={xStart - 6} y={l.y} textAnchor="end">{l.val}</text>
+            ))}
+          </g>
+          {/* Area + Line */}
+          {areaPath && <path fill="url(#area-grad)" opacity="0.9" d={areaPath} />}
+          {linePath && <path className="an-price-line" d={linePath} style={{ stroke: '#D4AF37' }} />}
+          {/* Current dot */}
+          <circle cx={xEnd} cy={scaleY(latest.close, pMin, pMax, yTop, yBot)} r="4" fill={isUp ? '#166534' : '#991b1b'} />
+          <text className="an-price-annot" x={xEnd - 5} y={scaleY(latest.close, pMin, pMax, yTop, yBot) - 8} textAnchor="end" fill={isUp ? '#166534' : '#991b1b'}>
+            {fmt(latest.close, 2)}
+          </text>
+          {/* X labels */}
+          <g className="an-chart-axis-x">
+            {xLabels.map((l, i) => (
+              <text key={i} x={l.x} y={chartH - 5} textAnchor={i === xLabels.length - 1 ? 'end' : 'start'}>
+                {i === xLabels.length - 1 ? 'TODAY' : l.label}
+              </text>
+            ))}
+          </g>
+        </svg>
+        <div className="an-chart-legend">
+          <span className="an-leg"><span className="an-leg__sq" style={{ background: '#D4AF37' }} />Close</span>
+          <span style={{ marginLeft: 'auto' }}>Source · S3 / Lambda</span>
+        </div>
+      </div>
+
+      {/* ── Stat strip ── */}
+      <div className="an-stats">
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '开盘 · Open' : 'Open'}</div>
+          <div className="an-stat__v">{fmt(latest.open, 2)}</div>
+          <div className="an-stat__sub">{latest.gap != null ? `gap ${pctSign(latest.gap)}${fmt(latest.gap, 2)}` : ''}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '日高 · High' : 'High'}</div>
+          <div className="an-stat__v an-up">{fmt(latest.high, 2)}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '日低 · Low' : 'Low'}</div>
+          <div className="an-stat__v an-down">{fmt(latest.low, 2)}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '日内波幅 · Range' : 'Day range'}</div>
+          <div className="an-stat__v">{latest.range_pct != null ? `${fmt(latest.range_pct, 2)}%` : '\u2014'}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '波动率 · Vol' : 'Volatility'}</div>
+          <div className="an-stat__v">{volCurrent != null ? `${(volCurrent * 100).toFixed(1)}%` : '\u2014'}</div>
+          <div className="an-stat__sub">{volRegime || ''}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '百分位 · Pctile' : 'Vol pctile'}</div>
+          <div className="an-stat__v">{volPercentile != null ? `${volPercentile}%` : '\u2014'}</div>
+          <div className="an-stat__sub">20d rank</div>
+        </div>
+      </div>
+
+      {/* ── Volatility Panel ── */}
+      <div className="an-sec-head">
+        <span className="an-sec-head__l">{isChinese ? '波动率 · Volatility' : 'Volatility'}</span>
+        <span className="an-sec-head__rule" />
+        <span className="an-sec-head__more">20d Vol vs ATR-14</span>
+      </div>
+      <div className="an-vola-panel">
+        <h3 className="an-vola-title">
+          {isChinese ? '波动率走势 · Volatility trend' : 'Volatility trend'}
+        </h3>
+        <p className="an-vola-sub">
+          {isChinese
+            ? `当前 20 日波动率 ${volCurrent != null ? (volCurrent * 100).toFixed(1) + '%' : '\u2014'}，处于 ${volPercentile ?? '\u2014'}% 分位，市场判定为「${volRegime || '\u2014'}」波动区间。`
+            : `Current 20-day volatility ${volCurrent != null ? (volCurrent * 100).toFixed(1) + '%' : '\u2014'}, at the ${volPercentile ?? '\u2014'}th percentile. Regime: ${volRegime || '\u2014'}.`}
+        </p>
+        {vol20d.length > 1 && (
+          <svg className="an-vola-svg" viewBox="0 0 900 140" preserveAspectRatio="none">
+            <line className="an-grid-line" x1="0" y1="30" x2="900" y2="30" />
+            <line className="an-grid-line" x1="0" y1="70" x2="900" y2="70" />
+            <line className="an-grid-line" x1="0" y1="110" x2="900" y2="110" />
+            <path className="an-vola-hv" d={volLinePath} />
+            {atrLinePath && <path className="an-vola-iv" d={atrLinePath} />}
+          </svg>
+        )}
+        <div className="an-chart-legend">
+          <span className="an-leg"><span className="an-leg__sq" />20d Vol</span>
+          <span className="an-leg"><span className="an-leg__sq an-leg__sq--ma" />ATR-14</span>
+        </div>
+      </div>
+
+      {/* ── Sessions + Weekly: two-col ── */}
+      <div className="an-two-col" style={{ marginTop: 40 }}>
+        {/* Session performance */}
+        <div>
+          <div className="an-sec-head" style={{ marginTop: 0 }}>
+            <span className="an-sec-head__l">{isChinese ? '交易时段 · Sessions' : 'Session performance'}</span>
+            <span className="an-sec-head__rule" />
+          </div>
+          {sessKeys.length > 0 && (
+            <div className="an-sess-grid">
+              {sessKeys.map(s => {
+                const d = sessions[s];
+                return (
+                  <div key={s} className="an-sess-card">
+                    <div className="an-sess-card__name">{sessNames[s] || s}</div>
+                    <div className="an-sess-card__rows">
+                      <div className="an-sess-card__row">
+                        <span className="an-sess-card__label">{isChinese ? '平均回报' : 'Avg return'}</span>
+                        <span className={`an-sess-card__val ${pctClass(d.avg_return_pct)}`}>
+                          {pctSign(d.avg_return_pct)}{fmt(d.avg_return_pct, 3)}%
+                        </span>
+                      </div>
+                      <div className="an-sess-card__row">
+                        <span className="an-sess-card__label">{isChinese ? '胜率' : 'Win rate'}</span>
+                        <span className="an-sess-card__val">{fmt(d.win_rate, 1)}%</span>
+                      </div>
+                      <div className="an-sess-card__row">
+                        <span className="an-sess-card__label">{isChinese ? '平均波幅' : 'Avg range'}</span>
+                        <span className="an-sess-card__val">{fmt(d.avg_range_pct, 3)}%</span>
+                      </div>
+                      <div className="an-sess-card__row">
+                        <span className="an-sess-card__label">{isChinese ? '交易日' : 'Days'}</span>
+                        <span className="an-sess-card__val">{d.trading_days}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Weekly summary */}
+        <div>
+          <div className="an-sec-head" style={{ marginTop: 0 }}>
+            <span className="an-sec-head__l">{isChinese ? '周度回顾 · Weekly' : 'Weekly review'}</span>
+            <span className="an-sec-head__rule" />
+          </div>
+          {recentWeeks.length > 0 && (
+            <table className="an-tbl">
+              <thead>
+                <tr>
+                  <th>{isChinese ? '周' : 'Week'}</th>
+                  <th>{isChinese ? '开盘' : 'Open'}</th>
+                  <th>{isChinese ? '收盘' : 'Close'}</th>
+                  <th>{isChinese ? '回报' : 'Return'}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentWeeks.map(w => (
+                  <tr key={w.week_ending}>
+                    <td><span className="an-sym">{w.week_ending.slice(5)}</span></td>
+                    <td>{fmt(w.open, 0)}</td>
+                    <td>{fmt(w.close, 0)}</td>
+                    <td className={pctClass(w.return_pct)}>{pctSign(w.return_pct)}{fmt(w.return_pct, 2)}%</td>
+                    <td>{w.trend === 'up' ? '\u2191' : '\u2193'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     </>
   );
 }
 
-function SectorHeatmap({ isChinese }) {
+/* ═══════════════════════════════════════════════════════════════════
+ * News Tab
+ * ═══════════════════════════════════════════════════════════════════ */
+
+function NewsTab({ isChinese }) {
+  const { data: sent, loading: l1 } = useFetch('/api/analytics/news/sentiment');
+  const { data: cats } = useFetch('/api/analytics/news/categories');
+  const { data: corr } = useFetch('/api/analytics/news/correlation');
+  const { data: syms } = useFetch('/api/analytics/news/symbols');
+
+  if (l1) return <div className="an-loading">{isChinese ? '加载中...' : 'Loading...'}</div>;
+
+  const series = sent?.results?.series || [];
+  const last60 = series.slice(-60);
+  const summary = sent?.results?.summary || {};
+
+  // Sentiment bar chart: stacked bars rendered in SVG
+  const sentMax = Math.max(...last60.map(d => (d.positive || 0) + (d.neutral || 0) + (d.negative || 0)), 1);
+  const sentChartW = 920, sentChartH = 200;
+  const barW = Math.max(2, (sentChartW - 60) / last60.length - 1);
+
+  // Category data
+  const overall = cats?.results?.overall || {};
+  const catLabels = Object.keys(overall);
+  const catTotal = catLabels.reduce((s, k) => s + (overall[k] || 0), 0);
+
+  // Correlation
+  const corrData = corr?.results || {};
+
+  // Top symbols
+  const topSyms = syms?.results?.top_symbols || [];
+  const topMax = topSyms.length > 0 ? topSyms[0].count : 1;
+
   return (
-    <div>
-      <div className="an-heat-label">
-        {isChinese ? 'S&P 500 板块热图 · Sector heatmap' : 'S&P 500 sector heatmap'}
+    <>
+      {/* ── Sentiment overview stats ── */}
+      <div className="an-stats" style={{ marginTop: 28 }}>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '总文章 · Total' : 'Total articles'}</div>
+          <div className="an-stat__v">{summary.total_articles_with_sentiment?.toLocaleString() || '\u2014'}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '积极 · Positive' : 'Positive'}</div>
+          <div className="an-stat__v an-up">{summary.overall_positive?.toLocaleString() || '\u2014'}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '消极 · Negative' : 'Negative'}</div>
+          <div className="an-stat__v an-down">{summary.overall_negative?.toLocaleString() || '\u2014'}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '中性 · Neutral' : 'Neutral'}</div>
+          <div className="an-stat__v">{summary.overall_neutral?.toLocaleString() || '\u2014'}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '净情绪 · Net' : 'Avg net sentiment'}</div>
+          <div className="an-stat__v">{summary.avg_net_sentiment != null ? fmt(summary.avg_net_sentiment, 3) : '\u2014'}</div>
+        </div>
+        <div className="an-stat">
+          <div className="an-stat__l">{isChinese ? '同日相关 · Same-day' : 'Same-day corr.'}</div>
+          <div className="an-stat__v">{corrData.same_day_correlation ?? '\u2014'}</div>
+        </div>
       </div>
-      <div className="an-heat">
-        {SECTORS.map((s, i) => (
-          <div key={i} className={`an-heat__cell ${s.size || ''} ${s.cls}`}>
-            <div>
-              <div className="an-heat__sym">{s.sym}</div>
-              <div className="an-heat__name">{s.name}</div>
-            </div>
-            <div className="an-heat__delta">{s.delta}</div>
+
+      {/* ── Sentiment stacked bar chart ── */}
+      <div className="an-sec-head">
+        <span className="an-sec-head__l">{isChinese ? '每日情绪 · Daily sentiment' : 'Daily sentiment'}</span>
+        <span className="an-sec-head__rule" />
+        <span className="an-sec-head__more">{isChinese ? '最近 60 天' : 'Last 60 days'}</span>
+      </div>
+      <div className="an-chart-card">
+        <svg className="an-chart-svg" viewBox={`0 0 ${sentChartW} ${sentChartH}`} preserveAspectRatio="none" style={{ height: 220 }}>
+          {/* Grid */}
+          <line className="an-grid-line" x1="40" y1="10" x2={sentChartW} y2="10" />
+          <line className="an-grid-line" x1="40" y1="60" x2={sentChartW} y2="60" />
+          <line className="an-grid-line" x1="40" y1="110" x2={sentChartW} y2="110" />
+          <line className="an-grid-line" x1="40" y1="160" x2={sentChartW} y2="160" />
+          <line className="an-grid-line" x1="40" y1={sentChartH - 10} x2={sentChartW} y2={sentChartH - 10} />
+          {/* Stacked bars */}
+          {last60.map((d, i) => {
+            const x = 50 + i * (barW + 1);
+            const total = (d.positive || 0) + (d.neutral || 0) + (d.negative || 0);
+            const h = (total / sentMax) * (sentChartH - 30);
+            const hPos = ((d.positive || 0) / sentMax) * (sentChartH - 30);
+            const hNeu = ((d.neutral || 0) / sentMax) * (sentChartH - 30);
+            const hNeg = ((d.negative || 0) / sentMax) * (sentChartH - 30);
+            const base = sentChartH - 10;
+            return (
+              <g key={i}>
+                <rect x={x} y={base - hNeg} width={barW} height={hNeg} fill="rgba(239,68,68,0.6)" />
+                <rect x={x} y={base - hNeg - hNeu} width={barW} height={hNeu} fill="rgba(245,158,11,0.4)" />
+                <rect x={x} y={base - hNeg - hNeu - hPos} width={barW} height={hPos} fill="rgba(34,197,94,0.6)" />
+              </g>
+            );
+          })}
+          {/* X labels (sparse) */}
+          <g className="an-chart-axis-x">
+            {last60.filter((_, i) => i % 10 === 0).map((d, i) => (
+              <text key={i} x={50 + (last60.indexOf(d)) * (barW + 1)} y={sentChartH - 0}>{d.date.slice(5)}</text>
+            ))}
+          </g>
+        </svg>
+        <div className="an-chart-legend">
+          <span className="an-leg"><span className="an-leg__sq" style={{ background: 'rgba(34,197,94,0.7)' }} />{isChinese ? '积极' : 'Positive'}</span>
+          <span className="an-leg"><span className="an-leg__sq" style={{ background: 'rgba(245,158,11,0.5)' }} />{isChinese ? '中性' : 'Neutral'}</span>
+          <span className="an-leg"><span className="an-leg__sq" style={{ background: 'rgba(239,68,68,0.7)' }} />{isChinese ? '消极' : 'Negative'}</span>
+        </div>
+      </div>
+
+      {/* ── Categories + Correlation: two-col ── */}
+      <div className="an-two-col" style={{ marginTop: 40 }}>
+        {/* Categories */}
+        <div>
+          <div className="an-sec-head" style={{ marginTop: 0 }}>
+            <span className="an-sec-head__l">{isChinese ? '分类分布 · Categories' : 'Category distribution'}</span>
+            <span className="an-sec-head__rule" />
           </div>
-        ))}
+          {catLabels.length > 0 && (
+            <div className="an-cat-bars">
+              {catLabels.map(k => {
+                const pct = catTotal > 0 ? (overall[k] / catTotal * 100) : 0;
+                return (
+                  <div key={k} className="an-cat-row">
+                    <span className="an-cat-row__label">{k.replace(/_/g, ' ')}</span>
+                    <div className="an-cat-row__track">
+                      <div className="an-cat-row__fill" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="an-cat-row__val">{overall[k]}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Correlation */}
+        <div>
+          <div className="an-sec-head" style={{ marginTop: 0 }}>
+            <span className="an-sec-head__l">{isChinese ? '情绪-价格相关 · Correlation' : 'Sentiment-price correlation'}</span>
+            <span className="an-sec-head__rule" />
+          </div>
+          <div className="an-corr-grid">
+            <div className="an-corr-cell">
+              <div className="an-corr-cell__label">{isChinese ? '同日' : 'Same day'}</div>
+              <div className="an-corr-cell__val">{corrData.same_day_correlation ?? '\u2014'}</div>
+            </div>
+            <div className="an-corr-cell">
+              <div className="an-corr-cell__label">{isChinese ? '次日' : 'Next day'}</div>
+              <div className="an-corr-cell__val">{corrData.next_day_correlation ?? '\u2014'}</div>
+            </div>
+            {corrData.lag_correlations && Object.entries(corrData.lag_correlations).map(([k, v]) => (
+              <div key={k} className="an-corr-cell">
+                <div className="an-corr-cell__label">{isChinese ? `滞后 ${k.split('_')[1]} 日` : `Lag ${k.split('_')[1]}d`}</div>
+                <div className="an-corr-cell__val">{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </div>
-  );
-}
 
-function VolatilityPanel({ isChinese }) {
-  return (
-    <div className="an-vola-panel">
-      <h3 className="an-vola-title">
-        {isChinese ? '波动率曲面 · Volatility surface' : 'Volatility surface'}
-      </h3>
-      <p className="an-vola-sub">
-        {isChinese
-          ? '历史波动率（实线）与隐含波动率（虚线）的分叉，暗示市场对财报的定价已偏紧。'
-          : 'The divergence between historical (solid) and implied (dashed) volatility suggests the market has already priced in earnings tightly.'}
-      </p>
-      <svg className="an-vola-svg" viewBox="0 0 900 140" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="vola-grad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#b45309" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#b45309" stopOpacity="0.00" />
-          </linearGradient>
-        </defs>
-        <line className="an-grid-line" x1="0" y1="30" x2="900" y2="30" />
-        <line className="an-grid-line" x1="0" y1="70" x2="900" y2="70" />
-        <line className="an-grid-line" x1="0" y1="110" x2="900" y2="110" />
-        {/* HV */}
-        <path className="an-vola-hv" d="M 0,90 C 80,88 160,70 240,80 S 400,95 500,75 S 700,50 900,55" />
-        {/* IV area */}
-        <path fill="url(#vola-grad)" opacity="0.5" d="M 0,100 C 80,100 160,85 240,90 S 400,100 500,80 S 700,40 900,20 L 900,140 L 0,140 Z" />
-        {/* IV line */}
-        <path className="an-vola-iv" d="M 0,100 C 80,100 160,85 240,90 S 400,100 500,80 S 700,40 900,20" />
-        {/* x labels */}
-        <g className="an-chart-axis-x">
-          <text x="2" y="132">T-60</text>
-          <text x="300" y="132">T-30</text>
-          <text x="600" y="132">T-14</text>
-          <text x="890" y="132" textAnchor="end">TODAY</text>
-        </g>
-        <g className="an-chart-axis-y">
-          <text x="6" y="28">80%</text>
-          <text x="6" y="68">50%</text>
-          <text x="6" y="108">20%</text>
-        </g>
-        <text x="885" y="18" textAnchor="end" className="an-price-annot" fill="#b45309">IV &nbsp; 72.4%</text>
-        <text x="885" y="52" textAnchor="end" className="an-price-annot">HV &nbsp; 38.1%</text>
-      </svg>
-    </div>
-  );
-}
-
-function MarketTable() {
-  return (
-    <table className="an-tbl">
-      <thead>
-        <tr>
-          <th style={{ width: 110 }}>Ticker</th>
-          <th>Name</th>
-          <th>Last</th>
-          <th>Chg</th>
-          <th>Chg%</th>
-          <th>Vol</th>
-          <th>Spark · 20d</th>
-          <th>Mkt cap</th>
-        </tr>
-      </thead>
-      <tbody>
-        {MARKET_ROWS.map(r => (
-          <tr key={r.sym}>
-            <td><span className="an-sym">{r.sym}</span></td>
-            <td className="an-name">{r.name}</td>
-            <td>{fmt(r.last, r.last > 10000 ? 0 : 2)}</td>
-            <td className={r.up ? 'an-up' : 'an-down'}>
-              {r.up ? '+' : ''}{fmt(r.chg, r.last > 10000 ? 0 : 2)}
-            </td>
-            <td className={r.up ? 'an-up' : 'an-down'}>
-              {r.up ? '+' : ''}{fmt(r.pct)}%
-            </td>
-            <td>{r.vol}</td>
-            <td className="an-spark"><TableSpark points={r.spark} up={r.up} /></td>
-            <td>{r.cap}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      {/* ── Top symbols ── */}
+      {topSyms.length > 0 && (
+        <>
+          <div className="an-sec-head">
+            <span className="an-sec-head__l">{isChinese ? '热门标的 · Top symbols' : 'Most mentioned symbols'}</span>
+            <span className="an-sec-head__rule" />
+            <span className="an-sec-head__more">Top 15</span>
+          </div>
+          <div className="an-sym-bars">
+            {topSyms.slice(0, 15).map(s => (
+              <div key={s.symbol} className="an-sym-row">
+                <span className="an-sym-row__label">{s.symbol}</span>
+                <div className="an-sym-row__track">
+                  <div className="an-sym-row__fill" style={{ width: `${(s.count / topMax * 100)}%` }} />
+                </div>
+                <span className="an-sym-row__val">{s.count}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
@@ -271,6 +568,9 @@ function MarketTable() {
 export default function Analytics({ onNavigate }) {
   const { currentLanguage } = useLanguage();
   const isChinese = currentLanguage === 'zh-CN';
+
+  const [tab, setTab] = useState('xau');
+  const [days, setDays] = useState(90);
 
   // Clock
   const [clock, setClock] = useState('');
@@ -284,22 +584,16 @@ export default function Analytics({ onNavigate }) {
     return () => clearInterval(id);
   }, []);
 
-  // Active ticker & time window
-  const [activeTicker, setActiveTicker] = useState(0);
-  const [activeWindow, setActiveWindow] = useState('1M');
-
-  // Candle data (memoized)
-  const candleData = useCandleData();
-
-  // Current ticker info
-  const ticker = WATCHLIST[activeTicker];
+  // Status
+  const { data: status } = useFetch('/api/analytics/status');
+  const lastUpdate = status?.analyses?.xau_daily_stats?.last_modified;
 
   // Date formatting
   const now = new Date();
-  const dayNames = { zh: ['周日','周一','周二','周三','周四','周五','周六'], en: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] };
+  const dayNamesCn = ['周日','周一','周二','周三','周四','周五','周六'];
   const dateStr = isChinese
-    ? `${now.getFullYear()}\u00b7${pad(now.getMonth()+1)}\u00b7${pad(now.getDate())} \u00b7 ${dayNames.zh[now.getDay()]}`
-    : `${dayNames.en[now.getDay()]}, ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+    ? `${now.getFullYear()}\u00b7${pad(now.getMonth()+1)}\u00b7${pad(now.getDate())} \u00b7 ${dayNamesCn[now.getDay()]}`
+    : now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
     <>
@@ -318,230 +612,43 @@ export default function Analytics({ onNavigate }) {
           </h1>
           <p className="an-mast__sub">
             {isChinese
-              ? '实时价格、成交量、波动率与板块轮动——一页之内，读懂今天的市场情绪与结构。'
-              : 'Live prices, volume, volatility, and sector rotation \u2014 read today\u2019s market sentiment and structure in a single page.'}
+              ? '黄金价格走势、波动率分析、交易时段表现与新闻情绪——用数据读懂市场。'
+              : 'Gold price trends, volatility analysis, session performance, and news sentiment \u2014 reading the market through data.'}
           </p>
           <div className="an-mast__bar">
             <span className="an-mast__stamp">{dateStr}</span>
             <span className="an-dot" />
             <span className="an-mast__clock">{clock}</span>
-            <span className="an-dot" />
-            <span className="an-mast__clock">
-              {isChinese ? 'NYSE 开盘中' : 'NYSE open'}
-            </span>
+            {lastUpdate && (
+              <>
+                <span className="an-dot" />
+                <span className="an-mast__clock">
+                  {isChinese ? '数据更新' : 'Updated'}: {lastUpdate.slice(0, 16).replace('T', ' ')}
+                </span>
+              </>
+            )}
             <span className="an-live">
               <span className="an-live__dot" />
-              {isChinese ? 'Live · 实时' : 'Live'}
+              {isChinese ? 'S3 · Lambda' : 'S3 · Lambda'}
             </span>
           </div>
         </section>
 
-        {/* ── Asset picker + quote ── */}
-        <div className="an-asset-row">
-          <div className="an-asset">
-            <div className="an-asset__ticker">{ticker.sym}</div>
-            <div>
-              <div className="an-asset__name">{ticker.name}</div>
-              <div><span className="an-asset__ex">{ticker.exchange}</span></div>
-            </div>
-          </div>
-          <div className="an-quote">
-            <div className="an-quote__price">142.08</div>
-            <div className="an-quote__delta an-up">
-              ▲ +3.42 &nbsp; +2.47% &nbsp;·&nbsp; {isChinese ? '今日' : 'today'}
-            </div>
-          </div>
+        {/* ── Tab switcher ── */}
+        <div className="an-tab-row">
+          <button className={`an-tab${tab === 'xau' ? ' active' : ''}`} onClick={() => setTab('xau')}>
+            {isChinese ? '黄金 · XAU' : 'XAU / Gold'}
+          </button>
+          <button className={`an-tab${tab === 'news' ? ' active' : ''}`} onClick={() => setTab('news')}>
+            {isChinese ? '新闻情绪 · Sentiment' : 'News sentiment'}
+          </button>
         </div>
 
-        {/* ── Ticker tabs ── */}
-        <div className="an-ticker-tabs">
-          {WATCHLIST.map((w, i) => (
-            <button
-              key={w.sym}
-              className={`an-tkr-tab${i === activeTicker ? ' active' : ''}`}
-              onClick={() => setActiveTicker(i)}
-            >
-              {w.sym}
-              <Sparkline points={w.spark} />
-            </button>
-          ))}
-        </div>
-
-        {/* ── Time window ── */}
-        <div className="an-controls-row">
-          <div className="an-window-tabs">
-            {TIME_WINDOWS.map(w => (
-              <button
-                key={w}
-                className={`an-wtab${w === activeWindow ? ' active' : ''}`}
-                onClick={() => setActiveWindow(w)}
-              >
-                {w}
-              </button>
-            ))}
-          </div>
-          <div className="an-range-label">
-            RANGE: 03·22 — 04·22 &nbsp; · &nbsp; 22 SESSIONS
-          </div>
-        </div>
-
-        {/* ── Main price chart ── */}
-        <div className="an-chart-card">
-          <svg className="an-chart-svg" viewBox="0 0 940 300" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#1a1a1a" stopOpacity="0.10" />
-                <stop offset="100%" stopColor="#1a1a1a" stopOpacity="0.00" />
-              </linearGradient>
-            </defs>
-            {/* Grid */}
-            <line className="an-grid-line" x1="50" y1="30" x2="920" y2="30" />
-            <line className="an-grid-line" x1="50" y1="90" x2="920" y2="90" />
-            <line className="an-grid-line" x1="50" y1="150" x2="920" y2="150" />
-            <line className="an-grid-line" x1="50" y1="210" x2="920" y2="210" />
-            <line className="an-grid-line" x1="50" y1="270" x2="920" y2="270" />
-            {/* Y labels */}
-            <g className="an-chart-axis-y">
-              <text x="44" y="33" textAnchor="end">150</text>
-              <text x="44" y="93" textAnchor="end">140</text>
-              <text x="44" y="153" textAnchor="end">130</text>
-              <text x="44" y="213" textAnchor="end">120</text>
-              <text x="44" y="273" textAnchor="end">110</text>
-            </g>
-            {/* Area */}
-            <path fill="url(#area-grad)" opacity="0.9" d="
-              M 50,210 L 90,220 L 130,200 L 170,215 L 210,190 L 250,205 L 290,175 L 330,190
-              L 370,155 L 410,170 L 450,140 L 490,160 L 530,130 L 570,150 L 610,120 L 650,100
-              L 690,125 L 730,95 L 770,110 L 810,80 L 850,95 L 890,70 L 920,90 L 920,280 L 50,280 Z" />
-            {/* Line */}
-            <path className="an-price-line" d="
-              M 50,210 L 90,220 L 130,200 L 170,215 L 210,190 L 250,205 L 290,175 L 330,190
-              L 370,155 L 410,170 L 450,140 L 490,160 L 530,130 L 570,150 L 610,120 L 650,100
-              L 690,125 L 730,95 L 770,110 L 810,80 L 850,95 L 890,70 L 920,90" />
-            {/* 20-day MA */}
-            <path d="M 50,220 C 200,215 350,180 500,150 S 800,90 920,95" fill="none" stroke="#b45309" strokeWidth="1.2" strokeDasharray="3 2" opacity="0.85" />
-            {/* Earnings annotation */}
-            <line x1="650" y1="30" x2="650" y2="100" stroke="#991b1b" strokeWidth="0.8" strokeDasharray="2 2" />
-            <circle className="an-price-dot" cx="650" cy="100" r="3" />
-            <text className="an-price-annot" x="655" y="24">
-              {isChinese ? '财报 · EARNINGS' : 'EARNINGS'}
-            </text>
-            {/* Current dot */}
-            <circle cx="920" cy="90" r="4" fill="#166534" />
-            <text className="an-price-annot" x="895" y="84" textAnchor="end" fill="#166534">142.08</text>
-            {/* Baseline */}
-            <line className="an-baseline" x1="50" y1="210" x2="920" y2="210" />
-            {/* X labels */}
-            <g className="an-chart-axis-x">
-              <text x="50" y="295">03·22</text>
-              <text x="210" y="295">03·29</text>
-              <text x="410" y="295">04·05</text>
-              <text x="610" y="295">04·12</text>
-              <text x="810" y="295">04·19</text>
-              <text x="920" y="295" textAnchor="end">TODAY</text>
-            </g>
-          </svg>
-          <div className="an-chart-legend">
-            <span className="an-leg"><span className="an-leg__sq" />Close</span>
-            <span className="an-leg"><span className="an-leg__sq an-leg__sq--ma" />20-day MA</span>
-            <span className="an-leg"><span className="an-leg__sq an-leg__sq--vol" />Volume</span>
-            <span style={{ marginLeft: 'auto' }}>Source · Polygon.io aggregate</span>
-          </div>
-        </div>
-
-        {/* ── Stat strip ── */}
-        <div className="an-stats">
-          <div className="an-stat">
-            <div className="an-stat__l">{isChinese ? '开盘 · Open' : 'Open'}</div>
-            <div className="an-stat__v">138.92</div>
-            <div className="an-stat__sub">+0.41</div>
-          </div>
-          <div className="an-stat">
-            <div className="an-stat__l">{isChinese ? '日高 · High' : 'High'}</div>
-            <div className="an-stat__v an-up">143.74</div>
-            <div className="an-stat__sub">14:02 EDT</div>
-          </div>
-          <div className="an-stat">
-            <div className="an-stat__l">{isChinese ? '日低 · Low' : 'Low'}</div>
-            <div className="an-stat__v an-down">138.10</div>
-            <div className="an-stat__sub">09:48 EDT</div>
-          </div>
-          <div className="an-stat">
-            <div className="an-stat__l">{isChinese ? '成交量 · Vol' : 'Volume'}</div>
-            <div className="an-stat__v">248.1 M</div>
-            <div className="an-stat__sub">30D avg 198M</div>
-          </div>
-          <div className="an-stat">
-            <div className="an-stat__l">{isChinese ? '市值 · Mkt cap' : 'Mkt cap'}</div>
-            <div className="an-stat__v">3.49 T</div>
-            <div className="an-stat__sub">USD</div>
-          </div>
-          <div className="an-stat">
-            <div className="an-stat__l">{isChinese ? '52周 · 52W' : '52W range'}</div>
-            <div className="an-stat__v">94 — 147</div>
-            <div className="an-stat__sub">position 87%</div>
-          </div>
-        </div>
-
-        {/* ── Candles + Volume | Heatmap ── */}
-        <div className="an-sec-head">
-          <span className="an-sec-head__l">
-            {isChinese ? 'K 线 · 成交量 · Candles + volume' : 'Candles + volume'}
-          </span>
-          <span className="an-sec-head__rule" />
-          <span className="an-sec-head__more">5D · 5-min</span>
-        </div>
-
-        <div className="an-two-col">
-          <div>
-            <CandleChart data={candleData} />
-          </div>
-          <SectorHeatmap isChinese={isChinese} />
-        </div>
-
-        {/* ── Volatility ── */}
-        <div className="an-sec-head">
-          <span className="an-sec-head__l">
-            {isChinese ? '波动率 · Volatility' : 'Volatility'}
-          </span>
-          <span className="an-sec-head__rule" />
-          <span className="an-sec-head__more">60-day HV vs 30-day IV</span>
-        </div>
-        <VolatilityPanel isChinese={isChinese} />
-
-        {/* ── Market snapshot table ── */}
-        <div className="an-sec-head">
-          <span className="an-sec-head__l">
-            {isChinese ? '全市场速览 · Market snapshot' : 'Market snapshot'}
-          </span>
-          <span className="an-sec-head__rule" />
-          <span className="an-sec-head__more">
-            {isChinese ? '按成交额排序 · by volume' : 'Sorted by volume'}
-          </span>
-        </div>
-        <MarketTable />
-
-        {/* ── Editorial commentary ── */}
-        <div className="an-sec-head">
-          <span className="an-sec-head__l">
-            {isChinese ? "今日解读 · Editor's note" : "Editor's note"}
-          </span>
-          <span className="an-sec-head__rule" />
-        </div>
-        <div className="an-comment">
-          <div className="an-comment__by">
-            {isChinese ? '临象评论员 · By editorial desk' : 'By editorial desk'}
-          </div>
-          <p className="an-comment__body">
-            {isChinese
-              ? '科技股吃下了今天的所有阳线。看似雨过天晴，但 IV 已经开始涨了——说明市场对下周的不确定性并不像价格图看起来那么从容。给自己一份谨慎，不会让你错过什么。\u201D'
-              : 'Tech absorbed all of today\u2019s green. It looks like clear skies, but IV is already climbing \u2014 the market isn\u2019t as calm about next week as the price chart suggests. A dose of caution won\u2019t cost you anything.\u201D'}
-          </p>
-          <div className="an-comment__sig">
-            <span>FILED {now.getFullYear()}\u00b7{pad(now.getMonth()+1)}\u00b7{pad(now.getDate())} · {clock.slice(0, 5)} EDT</span>
-            <span>{isChinese ? '— 沈 · 市场观察' : '— Shen · Market watch'}</span>
-          </div>
-        </div>
+        {/* ── Tab content ── */}
+        {tab === 'xau'
+          ? <XauTab isChinese={isChinese} days={days} setDays={setDays} />
+          : <NewsTab isChinese={isChinese} />
+        }
 
         {/* ── Footer ── */}
         <footer className="an-footer">
@@ -551,15 +658,9 @@ export default function Analytics({ onNavigate }) {
               : '© 2026 LinXiangFinance · Data for reference only · Invest at your own risk'}
           </p>
           <div className="an-footer__links">
-            <button className="an-footer__link">
-              {isChinese ? '数据说明' : 'Data disclaimer'}
-            </button>
-            <button className="an-footer__link">
-              {isChinese ? '隐私政策' : 'Privacy'}
-            </button>
-            <button className="an-footer__link">
-              {isChinese ? '联系我们' : 'Contact'}
-            </button>
+            <button className="an-footer__link">{isChinese ? '数据说明' : 'Data disclaimer'}</button>
+            <button className="an-footer__link">{isChinese ? '隐私政策' : 'Privacy'}</button>
+            <button className="an-footer__link">{isChinese ? '联系我们' : 'Contact'}</button>
           </div>
         </footer>
       </div>
